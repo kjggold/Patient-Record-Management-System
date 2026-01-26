@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use App\Models\AuthEvent;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -16,19 +18,48 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'), $request->remember)) {
-            $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput($request->only('email'))
+                ->with('open_modal', 'login');
         }
+
+        $credentials = $request->only('email', 'password');
+        $remember = (bool) $request->boolean('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+            $request->session()->regenerate();
+
+            AuthEvent::create([
+                'event_type' => 'login',
+                'user_id' => Auth::id(),
+                'email' => $request->input('email'),
+                'ip_address' => $request->ip(),
+                'user_agent' => (string) $request->userAgent(),
+                'success' => true,
+            ]);
+
+            return redirect()->intended(route('dashboard'));
+        }
+
+        AuthEvent::create([
+            'event_type' => 'login',
+            'user_id' => null,
+            'email' => $request->input('email'),
+            'ip_address' => $request->ip(),
+            'user_agent' => (string) $request->userAgent(),
+            'success' => false,
+        ]);
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+        ])->onlyInput('email')->with('open_modal', 'login');
     }
 
     public function showRegister()
@@ -38,11 +69,18 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput($request->only('name', 'email'))
+                ->with('open_modal', 'register');
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -52,7 +90,16 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/dashboard');
+        AuthEvent::create([
+            'event_type' => 'register',
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'ip_address' => $request->ip(),
+            'user_agent' => (string) $request->userAgent(),
+            'success' => true,
+        ]);
+
+        return redirect()->route('dashboard');
     }
 
     public function logout(Request $request)

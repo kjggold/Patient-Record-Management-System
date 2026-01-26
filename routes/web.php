@@ -7,6 +7,11 @@ use App\Http\Controllers\AuthController;
 // Welcome Page
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
+// Basic Dashboard (requires login)
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware('auth')->name('dashboard');
+
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
