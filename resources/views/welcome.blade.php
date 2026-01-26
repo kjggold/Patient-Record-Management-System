@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<<<<<<< HEAD
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
@@ -117,6 +118,172 @@
                             </a>
                         </li>
                     </ul>
+=======
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCore Clinic</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- App CSS -->
+    <style>
+        /* Gradient Animated Background */
+        body {
+            overflow-x: hidden;
+            background: linear-gradient(-45deg, #ddeffd, #c3e0ff, #ddeffd);
+            background-size: 400% 400%;
+            animation: gradientBG 25s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Floating Medical Icons */
+        .floating-icon {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            opacity: 0.7;
+            animation: floatUpDown linear infinite;
+        }
+
+        @keyframes floatUpDown {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-40px) rotate(15deg);
+            }
+
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+
+        /* Hero Section */
+        .hero-content {
+            max-width: 1200px;
+            margin-left: 120px;
+            /* space from left logo */
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            /* huge heading */
+        }
+
+        .hero-title .hero-subtitle {
+            font-size: 2.5rem;
+        }
+
+        .hero-desc {
+            font-size: 1.5rem;
+            line-height: 1.3;
+            max-width: 900px;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.75rem;
+            }
+
+            .hero-title .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .hero-desc {
+                font-size: clamp(1.2rem, 2vw, 1.5rem);
+                line-height: 1.2;
+                max-width: 1000px;
+            }
+
+        }
+    </style>
+</head>
+
+<body class="relative min-h-screen">
+
+    <!-- Floating Medical Icons -->
+    <img src="https://img.icons8.com/color/96/pill.png"
+        class="floating-icon left-10 top-40 animate-[floatUpDown_12s_infinite]" />
+    <img src="https://img.icons8.com/color/96/stethoscope.png"
+        class="floating-icon left-80 top-80 animate-[floatUpDown_15s_infinite]" />
+    <img src="https://img.icons8.com/color/96/thermometer.png"
+        class="floating-icon left-1/2 top-64 animate-[floatUpDown_18s_infinite]" />
+    <img src="https://img.icons8.com/color/96/syringe.png"
+        class="floating-icon left-1/4 top-96 animate-[floatUpDown_20s_infinite]" />
+    <img src="https://img.icons8.com/color/96/heart-with-pulse.png"
+        class="floating-icon left-3/4 top-48 animate-[floatUpDown_22s_infinite]" />
+
+    <!-- Main Content -->
+    <div class="relative z-10">
+
+        <!-- Header -->
+        <header class="w-full px-6 py-4">
+            <div class="w-full flex items-center justify-between">
+
+                <!-- Logo (Fully Left) -->
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-blue-500 rounded flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">MediCore</span>
+                </div>
+
+                <div></div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <!-- Hero Section -->
+        <main class="flex flex-col mt-32"> <!-- reduced from mt-48 to mt-32 -->
+            <div class="hero-content">
+
+                <!-- Main Heading -->
+                <h1 class="hero-title font-bold text-gray-900 mb-6 text-left">
+                    Organized Patient Management
+                    <span class="hero-subtitle block text-blue-600 mt-2">For Clinics</span>
+                </h1>
+
+                <!-- Description -->
+                <p class="hero-desc text-gray-700 mb-10 text-left">
+                    Where every patient's journey is carefully documented, securely preserved, and effortlessly
+                    accessible—transforming healthcare records into a seamless symphony of precision and care.
+                </p>
+
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-start mb-12">
+                    <a href="{{ route('login') }}"
+                        class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
+                        Login
+                    </a>
+
+                    <button
+                        class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors duration-200 shadow-sm">
+                        Learn More
+                    </button>
+>>>>>>> c691b35 (Welcome Page)
                 </div>
                 <div class="bg-[#fff2f2] dark:bg-[#1D0002] relative lg:-ml-px -mb-px lg:mb-0 rounded-t-lg lg:rounded-t-none lg:rounded-r-lg aspect-[335/376] lg:aspect-auto w-full lg:w-[438px] shrink-0 overflow-hidden">
                     {{-- Laravel Logo --}}
@@ -130,6 +297,7 @@
                         <path d="M376.571 30.3656C356.603 30.3656 340.797 46.8497 340.797 67.1828C340.797 89.6597 356.094 104 378.661 104C391.29 104 399.354 99.1488 409.206 88.5848L398.189 80.0226C398.183 80.031 389.874 90.9895 377.468 90.9895C363.048 90.9895 356.977 79.3111 356.977 73.269H411.075C413.917 50.1328 398.775 30.3656 376.571 30.3656ZM357.02 61.0967C357.145 59.7487 359.023 43.3761 376.442 43.3761C393.861 43.3761 395.978 59.7464 396.099 61.0967H357.02Z" fill="currentColor" />
                     </svg>
 
+<<<<<<< HEAD
                     {{-- Light Mode 12 SVG --}}
                     <svg class="w-[448px] max-w-none relative -mt-[4.9rem] -ml-8 lg:ml-0 lg:-mt-[6.6rem] dark:hidden" viewBox="0 0 440 376" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
@@ -274,4 +442,15 @@
             <div class="h-14.5 hidden lg:block"></div>
         @endif
     </body>
+=======
+
+            </div>
+        </main>
+
+
+    </div>
+
+</body>
+
+>>>>>>> c691b35 (Welcome Page)
 </html>
