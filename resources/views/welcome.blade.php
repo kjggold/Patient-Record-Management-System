@@ -33,7 +33,7 @@ main
     <div class="twinkling-star"></div>
 
     <!-- Main Content -->
-    <div class="relative z-10">
+    <div id="welcomeContent" class="relative z-10 transition duration-200">
         <!-- Header -->
         <header class="w-full px-6 py-4">
             <div class="max-w-6xl mx-auto flex items-center justify-between">
@@ -52,6 +52,22 @@ main
                     <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">Features</a>
                     <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">About</a>
                     <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">Contact</a>
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">Dashboard</a>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors duration-200">
+                                Logout
+                            </button>
+                        </form>
+                    @else
+                        <button type="button" data-open-modal="login" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
+                            Login
+                        </button>
+                        <button type="button" data-open-modal="register" class="px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors duration-200 shadow-sm">
+                            Register
+                        </button>
+                    @endauth
                 </nav>
             </div>
         </header>
@@ -306,15 +322,81 @@ c691b35 (Welcome Page)
 
                 <!-- CTA Buttons -->
                 <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                    <a href="{{ route('login') }}"
-                       class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
-                        Login
-                    </a>
-                    <button class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors duration-200 shadow-sm">
-                        Learn More
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
+                            Go to Dashboard
+                        </a>
+                    @else
+                        <button type="button" data-open-modal="login" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
+                            Login
+                        </button>
+                        <button type="button" data-open-modal="register" class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors duration-200 shadow-sm">
+                            Register
+                        </button>
+                    @endauth
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Auth Modal Overlay -->
+    <div id="authOverlay" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
+        <div id="authBackdrop" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+        <!-- Modal Container -->
+        <div class="relative min-h-full flex items-center justify-center p-4">
+            <!-- Login Modal -->
+            <div id="loginModal" class="hidden w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Login</h2>
+                        <p class="text-gray-600 mt-1">Sign in to access your clinic dashboard</p>
+                    </div>
+                    <button type="button" data-close-modal class="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+                        <span class="sr-only">Close</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
                     </button>
 main
                 </div>
+
+winlae
+                <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                    @csrf
+
+                    <div>
+                        <label for="login_email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input
+                            type="email"
+                            id="login_email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                            placeholder="admin@clinic.com"
+                            required
+                            autofocus
+                        />
+                        @error('email')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="login_password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input
+                            type="password"
+                            id="login_password"
+                            name="password"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                            placeholder="••••••••"
+                            required
+                        />
+                        @error('password')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
 eaindra
  HEAD
@@ -389,19 +471,174 @@ eaindra
                 <!-- Divider -->
                 <hr class="max-w-md mx-auto border-gray-200 mb-8">
 main
+ main
 
-                <!-- Navigation Section -->
-                <div class="text-center">
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Navigation:</h3>
-                    <div class="flex flex-col sm:flex-row justify-center gap-4 text-gray-700">
-                        <a href="#" class="font-medium hover:text-blue-600 transition-colors duration-200">Features</a>
-                        <a href="#" class="font-medium hover:text-blue-600 transition-colors duration-200">About</a>
-                        <a href="#" class="font-medium hover:text-blue-600 transition-colors duration-200">Contact</a>
+                    <div class="flex items-center justify-between gap-4">
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                            <input id="remember" name="remember" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                            Remember me
+                        </label>
+                        <button type="submit" class="px-5 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+                            Sign In
+                        </button>
                     </div>
-                </div>
+                </form>
+
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    Don't have an account?
+                    <button type="button" data-switch-modal="register" class="font-semibold text-blue-600 hover:text-blue-700 ml-1">
+                        Register
+                    </button>
+                </p>
             </div>
-        </main>
+
+            <!-- Register Modal -->
+            <div id="registerModal" class="hidden w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Create Account</h2>
+                        <p class="text-gray-600 mt-1">Register to access your clinic dashboard</p>
+                    </div>
+                    <button type="button" data-close-modal class="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+                        <span class="sr-only">Close</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <form method="POST" action="{{ route('register') }}" class="space-y-5">
+                    @csrf
+
+                    <div>
+                        <label for="register_name" class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                        <input
+                            type="text"
+                            id="register_name"
+                            name="name"
+                            value="{{ old('name') }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                            placeholder="Jane Doe"
+                            required
+                        />
+                        @error('name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="register_email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input
+                            type="email"
+                            id="register_email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                            placeholder="you@example.com"
+                            required
+                        />
+                        @error('email')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="register_password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input
+                            type="password"
+                            id="register_password"
+                            name="password"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                            placeholder="••••••••"
+                            required
+                        />
+                        @error('password')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="register_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                        <input
+                            type="password"
+                            id="register_password_confirmation"
+                            name="password_confirmation"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                            placeholder="••••••••"
+                            required
+                        />
+                    </div>
+
+                    <button type="submit" class="w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+                        Create Account
+                    </button>
+                </form>
+
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    Already have an account?
+                    <button type="button" data-switch-modal="login" class="font-semibold text-blue-600 hover:text-blue-700 ml-1">
+                        Back to login
+                    </button>
+                </p>
+            </div>
+        </div>
     </div>
+
+winlae
+    <script>
+        (function () {
+            const openModalFromServer = {!! json_encode(session('open_modal')) !!};
+
+            const overlay = document.getElementById('authOverlay');
+            const backdrop = document.getElementById('authBackdrop');
+            const content = document.getElementById('welcomeContent');
+            const loginModal = document.getElementById('loginModal');
+            const registerModal = document.getElementById('registerModal');
+
+            function showOverlay() {
+                overlay.classList.remove('hidden');
+                content.classList.add('blur-sm');
+                content.classList.add('pointer-events-none');
+                document.body.classList.add('overflow-hidden');
+            }
+
+            function hideOverlay() {
+                overlay.classList.add('hidden');
+                loginModal.classList.add('hidden');
+                registerModal.classList.add('hidden');
+                content.classList.remove('blur-sm');
+                content.classList.remove('pointer-events-none');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            function openModal(which) {
+                showOverlay();
+                loginModal.classList.toggle('hidden', which !== 'login');
+                registerModal.classList.toggle('hidden', which !== 'register');
+            }
+
+            document.querySelectorAll('[data-open-modal]').forEach((btn) => {
+                btn.addEventListener('click', () => openModal(btn.getAttribute('data-open-modal')));
+            });
+
+            document.querySelectorAll('[data-close-modal]').forEach((btn) => {
+                btn.addEventListener('click', hideOverlay);
+            });
+
+            document.querySelectorAll('[data-switch-modal]').forEach((btn) => {
+                btn.addEventListener('click', () => openModal(btn.getAttribute('data-switch-modal')));
+            });
+
+            backdrop.addEventListener('click', hideOverlay);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !overlay.classList.contains('hidden')) hideOverlay();
+            });
+
+            if (openModalFromServer === 'login' || openModalFromServer === 'register') {
+                openModal(openModalFromServer);
+            }
+        })();
+    </script>
 
 eaindra
         @if (Route::has('login'))
@@ -420,6 +657,7 @@ eaindra
 
 c691b35 (Welcome Page)
 </html>
+main
 
     <!-- NO INLINE STYLES HERE - everything is in app.css -->
 </body>
