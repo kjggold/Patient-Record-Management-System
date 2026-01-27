@@ -6,45 +6,137 @@
     <title>MediCore Clinic</title>
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Remove the inline body style - it's in app.css already -->
-</head>
-<!-- REMOVE bg-white from body class -->
-<body class="relative">
-    <!-- Animated Background -->
-    <div class="animated-bg"></div>
 
-    <!-- Twinkling Stars - REMOVE the inline style block at the bottom -->
-    <div class="twinkling-star"></div>
-    <div class="twinkling-star"></div>
-    <div class="twinkling-star"></div>
-    <div class="twinkling-star"></div>
-    <div class="twinkling-star"></div>
-    <div class="twinkling-star"></div>
-    <div class="twinkling-star"></div>
-    <div class="twinkling-star"></div>
-    <div class="twinkling-star"></div>
-    <div class="twinkling-star"></div>
+    <!-- Custom Styles for Welcome Page -->
+    <style>
+        /* Gradient Animated Background */
+        body {
+            overflow-x: hidden;
+            background: linear-gradient(-45deg, #e0eef9, #eaf4f9, #edf3f8);
+            background-size: 400% 400%;
+            animation: gradientBG 25s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Floating Medical Icons */
+        .floating-icon {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            opacity: 0.7;
+            animation: floatUpDown linear infinite;
+        }
+
+        @keyframes floatUpDown {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-40px) rotate(15deg);
+            }
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+
+        /* Hero Section */
+        .hero-content {
+            max-width: 1200px;
+            margin-left: 120px;
+            /* space from left logo */
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            /* huge heading */
+        }
+
+        .hero-title .hero-subtitle {
+            font-size: 2.5rem;
+        }
+
+        .hero-desc {
+            font-size: 1.5rem;
+            line-height: 1.3;
+            max-width: 900px;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                margin-left: 0;
+                padding: 0 1rem;
+            }
+
+            .hero-title {
+                font-size: 2.75rem;
+            }
+
+            .hero-title .hero-subtitle {
+                font-size: 1.8rem;
+            }
+
+            .hero-desc {
+                font-size: clamp(1.2rem, 2vw, 1.5rem);
+                line-height: 1.2;
+                max-width: 100%;
+            }
+        }
+
+        /* Hide twinkling stars as we're using floating icons instead */
+        .twinkling-star {
+            display: none;
+        }
+
+        /* Animated background overlay */
+        .animated-bg {
+            display: none;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen">
+    <!-- Floating Medical Icons -->
+    <img src="https://img.icons8.com/color/96/pill.png"
+        class="floating-icon left-10 top-40 animate-[floatUpDown_12s_infinite]" />
+    <img src="https://img.icons8.com/color/96/stethoscope.png"
+        class="floating-icon left-80 top-80 animate-[floatUpDown_15s_infinite]" />
+    <img src="https://img.icons8.com/color/96/thermometer.png"
+        class="floating-icon left-1/2 top-64 animate-[floatUpDown_18s_infinite]" />
+    <img src="https://img.icons8.com/color/96/syringe.png"
+        class="floating-icon left-1/4 top-96 animate-[floatUpDown_20s_infinite]" />
+    <img src="https://img.icons8.com/color/96/heart-with-pulse.png"
+        class="floating-icon left-3/4 top-48 animate-[floatUpDown_22s_infinite]" />
 
     <!-- Main Content -->
     <div id="welcomeContent" class="relative z-10 transition duration-200">
-        <!-- Header -->
+        <!-- Header (Simplified version from your first code) -->
         <header class="w-full px-6 py-4">
-            <div class="max-w-6xl mx-auto flex items-center justify-between">
-                <!-- Logo -->
+            <div class="w-full flex items-center justify-between">
+                <!-- Logo (Fully Left) -->
                 <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                    <div class="w-10 h-10 bg-blue-500 rounded flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                                clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <span class="text-xl font-semibold text-gray-900">MediCore</span>
+                    <span class="text-2xl font-bold text-gray-900">MediCore</span>
                 </div>
 
-                <!-- Navigation -->
+                <!-- Navigation buttons (from second code) -->
                 <nav class="hidden md:flex items-center space-x-6">
-                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">Features</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">About</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">Contact</a>
+                    
                     @auth
                         <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">Dashboard</a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -54,51 +146,55 @@
                             </button>
                         </form>
                     @else
-                        <button type="button" data-open-modal="login" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
+                        {{-- <button type="button" data-open-modal="login" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
                             Login
                         </button>
                         <button type="button" data-open-modal="register" class="px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors duration-200 shadow-sm">
                             Register
-                        </button>
+                        </button> --}}
                     @endauth
                 </nav>
             </div>
         </header>
 
-        <!-- Hero Section -->
-        <main class="min-h-[80vh] flex items-center justify-center px-4 py-12">
-            <div class="max-w-3xl w-full text-center">
+        <!-- Hero Section (Your new design) -->
+        <main class="flex flex-col mt-32">
+            <div class="hero-content">
                 <!-- Main Heading -->
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                <h1 class="hero-title font-bold text-gray-900 mb-6 text-left">
                     Organized Patient Management
-                    <span class="block text-blue-600 mt-2">For Clinics</span>
+                    <span class="hero-subtitle block text-blue-600 mt-2">For Clinics</span>
                 </h1>
 
                 <!-- Description -->
-                <p class="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-                    Where every patient's journey is carefully documented, securely preserved, and effortlessly accessible—transforming healthcare records into a seamless symphony of precision and care.
+                <p class="hero-desc text-gray-700 mb-10 text-left">
+                    Where every patient's journey is carefully documented, securely preserved, and effortlessly
+                    accessible—transforming healthcare records into a seamless symphony of precision and care.
                 </p>
 
                 <!-- CTA Buttons -->
-                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <div class="flex flex-col sm:flex-row gap-4 justify-start mb-12">
                     @auth
-                        <a href="{{ route('dashboard') }}" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
+                        <a href="{{ route('dashboard') }}"
+                            class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
                             Go to Dashboard
                         </a>
                     @else
-                        <button type="button" data-open-modal="login" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
+                        <button type="button" data-open-modal="login"
+                            class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
                             Login
                         </button>
-                        <button type="button" data-open-modal="register" class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors duration-200 shadow-sm">
+                        {{-- <button type="button" data-open-modal="register"
+                            class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors duration-200 shadow-sm">
                             Register
-                        </button>
+                        </button> --}}
                     @endauth
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Auth Modal Overlay -->
+    <!-- Auth Modal Overlay (Kept from second code) -->
     <div id="authOverlay" class="fixed inset-0 z-50 hidden">
         <!-- Backdrop -->
         <div id="authBackdrop" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
@@ -320,7 +416,5 @@
             }
         })();
     </script>
-
-    <!-- NO INLINE STYLES HERE - everything is in app.css -->
 </body>
 </html>

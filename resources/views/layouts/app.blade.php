@@ -13,7 +13,7 @@
         }
     </style>
 </head>
-<body class="bg-white">
+<body class="bg-blue">
     @yield('content')
 </body>
 </html>
