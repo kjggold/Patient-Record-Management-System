@@ -313,12 +313,20 @@
                 max-width: 100%;
             }
         }
+        
+        /* Success message */
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <form method="POST" action="{{ route('submit_doctor') }}" class="space-y-6">
-                @csrf
     <div class="db-form-container">
         <div class="db-form-header">
             <h1>Doctor Information Form</h1>
@@ -335,7 +343,28 @@
         </div>
         
         <div class="db-form-content">
-            <form id="dbDoctorForm">
+            <!-- Display Success Message -->
+            @if(session('success'))
+                <div class="alert-success">
+                    <i class="fas fa-check-circle"></i> {{ session('success') }}
+                </div>
+            @endif
+            
+            <!-- Display Validation Errors -->
+            @if ($errors->any())
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <h4 class="font-semibold text-red-600">Please fix the following errors:</h4>
+                    <ul class="mt-2 list-disc list-inside text-red-600 text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            
+            <form method="POST" action="{{ route('submit_doctor') }}" id="dbDoctorForm">
+                @csrf
+                
                 <div class="db-form-grid">
                     <!-- Doctor ID (PK, Integer, Auto-generated) -->
                     <div class="db-form-group">
@@ -347,65 +376,72 @@
                                 <span class="constraint notnull">NOT NULL</span>
                             </div>
                         </div>
-                        <input type="text" class="db-form-input readonly" value="Auto-generated" readonly data-field="doctor_id" data-type="integer" data-maxlength="30">
-                        <div class="db-error-message" id="error-doctor-id"></div>
+                        <input type="text" class="db-form-input readonly" value="Auto-generated" readonly>
                     </div>
                     
                     <!-- Full Name (Varchar 20) -->
                     <div class="db-form-group">
-                        <label class="db-form-label">Full Name</label>
+                        <label class="db-form-label">Full Name *</label>
                         <div class="db-field-info">
                             <span class="db-field-type">Varchar(20)</span>
                             <div class="db-field-constraint">
                                 <span class="constraint notnull">NOT NULL</span>
                             </div>
                         </div>
-                        <input type="text" class="db-form-input" placeholder="Enter full name (max 20 chars)" maxlength="20" data-field="full_name" data-type="varchar" data-maxlength="20" required>
-                        <div class="db-error-message" id="error-full-name"></div>
+                        <input type="text" name="full_name" class="db-form-input" placeholder="Enter full name (max 20 chars)" maxlength="20" value="{{ old('full_name') }}" required>
+                        @error('full_name')
+                            <div class="db-error-message" style="display: block;">{{ $message }}</div>
+                        @enderror
                     </div>
                     
                     <!-- Speciality (Varchar 100) -->
                     <div class="db-form-group">
-                        <label class="db-form-label">Speciality</label>
+                        <label class="db-form-label">Speciality *</label>
                         <div class="db-field-info">
                             <span class="db-field-type">Varchar(100)</span>
                             <div class="db-field-constraint">
                                 <span class="constraint notnull">NOT NULL</span>
                             </div>
                         </div>
-                        <input type="text" class="db-form-input" placeholder="Medical speciality" maxlength="100" data-field="speciality" data-type="varchar" data-maxlength="100" required>
-                        <div class="db-error-message" id="error-speciality"></div>
+                        <input type="text" name="speciality" class="db-form-input" placeholder="Medical speciality" maxlength="100" value="{{ old('speciality') }}" required>
+                        @error('speciality')
+                            <div class="db-error-message" style="display: block;">{{ $message }}</div>
+                        @enderror
                     </div>
                     
                     <!-- Experience (Integer 3) -->
                     <div class="db-form-group">
-                        <label class="db-form-label">Experience (Years)</label>
+                        <label class="db-form-label">Experience (Years) *</label>
                         <div class="db-field-info">
                             <span class="db-field-type">Integer(3)</span>
                             <div class="db-field-constraint">
                                 <span class="constraint notnull">NOT NULL</span>
                             </div>
                         </div>
-                        <input type="number" class="db-form-input" placeholder="Years of experience" min="0" max="999" data-field="experience" data-type="integer" data-maxlength="3" required>
-                        <div class="db-error-message" id="error-experience"></div>
+                        <input type="number" name="experience" class="db-form-input" placeholder="Years of experience" min="0" max="999" value="{{ old('experience_years') }}" required>
+                        @error('experience_years')
+                            <div class="db-error-message" style="display: block;">{{ $message }}</div>
+                        @enderror
                     </div>
                     
                     <!-- Phone Number (Varchar 100) -->
                     <div class="db-form-group">
-                        <label class="db-form-label">Phone Number</label>
+                        <label class="db-form-label">Phone Number *</label>
                         <div class="db-field-info">
                             <span class="db-field-type">Varchar(100)</span>
                             <div class="db-field-constraint">
                                 <span class="constraint notnull">NOT NULL</span>
                             </div>
                         </div>
-                        <input type="tel" class="db-form-input" placeholder="Phone number" maxlength="100" data-field="phone" data-type="varchar" data-maxlength="100" required>
-                        <div class="db-error-message" id="error-phone"></div>
+                        <input type="tel" name="phone_number" class="db-form-input" placeholder="Phone number" maxlength="100" value="{{ old('phone_number') }}" required>
+                        @error('phone_number')
+                            <div class="db-error-message" style="display: block;">{{ $message }}</div>
+                        @enderror
                     </div>
                     
                     <!-- Email (Varchar 100, Unique) -->
                     <div class="db-form-group">
-                        <label class="db-form-label">Email</label>
+                        <label class="db-form-label">Email *</label>
                         <div class="db-field-info">
                             <span class="db-field-type">Varchar(100)</span>
                             <div class="db-field-constraint">
@@ -413,26 +449,30 @@
                                 <span class="constraint notnull">NOT NULL</span>
                             </div>
                         </div>
-                        <input type="email" class="db-form-input" placeholder="Email address" maxlength="100" data-field="email" data-type="varchar" data-maxlength="100" required>
-                        <div class="db-error-message" id="error-email"></div>
+                        <input type="email" name="email" class="db-form-input" placeholder="Email address" maxlength="100" value="{{ old('email') }}" required>
+                        @error('email')
+                            <div class="db-error-message" style="display: block;">{{ $message }}</div>
+                        @enderror
                     </div>
                     
                     <!-- Consultation Fee (Integer 10) -->
                     <div class="db-form-group">
-                        <label class="db-form-label">Consultation Fee</label>
+                        <label class="db-form-label">Consultation Fee *</label>
                         <div class="db-field-info">
                             <span class="db-field-type">Integer(10)</span>
                             <div class="db-field-constraint">
                                 <span class="constraint notnull">NOT NULL</span>
                             </div>
                         </div>
-                        <input type="number" class="db-form-input" placeholder="Fee amount" min="0" max="9999999999" data-field="fee" data-type="integer" data-maxlength="10" required>
-                        <div class="db-error-message" id="error-fee"></div>
+                        <input type="number" name="consultation_fee" class="db-form-input" placeholder="Fee amount" min="0" max="9999999999" value="{{ old('consultation_fee') }}" required>
+                        @error('consultation_fee')
+                            <div class="db-error-message" style="display: block;">{{ $message }}</div>
+                        @enderror
                     </div>
                     
                     <!-- Status (Varchar 20) -->
                     <div class="db-form-group db-status-group">
-                        <label class="db-form-label">Status</label>
+                        <label class="db-form-label">Status *</label>
                         <div class="db-field-info">
                             <span class="db-field-type">Varchar(20)</span>
                             <div class="db-field-constraint">
@@ -441,19 +481,21 @@
                         </div>
                         <div class="db-status-options">
                             <label class="db-status-option">
-                                <input type="radio" name="status" value="Active" checked data-field="status" data-type="varchar" data-maxlength="20" required>
+                                <input type="radio" name="status" value="Active" {{ old('status') == 'Active' ? 'checked' : 'checked' }}>
                                 <span class="db-status-badge status-active">Active</span>
                             </label>
                             <label class="db-status-option">
-                                <input type="radio" name="status" value="Inactive" data-field="status" data-type="varchar" data-maxlength="20">
+                                <input type="radio" name="status" value="Inactive" {{ old('status') == 'Inactive' ? 'checked' : '' }}>
                                 <span class="db-status-badge status-inactive">Inactive</span>
                             </label>
                             <label class="db-status-option">
-                                <input type="radio" name="status" value="On Leave" data-field="status" data-type="varchar" data-maxlength="20">
+                                <input type="radio" name="status" value="On Leave" {{ old('status') == 'On Leave' ? 'checked' : '' }}>
                                 <span class="db-status-badge status-on-leave">On Leave</span>
                             </label>
                         </div>
-                        <div class="db-error-message" id="error-status"></div>
+                        @error('status')
+                            <div class="db-error-message" style="display: block;">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
                 
@@ -479,6 +521,27 @@
             </form>
         </div>
     </div>
-    <form>
+
+    <script>
+        // Simple form validation
+        document.getElementById('dbDoctorForm').addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('error');
+                } else {
+                    field.classList.remove('error');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+    </script>
 </body>
 </html>

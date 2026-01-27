@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Doctor; // ADD THIS IMPORT
 
 class DoctorController extends Controller
 {
@@ -11,30 +12,24 @@ class DoctorController extends Controller
         return view('auth.addDoctor');
     }
 
-    public function addDoctor(Request $request)
+    // Change method name to 'store' to match route
+    public function store(Request $request)
     {
-        // $request->validate([
-        //     'full_name' => 'required|string|max:20',
-        //     'speciality' => 'required|string|max:100',
-        //     'experience_years' => 'required|string|max:3',
-        //     'phone_number' => 'required|string|max:100',
-        //     'email' => 'required|string|max:100',
-        //     'consultation_fee' => 'required|string|max:10',
-        //     'status' => 'required|string|max:20',
-        // ]);
+        // Uncomment and use validation
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:100',
+            'speciality' => 'required|string|max:100',
+            'experience' => 'nullable|integer|min:0|max:999',
+            'phone_number' => 'required|string|max:100',
+            'email' => 'required|email|unique:doctors,email|max:100',
+            'consultation_fee' => 'required|integer|min:0|max:9999999999',
+            'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
+        ]);
 
-        Doctor::create([
-            'full_name' => $request->full_name,
-            'speciality' => $request->speciality,
-            'experience_years' => $request->experience_years,
-            'phone_number' => $request->phone_number,
-            'email' => $request->email,
-            'consultation_fee' => $request->consultation_fee,
-            'status' => $request->status,
-            ]);
+        // Create doctor with validated data
+        Doctor::create($validated);
 
-        // Auth::login($user);
-
-        return redirect('/add_doctor');
+        // Redirect back with success message
+        return redirect('/add_doctor')->with('success', 'Doctor added successfully!');
     }
 }
