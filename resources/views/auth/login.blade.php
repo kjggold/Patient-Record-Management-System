@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 {{-- <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,9 +11,9 @@
 <body class="bg-white">
     <!-- Animated Background -->
     <div class="animated-bg"></div>
-=======
+
 @extends('layouts.app')
->>>>>>> 921fcf8 (My updates on eaindra branch)
+
 
 @section('title', 'Login - MediCore Clinic')
 
@@ -84,7 +84,7 @@
 <<<<<<< HEAD
 </body>
 </html> --}}
-=======
+
 
     <!-- Animations -->
     <style>
@@ -160,4 +160,3 @@
     </style>
 
 @endsection
->>>>>>> 921fcf8 (My updates on eaindra branch)
