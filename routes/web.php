@@ -2,32 +2,50 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DoctorController;
 
-// Welcome page
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Welcome page (public)
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-<<<<<<< HEAD
-// Basic Dashboard (requires login)
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
+// Guest-only routes (login & register)
+Route::middleware('guest')->group(function () {
+    // Login
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 
-// Authentication Routes
-=======
+    // Register
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+});
 
-// Auth Routes
->>>>>>> 921fcf8 (My updates on eaindra branch)
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Dashboard (protected)
+// Auth-only routes (protected)
 Route::middleware('auth')->group(function () {
+    // Dashboard
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    //Doctor
+ 
+    Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors.index');
+    Route::post('/doctors/store', [DoctorController::class, 'store'])->name('doctors.store');
+
+
+
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+// Optional: Redirect any unknown route to welcome page
+Route::fallback(function () {
+    return redirect()->route('welcome');
 });

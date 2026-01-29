@@ -10,11 +10,20 @@
             <nav>
                 <a class="active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
                 <a><i class="fa-solid fa-user"></i> Patients</a>
-                <a><i class="fa-solid fa-user-doctor"></i> Doctors</a>
+                <a href="{{ route('doctors.index') }}" class="{{ request()->is('doctors') ? 'active' : '' }}">
+                    <i class="fa-solid fa-user-doctor"></i> Doctors
+                </a>
                 <a><i class="fa-solid fa-calendar-check"></i> Appointments</a>
                 <a><i class="fa-solid fa-stethoscope"></i> Services</a>
                 <a><i class="fa-solid fa-credit-card"></i> Payments</a>
-                <a class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                {{-- <a class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a> --}}
+                <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                    @csrf
+                    <a href="{{ route('logout') }}" class="logout"
+                        onclick="event.preventDefault(); this.closest('form').submit();">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </a>
+                </form>
 
             </nav>
         </aside>
