@@ -231,16 +231,13 @@
             .charts {
                 flex-direction: column;
             }
+
         }
     </style>
     @stack('head')
 </head>
-<<<<<<< HEAD
-<body class="bg-blue">
-=======
 
-<body>
->>>>>>> 921fcf8 (My updates on eaindra branch)
+<body class="bg-blue">
     @yield('content')
     @stack('scripts')
 </body>

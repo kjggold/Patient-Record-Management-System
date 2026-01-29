@@ -21,58 +21,51 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required|min:6',
         ]);
 
-<<<<<<< HEAD
         if ($validator->fails()) {
             return back()
                 ->withErrors($validator)
                 ->withInput($request->only('email'))
                 ->with('open_modal', 'login');
-=======
-        if(Auth::attempt($request->only('email','password'), $request->boolean('remember'))) {
-            $request->session()->regenerate();
-            return redirect()->intended(route('dashboard'));
->>>>>>> 921fcf8 (My updates on eaindra branch)
         }
 
         $credentials = $request->only('email', 'password');
-        $remember = (bool) $request->boolean('remember');
+        $remember    = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             AuthEvent::create([
                 'event_type' => 'login',
-                'user_id' => Auth::id(),
-                'email' => $request->input('email'),
+                'user_id'    => Auth::id(),
+                'email'      => $request->email,
                 'ip_address' => $request->ip(),
                 'user_agent' => (string) $request->userAgent(),
-                'success' => true,
+                'success'    => true,
             ]);
 
             return redirect()->intended(route('dashboard'));
         }
 
+        // Login failed
         AuthEvent::create([
             'event_type' => 'login',
-            'user_id' => null,
-            'email' => $request->input('email'),
+            'user_id'    => null,
+            'email'      => $request->email,
             'ip_address' => $request->ip(),
             'user_agent' => (string) $request->userAgent(),
-            'success' => false,
+            'success'    => false,
         ]);
 
-        return back()->withErrors([
-<<<<<<< HEAD
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email')->with('open_modal', 'login');
-=======
-            'email' => 'The provided credentials do not match our records.'
-        ])->onlyInput('email');
->>>>>>> 921fcf8 (My updates on eaindra branch)
+        return back()
+            ->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])
+            ->onlyInput('email')
+            ->with('open_modal', 'login');
     }
 
     // Show register page
@@ -85,8 +78,8 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -98,25 +91,22 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'name' => $request->name,
-            'email'=> $request->email,
-            'password'=> Hash::make($request->password),
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
         ]);
 
         Auth::login($user);
 
-<<<<<<< HEAD
         AuthEvent::create([
             'event_type' => 'register',
-            'user_id' => $user->id,
-            'email' => $user->email,
+            'user_id'    => $user->id,
+            'email'      => $user->email,
             'ip_address' => $request->ip(),
             'user_agent' => (string) $request->userAgent(),
-            'success' => true,
+            'success'    => true,
         ]);
 
-=======
->>>>>>> 921fcf8 (My updates on eaindra branch)
         return redirect()->route('dashboard');
     }
 
@@ -124,6 +114,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

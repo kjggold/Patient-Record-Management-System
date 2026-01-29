@@ -10,26 +10,11 @@ class Patient extends Model
     use HasFactory;
 
     protected $fillable = [
-        'patient_id',
-        'full_name',
-        'national_id_passport',
-        'age',
-        'sex_gender',
-        'date_of_birth_day',
-        'date_of_birth_month',
-        'date_of_birth_year',
-        'phone_number',
-        'address',
-        'known_medical_conditions',
-        'allergies',
-        'blood_type',
-        'alcohol_consumption',
-        'assigned_doctor',
-        'registration_date'
+        'name', 'age', 'phone', 'doctor', // adjust to your DB
     ];
 
-    public function doctor()
+    public function appointments()
     {
-        return $this->belongsTo(Doctor::class, 'assigned_doctor', 'doctor_name');
+        return $this->hasMany(Appointment::class);
     }
 }

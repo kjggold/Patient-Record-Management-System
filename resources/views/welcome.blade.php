@@ -3,6 +3,7 @@
  eaindra
 
 <head>
+<<<<<<< HEAD
  HEAD
 eaindra
     <meta charset="utf-8">
@@ -266,6 +267,11 @@ eaindra
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediCore Clinic</title>
 main
+=======
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCore Clinic</title>
+>>>>>>> e209553 (Patients & Appointments)
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -390,6 +396,7 @@ main
                                 clip-rule="evenodd" />
                         </svg>
                     </div>
+<<<<<<< HEAD
 HEAD
 
 eaindra
@@ -495,6 +502,9 @@ main
 
                     <span class="text-2xl font-bold text-gray-900">MediCore</span>
 921fcf8 (My updates on eaindra branch)
+=======
+                    <span class="text-2xl font-bold text-gray-900">MediCore</span>
+>>>>>>> e209553 (Patients & Appointments)
                 </div>
             </div>
         </header>
@@ -514,6 +524,7 @@ main
                 </p>
 
 
+<<<<<<< HEAD
  HEAD
                                         <!-- CTA Buttons -->
                                         <div class="flex flex-col sm:flex-row gap-4 justify-start mb-12">
@@ -1017,19 +1028,25 @@ eaindra
 main
 
 
+=======
+>>>>>>> e209553 (Patients & Appointments)
                 <div class="flex flex-col sm:flex-row gap-4 justify-start">
                     <a href="{{ route('login') }}"
                         class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-sm">
                         Login
                     </a>
                 </div>
+<<<<<<< HEAD
 921fcf8 (My updates on eaindra branch)
+=======
+>>>>>>> e209553 (Patients & Appointments)
 
             </div>
         </main>
 
     </div>
 
+<<<<<<< HEAD
  HEAD
     c691b35 (Welcome Page)
 
@@ -1060,3 +1077,8 @@ c691b35 (Welcome Page)
  921fcf8 (My updates on eaindra branch)
 
  main
+=======
+</body>
+
+</html>
+>>>>>>> e209553 (Patients & Appointments)
