@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+
+
 return new class extends Migration
 {
     /* Run the migrations.
@@ -12,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name')->unique();
+            $table->string('full_name');
             $table->string('national_id_passport')->unique();
             $table->integer('age');
             $table->string('sex_gender');
@@ -21,17 +23,20 @@ return new class extends Migration
             $table->integer('date_of_birth_year');
             $table->string('phone_number')->unique();
             $table->string('address');
-            $table->string('known_medical_conditions')->nullable();
-            $table->string('allergies')->nullable();
+            $table->string('known_medical_conditions')->default('None');;
+            $table->string('allergies')->default('None');
             $table->string('blood_type');
             $table->string('alcohol_consumption');
-            $table->string('assigned_doctor');
-    
-            // Add foreign key constraint to doctor_name
+            
+            // Change this line: use 'assigned_doctor' as the column name
+            $table->unsignedBigInteger('assigned_doctor');
+            
+            // Foreign key constraint pointing to doctors.id
             $table->foreign('assigned_doctor')
-                ->references('full_name')
+                ->references('id')
                 ->on('doctors')
                 ->onDelete('cascade');
+
             $table->date('registration_date');
             $table->timestamps();
         });
