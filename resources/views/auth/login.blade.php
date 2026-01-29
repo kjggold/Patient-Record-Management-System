@@ -1,4 +1,23 @@
+
 @extends('layouts.app')
+
+
+{{-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MediCore Clinic</title>
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white">
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+@extends('layouts.app')
+
+
 
 @section('title', 'Login - MediCore Clinic')
 
@@ -76,6 +95,7 @@
             </p>
         </div>
     </div>
+
 </div>
 
 <!-- Animations -->
@@ -99,5 +119,83 @@
     animation: fadeIn 0.5s ease-out forwards;
 }
 </style>
+
+</body>
+</html> --}}
+
+
+    <!-- Animations -->
+    <style>
+        @keyframes floatUpDown {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(10deg);
+            }
+
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+
+        .animate-\[floatUpDown_12s_infinite\] {
+            animation: floatUpDown 12s ease-in-out infinite;
+        }
+
+        .animate-\[floatUpDown_15s_infinite\] {
+            animation: floatUpDown 15s ease-in-out infinite;
+        }
+
+        .animate-\[floatUpDown_18s_infinite\] {
+            animation: floatUpDown 18s ease-in-out infinite;
+        }
+
+        .animate-\[floatUpDown_20s_infinite\] {
+            animation: floatUpDown 20s ease-in-out infinite;
+        }
+
+        .animate-\[floatUpDown_22s_infinite\] {
+            animation: floatUpDown 22s ease-in-out infinite;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Gradient Background Animation (optional if using Tailwind) */
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .bg-gradient-animate {
+            animation: gradientBG 25s ease infinite;
+            background-size: 400% 400%;
+        }
+    </style>
+
 
 @endsection
