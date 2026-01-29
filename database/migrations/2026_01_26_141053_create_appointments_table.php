@@ -49,6 +49,7 @@ return new class extends Migration
 
 
             $table->string('notes_optional');
+            $table->string('status')->default('Pending');
             $table->timestamps();
         });
     }
