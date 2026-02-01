@@ -14,7 +14,9 @@
                 <i class="fa-solid fa-user-doctor"></i> Doctors
             </a>
             <a><i class="fa-solid fa-calendar-check"></i> Appointments</a>
-            <a><i class="fa-solid fa-stethoscope"></i> Services</a>
+            <a href="{{ route('services') }}" class="{{ request()->is('services') ? 'active' : '' }}">
+                <i class="fa-solid fa-stethoscope"></i> Services
+            </a>
             <a><i class="fa-solid fa-credit-card"></i> Payments</a>
             <form method="POST" action="{{ route('logout') }}" class="logout-form">
                 @csrf
