@@ -3,13 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DoctorController;
-
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
+use App\Http\Controllers\ServiceController;
 
 // Welcome page (public)
 Route::get('/', function () {
@@ -35,9 +29,16 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     //Doctor
- 
+
     Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors.index');
     Route::post('/doctors/store', [DoctorController::class, 'store'])->name('doctors.store');
+
+    //Services
+    Route::get('/services', [ServiceController::class, 'index'])->name('services');
+    Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
+    
+
+
 
 
 
