@@ -3,53 +3,55 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\Service;
 
 class PatientController extends Controller
 {
     //
-    public function index()
+    public function index(Request $request)
     {
-        return view('auth.addPatient');
+        $doctors = Doctor::all();
+        $patients = Patient::all();
+        $services = Service::all();
+        
+        $query = Patient::query('doctor');
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('full_name', 'LIKE', "%{$search}%");
+        }
+        
+        $patients = $query->paginate(10);
+
+        return view('patients', compact('doctors','patients','services'));
     }
 
-    public function addPatient(Request $request)
+    public function store(Request $request)
     {
-        $request->validate([
-            'full_name' => 'required|string|max:30',
-            'national_id_passport' => 'required|string|max:20',
-            'age' => 'required|iteger|max:3',
-            // 'sex_gender' => 'required|string|email|max:255|unique:users',
-            // 'date_of_birth_day' => 'required|string|min:6|confirmed',
-            // 'date_of_birth_month' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:15',
-            'address' => 'required|string|max:100',
-            'known_medical_conditions' => 'required|string|max:100',
-            // 'allergies' => 'required|string|email|max:255|unique:users',
-            // 'blood_type' => 'required|string|min:6|confirmed',
-            // 'alcohol_consumption' => 'required|string|max:255',
-            //'assigned_doctor' => 'required|string|email|max:255|unique:users',
-            //'registration_date' => 'required|string|min:6|confirmed',
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:100',
+            'national_id_passport' => 'required|string|max:30',
+            'age' => 'required|integer|min:0|max:120',
+            'sex_gender' => 'required|string|in:male,female,other,prefer_not_to_say',
+            'date_of_birth_day' => 'required|integer|min:1|max:31',
+            'date_of_birth_month' => 'required|integer|min:1|max:12',
+            'date_of_birth_year' => 'required|integer|min:1900|max:' . date('Y'),
+            'phone_number' => 'required|string|max:20',
+            'address' => 'required|string|max:255',
+            'known_medical_conditions' => 'nullable|string|max:255',
+            'allergies' => 'nullable|string|max:255',
+            'blood_type' => 'required|string|in:A+,A-,B+,B-,O+,O-,AB+,AB-,unknown',
+            'alcohol_consumption' => 'nullable|string|in:none,occasional,regular',
+            'assigned_doctor' => 'required|exists:doctors,id', // Ensure doctor exists
+            'registration_date' => 'required|date',
         ]);
 
-        $patient = Patient::create([
-            'full_name' => $request->full_name,
-            'national_id_passport' => $request->natinal_id_passport,
-            'age' => $request->age,
-            'sex_gender' => $request->sex_gender,
-            'date_of_birth_day' => $request->date_of_birth_day,
-            // 'date_of_birth_month' => $request->date_of_birth_month,
-            'phone_number' => $request->phone_number,
-            'address' => $request->address,
-            'known_medical_conditions' => $request->known_medical_conditions,
-            'allergies' => $request->allergies,
-            'blood_type' => $request->blood_type,
-            'alcohol_consumption' => $request->alcohol_consumption,
-            'assigned_doctor' => $request->assigned_doctor,
-            'registration_date' => $request->registration_date,
-        ]);
+        Patient::create($validated);
 
         // Auth::login($user);
 
-        return redirect('/patient');
+        return redirect('patients')->with('success', 'Patient added successfully!');
     }
 }

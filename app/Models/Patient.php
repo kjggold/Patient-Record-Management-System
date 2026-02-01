@@ -10,7 +10,7 @@ class Patient extends Model
     use HasFactory;
 
     protected $fillable = [
-        'patient_id',
+        'id',
         'full_name',
         'national_id_passport',
         'age',
@@ -30,6 +30,11 @@ class Patient extends Model
 
     public function doctor()
     {
-        return $this->belongsTo(Doctor::class, 'assigned_doctor', 'doctor_name');
+        return $this->belongsTo(Doctor::class, 'assigned_doctor', 'id');
+    }
+
+    public function getDoctorNameAttribute()
+    {
+        return $this->doctor ? $this->doctor->full_name : 'Not Assigned';
     }
 }

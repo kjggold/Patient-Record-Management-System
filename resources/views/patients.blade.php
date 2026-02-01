@@ -18,7 +18,30 @@
             <!-- Top Actions -->
             <div class="flex justify-end items-center mb-6 gap-3">
                 <div class="flex gap-2">
-                    <input type="text" placeholder="Search by name..." class="border rounded px-3 py-2 w-64">
+                    <form method="GET" action="{{ route('patients.index') }}" class="flex gap-2">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            placeholder="Search by name..." 
+                            class="border rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value="{{ request('search') }}"
+                        >
+                        <button 
+                            type="submit" 
+                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                        >
+                            Search
+                        </button>
+                        
+                        @if(request('search'))
+                            <a 
+                                href="{{ route('patients.index') }}" 
+                                class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition"
+                            >
+                                Clear
+                            </a>
+                        @endif
+                    </form>                   
                 </div>
 
                 <!-- + Add Patient Button -->
@@ -44,12 +67,24 @@
                         @forelse ($patients as $p)
                             <tr class="hover:bg-slate-50">
                                 <td class="px-4 py-3">{{ $p->id }}</td>
-                                <td class="px-4 py-3">{{ $p->name }}</td>
+                                <td class="px-4 py-3">{{ $p->full_name }}</td>
                                 <td class="px-4 py-3">{{ $p->age }}</td>
-                                <td class="px-4 py-3">{{ $p->phone }}</td>
-                                <td class="px-4 py-3">{{ $p->doctor }}</td>
+                                <td class="px-4 py-3">{{ $p->phone_number }}</td>
+
+                                <td class="px-4 py-3">
+                                    @if($p->doctor)
+                                        {{ $p->doctor->full_name }}
+                                        @if($p->doctor->speciality)
+                                            <span class="text-xs text-gray-500">({{ $p->doctor->speciality }})</span>
+                                        @endif
+                                        @else
+                                            <span class="text-gray-400">Not Assigned</span>
+                                    @endif
+                                </td>
+
                                 <td class="px-4 py-3 text-center space-x-2">
                                     <button class="text-amber-600 hover:underline" onclick="openViewModal()">View</button>
+                                    <button class="text-amber-600 hover:underline" onclick="">Edit</button>
                                     <button class="text-red-600 hover:underline">Delete</button>
                                 </td>
                             </tr>
@@ -70,12 +105,23 @@
         <div class="bg-white rounded-xl w-full max-w-lg p-6">
             <h2 class="text-xl font-semibold mb-4 text-slate-700">Patient Details</h2>
             <div class="grid grid-cols-2 gap-4 text-sm">
-                <div><b>ID:</b> P001</div>
-                <div><b>Age:</b> 29</div>
-                <div><b>Name:</b> Aung Min</div>
-                <div><b>Phone:</b> 09-12345678</div>
-                <div class="col-span-2"><b>Assigned Doctor:</b> Dr. Kyaw</div>
-                <div class="col-span-2"><b>Notes:</b> No allergies reported.</div>
+                @foreach ($patients as $p)
+                    <div><b>ID:</b> {{ $p->id }}</div>
+                    <div><b>Name:</b>{{ $p->full_name }}</div>
+                    <div><b>National ID:</b>{{ $p->national_id_passport }}</div>
+                    <div><b>Age:</b>{{ $p->age }}</div>
+                    <div><b>Gender:</b> {{ $p->sex_gender }}</div>
+                    <div><b>Birth Date:</b>{{ $p->date_of_birth_day }}/{{ $p->date_of_birth_month }}/{{ $p->date_of_birth_year }}</div>
+                    <div><b>Phone:</b> {{ $p->phone_number }}</div>
+                    <div><b>Address:</b>{{ $p->address }}</div>
+                    <div><b>Known Medical Conditioins:</b>{{ $p->known_medical_conditions }}</div>
+                    <div><b>Allergies:</b>{{ $p->allergies }}</div>
+                    <div><b>Blood Type:</b>{{ $p->blood_type }}</div>
+                    <div><b>Alcohol Consumption:</b>{{ $p->alcohol_consumption }}</div>
+                    <div><b>Assigned Doctor:</b>{{ $p->assigned_doctor }}</div>
+                    <div><b>Registration Date:</b>{{ $p->registration_date }}</div>
+                @endforeach
+
             </div>
             <div class="text-right mt-6">
                 <button onclick="closeViewModal()" class="px-4 py-2 bg-slate-200 rounded hover:bg-slate-300">Close</button>
@@ -156,11 +202,14 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Known Medical Conditions</label>
-                        <textarea name="known_medical_conditions" rows="2" placeholder="List known medical conditions"></textarea>
+                        <link href='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/19.2.4/autocomplete-lhc.min.css' rel="stylesheet">
+                        <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+                        <script src='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/19.2.4/autocomplete-lhc.min.js'></script>
+                        <textarea id="known_medical_conditions" name="known_medical_conditions" rows="2" placeholder="List known medical conditions"></textarea>
                     </div>
                     <div class="form-group">
                         <label>Allergies</label>
-                        <textarea name="allergies" rows="2" placeholder="List any allergies"></textarea>
+                        <textarea id= "allergies" name="allergies" rows="2" placeholder="List any allergies"></textarea>
                     </div>
                 </div>
 
@@ -394,6 +443,9 @@
         function closeAddModal() {
             document.getElementById('addModal').classList.add('hidden');
         }
+
+        new Def.Autocompleter.Search('known_medical_conditions', 'https://clinicaltables.nlm.nih.gov/api/conditions/v3/search');
+        new Def.Autocompleter.Search('allergies', 'https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
     </script>
 
 @endsection

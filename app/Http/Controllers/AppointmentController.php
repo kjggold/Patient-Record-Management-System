@@ -11,13 +11,22 @@ use App\Models\Appointment;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {    
         $doctors = Doctor::all();
         $patients = Patient::all();
         $services = Service::all();
 
-        return view('auth.addAppointment', compact('doctors', 'patients', 'services'));
+        $query = Appointment::query('doctor','patient');
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('full_name', 'LIKE', "%{$search}%");
+        }
+        
+        $appointments = $query->paginate(10);
+
+        return view('appointments', compact('doctors', 'patients', 'services','appointments'));
     }
 
     // Change method name to 'store' to match route
@@ -37,6 +46,6 @@ class AppointmentController extends Controller
         Appointment::create($validated);
 
         // Redirect back with success message
-        return redirect('/add_appointment')->with('success', 'Appointment added successfully!');
+        return redirect('appointments')->with('success', 'Appointment added successfully!');
     }
 }
