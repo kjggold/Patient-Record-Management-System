@@ -41,3 +41,24 @@ Route::post('/discharge', [DischargeController::class, 'store'])->name('discharg
         'discharge' => DischargeController::class,
     ]);
 });
+
+// Add medical services route
+Route::get('/medical-services', function () {
+    // Get clinic services data (you'll need to replace this with your actual data source)
+    $clinicServices = [
+        [
+            'name' => 'General Consultation',
+            'description' => 'Comprehensive health check-ups and general medical advice',
+            'illnesses' => ['Fever', 'Cough', 'Headache', 'Fatigue', 'Allergies'],
+            'doctors' => [
+                ['id' => 1, 'name' => 'Dr. Sarah Johnson', 'speciality' => 'General Physician', 'qualification' => 'MD, MBBS', 'availability' => 'Mon-Fri: 9AM-5PM', 'rating' => '4.8', 'experience' => '10+ years', 'fee' => '$50']
+            ]
+        ],
+        // ... other clinic services data
+    ];
+
+    return view('medical-services', compact('clinicServices'));
+})->name('medical-services.index');
+
+//
+

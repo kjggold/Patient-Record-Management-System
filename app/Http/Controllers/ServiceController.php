@@ -13,11 +13,15 @@ class ServiceController extends Controller
     {
         // Get services from database for the table
         $services = Service::all();
+        // Order by service_name A-Z and paginate 20 per page
+    $services = Service::orderBy('service_name', 'asc')->paginate(10);
 
-        // Get clinic services data without relationships
-        $clinicServices = $this->getClinicServicesData();
+    return view('services', compact('services'));
 
-        return view('services', compact('services', 'clinicServices'));
+        // // Get clinic services data without relationships
+        // $clinicServices = $this->getClinicServicesData();
+
+        // return view('services', compact('services', 'clinicServices'));
     }
 
     private function getClinicServicesData()
