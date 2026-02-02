@@ -3,48 +3,44 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Doctor; // Make sure this model exists
+use App\Models\Doctor;
 
 class DoctorController extends Controller
 {
-    // Show all doctors and the form modal
-    public function index()
+    public function index(Request $request)
     {
-        $doctors = Doctor::all(); // fetch all doctors
-        return view('doctors.index', compact('doctors'));
-    }
-    public function create()
-    {
-        return view('doctors.create');
+        $doctors=Doctor::all();
+
+        $query = Doctor::query();
+
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('full_name', 'LIKE', "%{$search}%");
+        }
+
+        $doctors = $query->paginate(10);
+        return view('doctors',compact('doctors'));
     }
 
-    // Store new doctor
+    // Change method name to 'store' to match route
     public function store(Request $request)
     {
-        // Validate the incoming request
-        $request->validate([
-            'full_name' => 'required|string|max:255',
-            'speciality' => 'required|string|max:255',
-            'department' => 'nullable|string|max:255',
-            'experience' => 'nullable|integer|min:0',
-            'phone_number' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'consultation_fee' => 'nullable|numeric|min:0',
-            'status' => 'required|string|in:Active,On Leave',
+        // Uncomment and use validation
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:100',
+            'speciality' => 'required|string|max:100',
+            'experience' => 'nullable|integer|min:0|max:999',
+            'phone_number' => 'required|string|max:100',
+            'email' => 'required|email|unique:doctors,email|max:100',
+            'consultation_fee' => 'required|integer|min:0|max:9999999999',
+            'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
         ]);
 
-        // Create new doctor
-        Doctor::create([
-            'full_name' => $request->full_name,
-            'speciality' => $request->speciality,
-            'department' => $request->department,
-            'experience' => $request->experience,
-            'phone_number' => $request->phone_number,
-            'email' => $request->email,
-            'consultation_fee' => $request->consultation_fee,
-            'status' => $request->status,
-        ]);
+        // Create doctor with validated data
+        Doctor::create($validated);
 
-        return redirect()->back()->with('success', 'Doctor added successfully!');
+        // Redirect back with success message
+        return redirect('doctors')->with('success', 'Doctor added successfully!');
     }
 }

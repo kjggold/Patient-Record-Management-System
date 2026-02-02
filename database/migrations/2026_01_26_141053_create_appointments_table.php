@@ -12,34 +12,44 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->string('patient_name');//fk
+            $table->unsignedBigInteger('patient_name');
             $table->foreign('patient_name')
-                ->references('full_name')
+                ->references('id')
                 ->on('patients')
                 ->onDelete('cascade');
 
-            $table->string('doctor_name');//fk
+            // $table->foreignId('patient_id')->constrained()->onDelete('cascade');
+
+
+            $table->unsignedBigInteger('doctor_name');
             $table->foreign('doctor_name')
-                ->references('full_name')
+                ->references('id')
                 ->on('doctors')
                 ->onDelete('cascade');
 
-            $table->string('service');//fk
+            // $table->foreignId('doctor_id')->constrained()->onDelete('cascade');
+
+
+            $table->unsignedBigInteger('service');//fk
             $table->foreign('service')
-                ->references('service_name')
+                ->references('id')
                 ->on('services')
                 ->onDelete('cascade');
+
+            // $table->foreignId('service_id')->constrained()->onDelete('cascade');
+
 
             $table->date('appointment_date');
             $table->time('appointment_time');
             $table->string('phone');
-            $table->foreign('phone')
-                ->references('phone_number')
-                ->on('patients')
-                ->onDelete('cascade');
+            // $table->foreign('phone')
+            //     ->references('phone_number')
+            //     ->on('patients')
+            //     ->onDelete('cascade');
+
 
             $table->string('notes_optional');
-            $table->string('status');
+            $table->string('status')->default('Pending');
             $table->timestamps();
         });
     }

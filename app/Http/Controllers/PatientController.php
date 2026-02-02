@@ -3,56 +3,55 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\Service;
 
 class PatientController extends Controller
 {
-    // Show list of patients
-    public function index()
+    //
+    public function index(Request $request)
     {
-        $patients = []; // replace with actual query
-        $doctors = []; // replace with actual query
-        return view('patients', compact('patients', 'doctors'));
+        $doctors = Doctor::all();
+        $patients = Patient::all();
+        $services = Service::all();
+
+        $query = Patient::query('doctor');
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('full_name', 'LIKE', "%{$search}%");
+        }
+
+        $patients = $query->paginate(10);
+
+        return view('patients', compact('doctors','patients','services'));
     }
 
-    // Store new patient
     public function store(Request $request)
-{
-    // Validate request
-    $validated = $request->validate([
-        'full_name' => 'required|string|max:255',
-        'national_id_passport' => 'required|string|max:50',
-        'age' => 'required|integer|min:0|max:120',
-        'date_of_birth_day' => 'required|integer|min:1|max:31',
-        'date_of_birth_month' => 'required|integer|min:1|max:12',
-        'date_of_birth_year' => 'required|integer|min:1900|max:2026',
-        'sex_gender' => 'required|string',
-        'phone_number' => 'required|string|max:20',
-        'address' => 'required|string|max:255',
-        'known_medical_conditions' => 'nullable|string',
-        'allergies' => 'nullable|string',
-        'blood_type' => 'nullable|string',
-        'alcohol_consumption' => 'nullable|string',
-        'assigned_doctor' => 'required|exists:doctors,id',
-        'registration_date' => 'required|date',
-    ]);
+    {
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:100',
+            'national_id_passport' => 'required|string|max:30',
+            'age' => 'required|integer|min:0|max:120',
+            'sex_gender' => 'required|string|in:male,female,other,prefer_not_to_say',
+            'date_of_birth_day' => 'required|integer|min:1|max:31',
+            'date_of_birth_month' => 'required|integer|min:1|max:12',
+            'date_of_birth_year' => 'required|integer|min:1900|max:' . date('Y'),
+            'phone_number' => 'required|string|max:20',
+            'address' => 'required|string|max:255',
+            'known_medical_conditions' => 'nullable|string|max:255',
+            'allergies' => 'nullable|string|max:255',
+            'blood_type' => 'required|string|in:A+,A-,B+,B-,O+,O-,AB+,AB-,unknown',
+            'alcohol_consumption' => 'nullable|string|in:none,occasional,regular',
+            'assigned_doctor' => 'required|exists:doctors,id', // Ensure doctor exists
+            'registration_date' => 'required|date',
+        ]);
 
-    // Save patient
-    Patient::create([
-        'full_name' => $validated['full_name'],
-        'national_id_passport' => $validated['national_id_passport'],
-        'age' => $validated['age'],
-        'date_of_birth' => $validated['date_of_birth_year'].'-'.$validated['date_of_birth_month'].'-'.$validated['date_of_birth_day'],
-        'sex_gender' => $validated['sex_gender'],
-        'phone_number' => $validated['phone_number'],
-        'address' => $validated['address'],
-        'known_medical_conditions' => $validated['known_medical_conditions'],
-        'allergies' => $validated['allergies'],
-        'blood_type' => $validated['blood_type'],
-        'alcohol_consumption' => $validated['alcohol_consumption'],
-        'assigned_doctor' => $validated['assigned_doctor'],
-        'registration_date' => $validated['registration_date'],
-    ]);
+        Patient::create($validated);
 
-    return redirect()->route('patients.index')->with('success', 'Patient registered successfully.');
-}
+        // Auth::login($user);
+
+        return redirect('patients')->with('success', 'Patient added successfully!');
+    }
 }

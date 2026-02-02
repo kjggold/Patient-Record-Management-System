@@ -14,32 +14,22 @@ Route::get('/welcome', function () {
     return view('welcome');
 })->name('welcome');
 
-// Auth
+// Authentication
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Protected routes
+// Protected dashboard + resources
 Route::middleware('auth')->group(function () {
-
-    // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Patients
-    Route::resource('patients', PatientController::class);
-
-    // Doctors
-    Route::resource('doctors', DoctorController::class);
-
-    // Appointments
-    Route::resource('appointments', AppointmentController::class);
-
-    // Services
-    Route::resource('services', ServiceController::class);
-
-    // Payments
-    Route::resource('payments', PaymentController::class);
-
+    Route::resources([
+        'patients' => PatientController::class,
+        'doctors' => DoctorController::class,
+        'appointments' => AppointmentController::class,
+        'services' => ServiceController::class,
+        'payments' => PaymentController::class,
+    ]);
 });

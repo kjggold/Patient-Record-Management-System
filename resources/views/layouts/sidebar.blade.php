@@ -38,14 +38,6 @@
             <a href="#"><i class="fa-solid fa-stethoscope"></i> Services</a>
         @endif
 
-        @if (Route::has('payments.index'))
-            <a href="{{ route('payments.index') }}" class="{{ request()->routeIs('payments.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-credit-card"></i> Payments
-            </a>
-        @else
-            <a href="#"><i class="fa-solid fa-credit-card"></i> Payments</a>
-        @endif
-
         <!-- Logout -->
         <form method="POST" action="{{ route('logout') }}" class="logout-form">
             @csrf

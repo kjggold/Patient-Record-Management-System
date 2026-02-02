@@ -17,28 +17,25 @@
         :root {
             --main-color: #22d3ee;
             --secondary-color: #3b82f6;
+            --accent-color: #0d6efd;
             --text-color: #0f172a;
             --bg-color: #f4f9ff;
-            --card-bg: white;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Segoe UI", sans-serif;
+            --card-bg: #fff;
         }
 
         body {
             background: var(--bg-color);
+            font-family: "Segoe UI", sans-serif;
+            margin: 0;
         }
 
-        /* SIDEBAR & DASHBOARD STYLES */
+        /* APP LAYOUT */
         .app {
             display: flex;
             min-height: 100vh;
         }
 
+        /* SIDEBAR */
         .sidebar {
             width: 250px;
             background: linear-gradient(180deg, #d8eaf8);
@@ -76,162 +73,171 @@
             margin-top: auto;
         }
 
+        /* MAIN */
         main {
             flex: 1;
             padding: 30px;
         }
 
-        .topbar {
+        /* HEADER */
+        .main-header {
             display: flex;
-            justify-content: space-between;
+            justify-between;
             align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .topbar input {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #dbeafe;
-        }
-
-        .profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .profile span {
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        .avatar {
-            background: var(--main-color);
-            color: #fff;
-            font-weight: bold;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            flex-shrink: 0;
-            font-size: 1rem;
-            text-transform: uppercase;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-            transition: 0.3s;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 14px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .positive {
-            color: #22c55e;
-        }
-
-        .charts {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
             flex-wrap: wrap;
+            margin-bottom: 20px;
         }
 
-        .chart-card {
-            flex: 1 1 48%;
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(172, 202, 231, 0.05);
-            min-width: 250px;
+        .main-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-color);
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1.3fr 1fr;
-            gap: 20px;
-        }
-
-        .box {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 14px;
-        }
-
-        .list-item {
+        /* CONTROLS */
+        .flex-controls {
             display: flex;
-            justify-content: space-between;
-            padding: 12px;
-            border-radius: 10px;
-            margin-top: 12px;
-        }
-
-        .completed {
-            background: #ecfdf5;
-        }
-
-        .progress {
-            background: #eff6ff;
-        }
-
-        .scheduled {
-            background: #f8fafc;
-        }
-
-        .actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .actions button {
-            display: flex;
-            align-items: center;
+            justify-between;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
             gap: 10px;
-            padding: 10px 15px;
-            border: none;
+        }
+
+        input.search {
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            padding: 8px 12px;
+            width: 220px;
+        }
+
+        button.add-payment,
+        button.export-btn {
+            background: var(--main-color);
+            color: white;
+            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
-            background: var(--bg-color);
-            color: var(--text-color);
             font-weight: 500;
-            width: 100%;
             transition: 0.3s;
         }
 
-        .actions button:hover {
+        button.add-payment:hover,
+        button.export-btn:hover {
             background: var(--secondary-color);
         }
 
-        @media(max-width:768px) {
-            .topbar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
+        /* TABLE */
+        .table-container {
+            overflow-x-auto;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(132, 104, 12, 0.05);
+        }
 
-            .topbar input {
-                width: 100%;
-            }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
 
-            .grid {
-                grid-template-columns: 1fr;
-            }
+        thead tr {
+            background: #b4e4fb;
+            color: #0f172a;
+            cursor: pointer;
+        }
 
-            .charts {
-                flex-direction: column;
-            }
+        th,
+        td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            vertical-align: middle;
+        }
 
+        /* ACTION BUTTONS */
+        button.action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+
+        button.action-btn:hover {
+            background: #084298;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal-content h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+        }
+
+        .modal-content label {
+            display: block;
+            margin: 8px 0 4px;
+            color: #0f172a;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #dbeafe;
+            margin-bottom: 10px;
+        }
+
+        .modal-content button {
+            background: var(--accent-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .modal-content button:hover {
+            background: #084298;
+        }
+
+        .close-btn {
+            background: #ef4444;
+            margin-left: 10px;
+        }
+
+        .close-btn:hover {
+            background: #b91c1c;
         }
     </style>
     @stack('head')

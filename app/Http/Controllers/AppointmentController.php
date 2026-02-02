@@ -3,44 +3,58 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\Service;
 use App\Models\Appointment;
-use App\Models\Patient;    // ✅ Make sure Patient model exists
-use App\Models\Doctor;     // ✅ Make sure Doctor model exists
 
 class AppointmentController extends Controller
 {
-    // Show appointments page
-    public function index()
+    public function __construct()
     {
-        // Load appointments with patient and doctor relations
-        $appointments = Appointment::with(['patient', 'doctor'])->get();
-
-        // Get all patients and doctors for dropdowns / modals
-        $patients = Patient::all();
-        $doctors = Doctor::all();
-
-        return view('appointments', compact('appointments', 'patients', 'doctors'));
+        $this->middleware('auth'); // Protect appointments
     }
 
-    // Store new appointment
+    public function index(Request $request)
+    {
+        $doctors = Doctor::all();
+        $patients = Patient::all();
+        $services = Service::all();
+
+        // Load appointments with relationships
+        $query = Appointment::with(['doctor', 'patient', 'service']);
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->whereHas('patient', function ($q) use ($search) {
+                $q->where('full_name', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $appointments = $query->paginate(10);
+
+        return view('appointments', compact('doctors', 'patients', 'services', 'appointments'));
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'doctor_id' => 'required|exists:doctors,id',
-            'date' => 'required|date',
-            'time' => 'required',
-            'status' => 'required|string',
+            'service_id' => 'required|exists:services,id',
+            'appointment_date' => 'required|date',
+            'appointment_time' => 'required',
         ]);
 
         Appointment::create([
-            'patient_id' => $request->patient_id,
-            'doctor_id' => $request->doctor_id,
-            'date' => $request->date,
-            'time' => $request->time,
-            'status' => $request->status,
+            'patient_id' => $validated['patient_id'],
+            'doctor_id' => $validated['doctor_id'],
+            'service_id' => $validated['service_id'],
+            'appointment_date' => $validated['appointment_date'],
+            'appointment_time' => $validated['appointment_time'],
+            'status' => 'Scheduled',
         ]);
 
-        return redirect()->route('appointments.index')->with('success', 'Appointment created successfully!');
+        return redirect()->back()->with('success', 'Appointment added successfully!');
     }
 }

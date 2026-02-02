@@ -38,6 +38,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
+            // Log successful login
             AuthEvent::create([
                 'event_type' => 'login',
                 'user_id'    => Auth::id(),
@@ -50,7 +51,7 @@ class AuthController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
-        // Login failed
+        // Log failed login
         AuthEvent::create([
             'event_type' => 'login',
             'user_id'    => null,
@@ -61,9 +62,7 @@ class AuthController extends Controller
         ]);
 
         return back()
-            ->withErrors([
-                'email' => 'The provided credentials do not match our records.',
-            ])
+            ->withErrors(['email' => 'The provided credentials do not match our records.'])
             ->onlyInput('email')
             ->with('open_modal', 'login');
     }
@@ -98,6 +97,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
+        // Log registration
         AuthEvent::create([
             'event_type' => 'register',
             'user_id'    => $user->id,
@@ -108,6 +108,12 @@ class AuthController extends Controller
         ]);
 
         return redirect()->route('dashboard');
+    }
+
+    // Dashboard
+    public function dashboard()
+    {
+        return view('dashboard'); // create resources/views/dashboard.blade.php
     }
 
     // Logout
