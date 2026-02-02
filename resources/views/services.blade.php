@@ -9,7 +9,7 @@
         <h2 class="logo">MediCore</h2>
         <nav>
             <a href="{{ route('dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-            <a><i class="fa-solid fa-user"></i> Patients</a>
+            <a href="{{ route('patients.index') }}"><i class="fa-solid fa-user"></i> Patients</a>
             <a href="{{ route('doctors.index') }}"><i class="fa-solid fa-user-doctor"></i> Doctors</a>
             <a><i class="fa-solid fa-calendar-check"></i> Appointments</a>
             <a href="{{ route('services.index') }}" class="{{ request()->is('services') ? 'active' : '' }}">

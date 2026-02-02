@@ -83,8 +83,19 @@
                         </td>
                         <td class="px-6 py-4 text-center space-x-2">
                             <button class="text-blue-600 hover:underline">View</button>
-                            <button class="text-amber-600 hover:underline">Edit</button>
-                            <button class="text-red-600 hover:underline">Delete</button>
+                            <a href="{{ route('doctors.edit', $doctor->id) }}" class="text-amber-600 hover:underline">Edit</a>
+                            <form
+                                action="/doctors/{{ $doctor->id }}"
+                                method="POST"
+                                onsubmit="return confirm('Are you sure you want to delete this doctor?')"
+                            >
+                                @csrf
+                                @method('DELETE')
+
+                                <button class="bg-red-500 text-white px-3 py-1 rounded">
+                                    Delete
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach

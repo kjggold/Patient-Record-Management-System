@@ -43,4 +43,38 @@ class DoctorController extends Controller
         // Redirect back with success message
         return redirect('doctors')->with('success', 'Doctor added successfully!');
     }
+
+    // Show edit form
+    public function edit(Doctor $doctor)
+    {
+        return view('doctorsEdit', compact('doctor'));
+    }
+
+    // Update doctor
+    public function update(Request $request, Doctor $doctor)
+    {
+        // Validation rules
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:100',
+            'speciality' => 'required|string|max:100',
+            'experience' => 'nullable|integer|min:0|max:999',
+            'phone_number' => 'required|string|max:100',
+            'email' => 'required|email|max:100|unique:doctors,email,' . $doctor->id,
+            'consultation_fee' => 'required|integer|min:0|max:9999999999',
+            'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
+        ]);
+
+        // Update doctor
+        $doctor->update($validated);
+
+        return redirect()->route('doctors.index')
+            ->with('success', 'Doctor updated successfully.');
+    }
+
+    public function destroy(Doctor $doctor)
+    {
+        $doctor->delete();
+
+        return redirect('doctors');
+    }
 }

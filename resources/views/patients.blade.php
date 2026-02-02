@@ -84,8 +84,19 @@
 
                                 <td class="px-4 py-3 text-center space-x-2">
                                     <button class="text-amber-600 hover:underline" onclick="openViewModal()">View</button>
-                                    <button class="text-amber-600 hover:underline" onclick="">Edit</button>
-                                    <button class="text-red-600 hover:underline">Delete</button>
+                                    <a href="{{ route('patients.edit', $p->id) }}" class="text-amber-600 hover:underline">Edit</a>
+                                    <form
+                                        action="/patients/{{ $patient->id }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Are you sure you want to delete this patient?')"
+                                    >
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button class="bg-red-500 text-white px-3 py-1 rounded">
+                                            Delete
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @empty

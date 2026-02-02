@@ -67,4 +67,21 @@ Route::middleware('auth')->group(function () {
     // Payments
     Route::resource('payments', PaymentController::class);
 
-});
+
+    // Show edit form
+        Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
+        // Update patient
+        Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
+
+        Route::delete('/patients/{patient}', [DoctorController::class, 'destroy'])->name('doctors.destroy');
+
+        // Show edit form
+        Route::get('/doctors/{doctor}/edit', [DoctorController::class, 'edit'])->name('doctors.edit');
+        // Update doctor
+        Route::put('/doctors/{doctor}', [DoctorController::class, 'update'])->name('doctors.update');
+
+        Route::delete('/patients/{id}', [PatientController::class, 'destroy']);
+
+        Route::delete('/doctors/{id}', [DoctoreController::class, 'destroy']);
+
+        });
