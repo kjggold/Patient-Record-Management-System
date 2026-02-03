@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DoctorController;
@@ -11,16 +12,22 @@ use App\Http\Controllers\AuthController;
 
 
 // Public
-Route::get('/welcome', function () {
+Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
 // Authentication
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/register', [AuthController::class, 'register'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->withoutMiddleware([VerifyCsrfToken::class])
+    ->name('logout');
 
 // Protected dashboard + resources
 Route::middleware('auth')->group(function () {
