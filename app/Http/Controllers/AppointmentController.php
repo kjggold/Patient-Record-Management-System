@@ -57,4 +57,39 @@ class AppointmentController extends Controller
 
         return redirect()->back()->with('success', 'Appointment added successfully!');
     }
+
+    public function completeDischarge(Request $request)
+{
+    $appointment = Appointment::where('code',$request->appointment_code)->firstOrFail();
+
+    $appointment->payment_status = 'paid';
+    $appointment->save();
+
+    return response()->json(['success'=>true]);
+}
+
+public function discharge(Request $request)
+{
+    $appointment = Appointment::find($request->appointment_id);
+    if(!$appointment) return response()->json(['error'=>'Appointment not found'], 404);
+
+    $appointment->status = 'Discharged';
+    $appointment->save();
+
+    Payment::create([
+        'appointment_id'=>$appointment->id,
+        'services'=>$request->services_json,
+        'paid_amount'=>$request->paid_amount,
+        'discount'=>$request->discount_amount,
+        'payment_method'=>$request->payment_method,
+        'remarks'=>$request->remarks,
+    ]);
+
+return response()->json([
+    'success' => true,
+    'paid_amount' => number_format($request->paid_amount),
+    'payment_method' => $request->payment_method,
+    'time' => now()->format('H:i')
+]);
+}
 }
