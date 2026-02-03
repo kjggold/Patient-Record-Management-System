@@ -137,11 +137,11 @@
                                 No services found
                             @endif
                         </h3>
-                        <p class="text-gray-500 mb-4">Add your first service to get started</p>
+                        {{-- <p class="text-gray-500 mb-4">Add your first service to get started</p>
                         <button onclick="openAddServiceModal()"
                             class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
                             + Add Service
-                        </button>
+                        </button> --}}
                     </div>
                 @endif
             </div>
