@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         // Fixed admins
         User::updateOrCreate(
-            ['email' => env('MAIN_ADMIN_EMAIL', 'mainadmin@clinic.com')],
+            ['email' => env('MAIN_ADMIN_EMAIL', 'winlaeshweyee636@gmailcom')],
             [
                 'name'     => 'Main Admin',
                 'password' => 'mainadmin123', // hashed cast
@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'admin1@clinic.com'],
+            ['email' => 'eaindrakyaw887@gmail.com'],
             [
                 'name'     => 'Admin One',
                 'password' => 'admin1234',
@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'admin2@clinic.com'],
+            ['email' => 'phooiechennie@gmail.com'],
             [
                 'name'     => 'Admin Two',
                 'password' => 'admin1234',
