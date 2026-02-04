@@ -6,6 +6,8 @@ use App\Models\RegistrationRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RegistrationApprovedMail;
 
 class AdminUserApprovalController extends Controller
 {
@@ -33,11 +35,14 @@ class AdminUserApprovalController extends Controller
             'status'   => 'active',
         ]);
 
+        // Notify the user that their registration has been approved.
+        Mail::to($user->email)->send(new RegistrationApprovedMail($user));
+
         // Remove request after processing
         $registrationRequest->delete();
 
         return view('auth.approval-result', [
-            'title' => 'Registration Successful',
+            'title' => 'Registration Approved',
             'message' => "Registration successful for {$user->email}. The account is now created and the user can log in and access the dashboard.",
             'status' => 'success',
         ]);
