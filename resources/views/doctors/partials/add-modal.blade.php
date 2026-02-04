@@ -15,13 +15,6 @@
             <!-- Form Content -->
             <form method="POST" action="{{ route('doctors.store') }}" id="dbDoctorForm">
                 @csrf
-
-                <!-- Doctor ID -->
-                <div class="form-group">
-                    <label>Doctor ID</label>
-                    <div class="doctor-id">Auto-Generated</div>
-                </div>
-
                 <!-- Form Grid - 2 columns -->
                 <div class="form-grid">
                     <!-- Column 1 -->
@@ -36,11 +29,6 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Experience (Years)</label>
-                        <input type="number" name="experience" placeholder="Enter Years of Experience" min="0">
-                    </div>
-
-                    <div class="form-group">
                         <label>Phone <span class="required">*</span></label>
                         <input type="tel" name="phone_number" placeholder="Enter Phone Number" required>
                     </div>
@@ -52,17 +40,18 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Consultation Fee</label>
-                        <input type="number" name="consultation_fee" placeholder="Enter Consultation Fee" min="0">
-                    </div>
-
-                    <div class="form-group">
                         <label>Status <span class="required">*</span></label>
                         <select name="status" required>
                             <option value="">Select Status</option>
                             <option value="Active">Active</option>
                             <option value="On Leave">On Leave</option>
                         </select>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Maximum Patients Per Day <span class="required">*</span></label>
+                        <input type="number" name="max_patients" placeholder="Enter maximum patients" required>
                     </div>
                 </div>
 

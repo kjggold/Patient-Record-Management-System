@@ -10,14 +10,10 @@ class Patient extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'full_name',
-        'national_id_passport',
         'age',
         'sex_gender',
-        'date_of_birth_day',
-        'date_of_birth_month',
-        'date_of_birth_year',
+        'date_of_birth',
         'phone_number',
         'address',
         'known_medical_conditions',
@@ -25,16 +21,43 @@ class Patient extends Model
         'blood_type',
         'alcohol_consumption',
         'assigned_doctor',
-        'registration_date'
+        'registration_date',
+        'created_by',
+        'updated_by'
     ];
 
-    public function doctor()
+    protected static function boot()
     {
-        return $this->belongsTo(Doctor::class, 'assigned_doctor', 'id');
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (auth()->check()) {
+                $model->created_by = auth()->id();
+            }
+        });
+
+        static::updating(function ($model) {
+            if (auth()->check()) {
+                $model->updated_by = auth()->id();
+            }
+        });
     }
 
-    public function getDoctorNameAttribute()
+    // Relationship with doctor
+    public function doctor()
     {
-        return $this->doctor ? $this->doctor->full_name : 'Not Assigned';
+        return $this->belongsTo(Doctor::class, 'assigned_doctor');
+    }
+
+    // Relationship with creator
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Relationship with updater
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

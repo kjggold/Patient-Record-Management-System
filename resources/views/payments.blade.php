@@ -1,131 +1,113 @@
 @extends('layouts.app')
 
-@section('title', 'Payments')
-
 @section('content')
     <div class="app flex">
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <h2 class="logo">MediCore</h2>
-            <nav>
-                <a href="{{ route('dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-                <a href="{{ route('patients.index') }}"><i class="fa-solid fa-user"></i> Patients</a>
-                <a href="{{ route('doctors.index') }}"><i class="fa-solid fa-user-doctor"></i> Doctors</a>
-                <a href="{{ route('appointments.index') }}"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
-                <a class="active" href="{{ route('payments.index') }}"><i class="fa-solid fa-credit-card"></i> Payments</a>
-                <a href="{{ route('logout') }}" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-            </nav>
-        </aside>
+        {{-- SIDEBAR --}}
+        @include('layouts.sidebar')
 
         <!-- MAIN CONTENT -->
         <main class="flex-1 p-6">
-            <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+
+            <!-- Header + Add Payment Button -->
+            <div class="flex w-full sm:w-auto gap-2">
                 <h1 class="text-2xl font-semibold text-slate-700">Payments</h1>
-                <div class="flex gap-2 flex-wrap">
-                    <input type="text" placeholder="Search by patient..." class="search border rounded px-3 py-2"
-                        onkeyup="filterTable()">
-                    <button onclick="openAddModal()"
-                        class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">+ Add Payment</button>
-                    <button onclick="exportExcel()"
-                        class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">Export Excel</button>
-                    <button onclick="exportPDF()"
-                        class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">Export PDF</button>
+            </div>
+            <div class="flex justify-end items-center mb-6 gap-3">
+
+                <!-- Search Input + Button -->
+                <div class="flex gap-2">
+                    <input type="text" placeholder="Search by name..." class="border rounded px-3 py-2 w-64">
                 </div>
+
+                <!-- Add Patient -->
+                <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
+                    + Add Payments
+                </button>
             </div>
 
-            <div class="table-container">
-                <table id="paymentsTable" class="min-w-full text-sm">
-                    <thead class="bg-sky-50 cursor-pointer">
+            <!-- Payments Table -->
+            <div class="overflow-x-auto bg-white p-4 rounded-xl shadow">
+                <table id="paymentsTable" class="min-w-full text-left">
+                    <thead class="bg-sky-100 text-slate-800">
                         <tr>
-                            <th onclick="sortTable(0)">Patient</th>
-                            <th onclick="sortTable(1)">Doctor</th>
-                            <th onclick="sortTable(2)">Service</th>
-                            <th onclick="sortTable(3)">Amount</th>
-                            <th onclick="sortTable(4)">Date</th>
-                            <th>Actions</th>
+                            <th class="px-4 py-2 cursor-pointer" onclick="sortTable(0)">Patient</th>
+                            <th class="px-4 py-2 cursor-pointer" onclick="sortTable(1)">Doctor</th>
+                            <th class="px-4 py-2 cursor-pointer" onclick="sortTable(2)">Service</th>
+                            <th class="px-4 py-2 cursor-pointer" onclick="sortTable(3)">Amount</th>
+                            <th class="px-4 py-2 cursor-pointer" onclick="sortTable(4)">Date</th>
+                            <th class="px-4 py-2 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($payments as $payment)
-                            <tr>
-                                <td>{{ $payment->patient->name }}</td>
-                                <td>{{ $payment->doctor->full_name }}</td>
-                                <td>{{ $payment->service }}</td>
-                                <td>{{ number_format($payment->amount) }}</td>
-                                <td>{{ $payment->date->format('d-M-Y') }}</td>
-                                <td>
-                                    <button class="action-btn" onclick="printBill(this)">Print Bill</button>
+                        @foreach ($payments as $payment)
+                            <tr class="hover:bg-sky-50">
+                                <td class="px-4 py-2">{{ $payment->patient }}</td>
+                                <td class="px-4 py-2">{{ $payment->doctor }}</td>
+                                <td class="px-4 py-2">{{ $payment->service }}</td>
+                                <td class="px-4 py-2">{{ number_format($payment->amount) }}</td>
+                                <td class="px-4 py-2">{{ $payment->date->format('d-M-Y') }}</td>
+                                <td class="px-4 py-2 text-center">
+                                    <button onclick="printBill(this)"
+                                        class="bg-sky-500 hover:bg-sky-700 text-white px-3 py-1 rounded-md text-sm">
+                                        Print Bill
+                                    </button>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center text-gray-500">No payments found.</td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
-        </main>
     </div>
 
     <!-- Add Payment Modal -->
-    <div class="modal" id="paymentModal">
-        <div class="modal-content">
-            <h3>Add Payment</h3>
-            <form method="POST" action="{{ route('payments.store') }}" class="space-y-3">
+    <div id="paymentModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold text-sky-600 mb-4">Add Payment</h3>
+            <form method="POST" action="{{ route('payments.store') }}">
                 @csrf
-                <label>Patient</label>
-                <select name="patient_id" class="w-full border rounded px-3 py-2">
-                    <option value="">Select Patient</option>
-                    @foreach ($patients as $patient)
-                        <option value="{{ $patient->id }}">{{ $patient->name }}</option>
-                    @endforeach
-                </select>
-
-                <label>Doctor</label>
-                <select name="doctor_id" class="w-full border rounded px-3 py-2">
-                    <option value="">Select Doctor</option>
-                    @foreach ($doctors as $doctor)
-                        <option value="{{ $doctor->id }}">{{ $doctor->full_name }}</option>
-                    @endforeach
-                </select>
-
-                <label>Service</label>
-                <input type="text" name="service" placeholder="Service Name" class="w-full border rounded px-3 py-2">
-
-                <label>Amount</label>
-                <input type="number" name="amount" placeholder="Amount" class="w-full border rounded px-3 py-2">
-
-                <label>Date</label>
-                <input type="date" name="date" class="w-full border rounded px-3 py-2">
-
-                <div class="flex justify-end gap-2 mt-2">
-                    <button type="button" class="close-btn" onclick="closeModal()">Close</button>
-                    <button type="submit"
-                        class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">Add</button>
+                <div class="flex flex-col gap-3">
+                    <input type="text" name="patient" placeholder="Patient Name" class="border px-3 py-2 rounded w-full"
+                        required>
+                    <input type="text" name="doctor" placeholder="Doctor Name" class="border px-3 py-2 rounded w-full"
+                        required>
+                    <input type="text" name="service" placeholder="Service" class="border px-3 py-2 rounded w-full"
+                        required>
+                    <input type="number" name="amount" placeholder="Amount" class="border px-3 py-2 rounded w-full"
+                        required>
+                    <input type="date" name="date" class="border px-3 py-2 rounded w-full" required>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                    <button type="button" onclick="closeAddModal()"
+                        class="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded">Add
+                        Payment</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Scripts -->
     <script>
         function openAddModal() {
-            document.getElementById('paymentModal').style.display = 'flex';
+            document.getElementById('paymentModal').classList.remove('hidden');
+            document.getElementById('paymentModal').classList.add('flex');
         }
 
-        function closeModal() {
-            document.getElementById('paymentModal').style.display = 'none';
+        function closeAddModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+            document.getElementById('paymentModal').classList.remove('flex');
         }
 
+        // Filter table
         function filterTable() {
-            const input = document.querySelector('.search').value.toLowerCase();
-            document.querySelectorAll('#paymentsTable tbody tr').forEach(r => {
-                r.style.display = r.innerText.toLowerCase().includes(input) ? '' : 'none';
+            const input = document.querySelector('input[placeholder="Search by patient..."]').value.toLowerCase();
+            document.querySelectorAll('#paymentsTable tbody tr').forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(input) ? '' : 'none';
             });
         }
 
+        // Print bill
         function printBill(btn) {
             const tr = btn.closest('tr');
             const data = tr.children;
@@ -141,22 +123,7 @@
             w.print();
         }
 
-        function exportExcel() {
-            const table = document.getElementById('paymentsTable');
-            const wb = XLSX.utils.table_to_book(table, {
-                sheet: "Payments"
-            });
-            XLSX.writeFile(wb, "Payments.xlsx");
-        }
-
-        function exportPDF() {
-            const printWindow = window.open('', 'Print', 'height=600,width=500');
-            printWindow.document.write('<h2>MediCore Clinic - Payments Report</h2><hr>' + document.getElementById(
-                'paymentsTable').outerHTML);
-            printWindow.document.close();
-            printWindow.print();
-        }
-
+        // Sort table
         function sortTable(n) {
             const table = document.getElementById('paymentsTable');
             let switching = true,

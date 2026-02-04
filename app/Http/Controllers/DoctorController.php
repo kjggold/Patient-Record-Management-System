@@ -7,12 +7,12 @@ use App\Models\Doctor;
 
 class DoctorController extends Controller
 {
+    // NO CONSTRUCTOR HERE - Remove it if you have one
+    
     public function index(Request $request)
     {
-        $doctors=Doctor::all();
-
         $query = Doctor::query();
-    
+
         // Search functionality
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -20,22 +20,25 @@ class DoctorController extends Controller
         }
         
         $doctors = $query->paginate(10);
-        return view('doctors',compact('doctors'));
+        return view('doctors', compact('doctors'));
     }
 
-    // Change method name to 'store' to match route
     public function store(Request $request)
     {
-        // Uncomment and use validation
         $validated = $request->validate([
             'full_name' => 'required|string|max:100',
             'speciality' => 'required|string|max:100',
-            'experience' => 'nullable|integer|min:0|max:999',
-            'phone_number' => 'required|string|max:100',
+            'phone_number' => 'required|string|max:100|unique:doctors,phone_number',
             'email' => 'required|email|unique:doctors,email|max:100',
-            'consultation_fee' => 'required|integer|min:0|max:9999999999',
             'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
+            'max_patients' => 'required|integer|min:1|max:100',
         ]);
+
+        // Get authenticated user ID
+        $userId = auth()->id();
+
+        // Add created_by to validated data
+        $validated['created_by'] = $userId;
 
         // Create doctor with validated data
         Doctor::create($validated);
@@ -57,12 +60,14 @@ class DoctorController extends Controller
         $validated = $request->validate([
             'full_name' => 'required|string|max:100',
             'speciality' => 'required|string|max:100',
-            'experience' => 'nullable|integer|min:0|max:999',
-            'phone_number' => 'required|string|max:100',
+            'phone_number' => 'required|string|max:100|unique:doctors,phone_number,' . $doctor->id,
             'email' => 'required|email|max:100|unique:doctors,email,' . $doctor->id,
-            'consultation_fee' => 'required|integer|min:0|max:9999999999',
             'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
+            'max_patients' => 'required|integer|min:1|max:100',
         ]);
+
+        // Add updated_by
+        $validated['updated_by'] = auth()->id();
 
         // Update doctor
         $doctor->update($validated);
@@ -75,6 +80,6 @@ class DoctorController extends Controller
     {
         $doctor->delete();
 
-        return redirect('doctors');
+        return redirect('doctors')->with('success', 'Doctor deleted successfully.');
     }
 }

@@ -15,12 +15,9 @@ return new class extends Migration
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
             $table->string('full_name');
-            $table->string('national_id_passport')->unique();
             $table->integer('age');
             $table->string('sex_gender');
-            $table->integer('date_of_birth_day');
-            $table->integer('date_of_birth_month');
-            $table->integer('date_of_birth_year');
+            $table->date('date_of_birth');
             $table->string('phone_number')->unique();
             $table->string('address');
             $table->string('known_medical_conditions')->default('None');;

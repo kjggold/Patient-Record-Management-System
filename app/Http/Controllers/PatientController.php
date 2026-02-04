@@ -5,18 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Models\Patient;
-use App\Models\Service;
 
 class PatientController extends Controller
 {
-    //
     public function index(Request $request)
     {
         $doctors = Doctor::all();
-        $patients = Patient::all();
-        $services = Service::all();
         
-        $query = Patient::query('doctor');
+        $query = Patient::with('doctor');
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -25,63 +21,75 @@ class PatientController extends Controller
         
         $patients = $query->paginate(10);
 
-        return view('patients', compact('doctors','patients','services'));
+        return view('patients', compact('doctors', 'patients'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'full_name' => 'required|string|max:100',
-            'national_id_passport' => 'required|string|max:30',
+            'full_name' => 'required|string|max:255',
             'age' => 'required|integer|min:0|max:120',
-            'sex_gender' => 'required|string|in:male,female,other,prefer_not_to_say',
-            'date_of_birth_day' => 'required|integer|min:1|max:31',
-            'date_of_birth_month' => 'required|integer|min:1|max:12',
-            'date_of_birth_year' => 'required|integer|min:1900|max:' . date('Y'),
-            'phone_number' => 'required|string|max:20',
-            'address' => 'required|string|max:255',
-            'known_medical_conditions' => 'nullable|string|max:255',
-            'allergies' => 'nullable|string|max:255',
-            'blood_type' => 'required|string|in:A+,A-,B+,B-,O+,O-,AB+,AB-,unknown',
-            'alcohol_consumption' => 'nullable|string|in:none,occasional,regular',
-            'assigned_doctor' => 'required|exists:doctors,id', // Ensure doctor exists
+            'sex_gender' => 'required|string|in:male,female',
+            'date_of_birth' => 'required|date',
+            'phone_number' => 'required|string|unique:patients,phone_number',
+            'address' => 'required|string',
+            'known_medical_conditions' => 'nullable|string',
+            'allergies' => 'nullable|string',
+            'blood_type' => 'nullable|string',
+            'alcohol_consumption' => 'required|string|in:none,occasional,regular',
+            'assigned_doctor' => 'required|exists:doctors,id',
             'registration_date' => 'required|date',
         ]);
 
-        Patient::create($validated);
+        // Get authenticated user ID
+        $userId = auth()->id();
 
-        // Auth::login($user);
+        $patient = Patient::create([
+            'full_name' => $validated['full_name'],
+            'age' => $validated['age'],
+            'sex_gender' => $validated['sex_gender'],
+            'date_of_birth' => $validated['date_of_birth'],
+            'phone_number' => $validated['phone_number'],
+            'address' => $validated['address'],
+            'known_medical_conditions' => $validated['known_medical_conditions'] ?? 'None',
+            'allergies' => $validated['allergies'] ?? 'None',
+            'blood_type' => $validated['blood_type'] ?? 'Unknown',
+            'alcohol_consumption' => $validated['alcohol_consumption'],
+            'assigned_doctor' => $validated['assigned_doctor'],
+            'registration_date' => $validated['registration_date'],
+            'created_by' => $userId,
+        ]);
 
-        return redirect('patients')->with('success', 'Patient added successfully!');
+        return redirect()->back()->with('success', 'Patient registered successfully!');
     }
 
     public function edit(Patient $patient)
     {
-        $doctors = Doctor::all(); // Or however you get doctors
+        $doctors = Doctor::all();
         return view('patientsEdit', compact('patient', 'doctors'));
     }
 
     public function update(Request $request, Patient $patient)
     {
-        // Validation
+        // Fixed validation - remove non-existent fields
         $validated = $request->validate([
             'full_name' => 'required|string|max:100',
-            'national_id_passport' => 'required|string|max:30',
             'age' => 'required|integer|min:0|max:120',
-            'sex_gender' => 'required|string|in:male,female,other,prefer_not_to_say',
-            'date_of_birth_day' => 'required|integer|min:1|max:31',
-            'date_of_birth_month' => 'required|integer|min:1|max:12',
-            'date_of_birth_year' => 'required|integer|min:1900|max:' . date('Y'),
-            'phone_number' => 'required|string|max:20',
+            'sex_gender' => 'required|string|in:male,female',
+            'date_of_birth' => 'required|date',
+            'phone_number' => 'required|string|max:20|unique:patients,phone_number,' . $patient->id,
             'address' => 'required|string|max:255',
-            'known_medical_conditions' => 'nullable|string|max:255',
+            'known_medical_conditions' => 'nullable|string',
             'allergies' => 'nullable|string|max:255',
             'blood_type' => 'required|string|in:A+,A-,B+,B-,O+,O-,AB+,AB-,unknown',
-            'alcohol_consumption' => 'nullable|string|in:none,occasional,regular',
-            'assigned_doctor' => 'required|exists:doctors,id', // Ensure doctor exists
+            'alcohol_consumption' => 'required|string|in:none,occasional,regular',
+            'assigned_doctor' => 'required|exists:doctors,id',
             'registration_date' => 'required|date',
         ]);
-        
+
+        // Add updated_by
+        $validated['updated_by'] = auth()->id();
+
         // Update patient
         $patient->update($validated);
         
@@ -91,9 +99,8 @@ class PatientController extends Controller
 
     public function destroy(Patient $patient)
     {
-        $patient = Patient::all();
         $patient->delete();
 
-        return redirect('patients', compact('patient'));
+        return redirect('patients')->with('success', 'Patient deleted successfully.');
     }
 }

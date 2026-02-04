@@ -41,14 +41,6 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="required">National ID / Passport</label>
-                            <input type="text" name="national_id_passport" placeholder="Enter National ID or Passport Number"
-                                required value="{{ old('national_id_passport', $patient->national_id_passport) }}">
-                            @error('national_id_passport')
-                                <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="form-group">
                             <label class="required">Age</label>
                             <input type="number" name="age" placeholder="Enter Age" min="0" max="120" required
                                    value="{{ old('age', $patient->age) }}">
@@ -56,39 +48,28 @@
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
-                    </div>
-
-                    <div class="form-row">
                         <div class="form-group">
                             <label class="required">Date of Birth</label>
-                            <div class="dob-inputs">
-                                <input type="number" name="date_of_birth_day" placeholder="D" min="1" max="31"
-                                    required value="{{ old('date_of_birth_day', $patient->date_of_birth_day) }}">
-                                <input type="number" name="date_of_birth_month" placeholder="M" min="1" max="12"
-                                    required value="{{ old('date_of_birth_month', $patient->date_of_birth_month) }}">
-                                <input type="number" name="date_of_birth_year" placeholder="Y" min="1900" max="2026"
-                                    required value="{{ old('date_of_birth_year', $patient->date_of_birth_year) }}">
-                            </div>
-                            @error('date_of_birth_day')<span class="text-red-500 text-sm">{{ $message }}</span>@enderror
-                            @error('date_of_birth_month')<span class="text-red-500 text-sm">{{ $message }}</span>@enderror
-                            @error('date_of_birth_year')<span class="text-red-500 text-sm">{{ $message }}</span>@enderror
-                        </div>
-                        <div class="form-group">
-                            <label class="required">Sex / Gender</label>
-                            <select name="sex_gender" required>
-                                <option value="" disabled {{ !old('sex_gender', $patient->sex_gender) ? 'selected' : '' }}>Select</option>
-                                <option value="male" {{ old('sex_gender', $patient->sex_gender) == 'male' ? 'selected' : '' }}>Male</option>
-                                <option value="female" {{ old('sex_gender', $patient->sex_gender) == 'female' ? 'selected' : '' }}>Female</option>
-                                <option value="other" {{ old('sex_gender', $patient->sex_gender) == 'other' ? 'selected' : '' }}>Other</option>
-                                <option value="prefer_not_to_say" {{ old('sex_gender', $patient->sex_gender) == 'prefer_not_to_say' ? 'selected' : '' }}>Prefer not to say</option>
-                            </select>
-                            @error('sex_gender')
+                            <input type="date" name="date_of_birth" required
+                                   value="{{ old('date_of_birth', $patient->date_of_birth) }}">
+                            @error('date_of_birth')
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
 
                     <div class="form-row">
+                        <div class="form-group">
+                            <label class="required">Sex / Gender</label>
+                            <select name="sex_gender" required>
+                                <option value="" disabled {{ !old('sex_gender', $patient->sex_gender) ? 'selected' : '' }}>Select</option>
+                                <option value="male" {{ old('sex_gender', $patient->sex_gender) == 'male' ? 'selected' : '' }}>Male</option>
+                                <option value="female" {{ old('sex_gender', $patient->sex_gender) == 'female' ? 'selected' : '' }}>Female</option>
+                            </select>
+                            @error('sex_gender')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
                         <div class="form-group">
                             <label class="required">Phone Number</label>
                             <input type="tel" name="phone_number" placeholder="Enter Phone Number" required
@@ -97,6 +78,9 @@
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label class="required">Address</label>
                             <input type="text" name="address" placeholder="Enter Address" required
@@ -105,22 +89,17 @@
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
-                    </div>
-
-                    <!-- Medical History Section -->
-                    <h2 class="section-title">Medical History</h2>
-                    <div class="form-row">
                         <div class="form-group">
                             <label>Known Medical Conditions</label>
-                            <link href='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/19.2.4/autocomplete-lhc.min.css' rel="stylesheet">
-                            <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
-                            <script src='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/19.2.4/autocomplete-lhc.min.js'></script>
                             <textarea id="known_medical_conditions" name="known_medical_conditions" rows="2" 
                                 placeholder="List known medical conditions">{{ old('known_medical_conditions', $patient->known_medical_conditions) }}</textarea>
                             @error('known_medical_conditions')
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label>Allergies</label>
                             <textarea id="allergies" name="allergies" rows="2" 
@@ -129,9 +108,6 @@
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
-                    </div>
-
-                    <div class="form-row">
                         <div class="form-group">
                             <label>Blood Type</label>
                             <select name="blood_type">
@@ -150,6 +126,9 @@
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label>Alcohol Consumption</label>
                             <div class="radio-group">
@@ -164,13 +143,10 @@
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
-                    </div>
-
-                    <div class="form-row">
                         <div class="form-group">
                             <label class="required">Assigned Doctor</label>
                             <select name="assigned_doctor" required>
-                                <option value="" disabled>Select Doctor</option>
+                                <option value="" disabled {{ !old('assigned_doctor', $patient->assigned_doctor) ? 'selected' : '' }}>Select Doctor</option>
                                 @foreach ($doctors as $doctor)
                                     <option value="{{ $doctor->id }}" 
                                         {{ old('assigned_doctor', $patient->assigned_doctor) == $doctor->id ? 'selected' : '' }}>
@@ -182,6 +158,9 @@
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label class="required">Registration Date</label>
                             <input type="date" name="registration_date" required
@@ -344,16 +323,6 @@
             text-decoration: none;
         }
 
-        .dob-inputs {
-            display: flex;
-            gap: 10px;
-        }
-
-        .dob-inputs input {
-            flex: 1;
-            text-align: center;
-        }
-
         .text-red-500 {
             color: #ef4444;
             font-size: 0.875rem;
@@ -361,15 +330,4 @@
             display: block;
         }
     </style>
-
-    <!-- SCRIPTS -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize autocomplete for medical conditions and allergies
-            if (typeof Def !== 'undefined') {
-                new Def.Autocompleter.Search('known_medical_conditions', 'https://clinicaltables.nlm.nih.gov/api/conditions/v3/search');
-                new Def.Autocompleter.Search('allergies', 'https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
-            }
-        });
-    </script>
 @endsection

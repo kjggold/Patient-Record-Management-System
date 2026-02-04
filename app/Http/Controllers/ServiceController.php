@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\Doctor;
 
-
 class ServiceController extends Controller
 {
+
     public function index()
     {
         // Get services from database for the table
@@ -26,14 +26,11 @@ class ServiceController extends Controller
         $doctors = Doctor::all();
         
         // Define clinic services with static illness data
-        // You can fetch this from a separate table if you have one
-        // For now, we'll use static data
         $clinicServices = [
             [
                 'name' => 'General Consultation',
                 'description' => 'Comprehensive general medical consultations for common health concerns',
                 'illnesses' => ['Fever & Flu', 'Headache', 'Body Pain', 'Cold & Cough', 'Stomach Issues', 'Allergies', 'Skin Issues', 'Fatigue'],
-                // Filter doctors by speciality or get all general medicine doctors
                 'doctors' => $this->getDoctorsBySpeciality($doctors, ['General Medicine', 'Family Medicine', 'Internal Medicine'])
             ],
             [
@@ -99,7 +96,6 @@ class ServiceController extends Controller
     {
         return $doctors
             ->filter(function($doctor) use ($specialities) {
-                // Check if doctor's speciality matches any in the array
                 foreach ($specialities as $speciality) {
                     if (stripos($doctor->speciality, $speciality) !== false) {
                         return true;
@@ -107,11 +103,11 @@ class ServiceController extends Controller
                 }
                 return false;
             })
-            ->take(3) // Limit to 3 doctors per service
+            ->take(3)
             ->map(function($doctor) {
                 return [
                     'id' => $doctor->id,
-                    'name' => $doctor->name,
+                    'name' => $doctor->full_name, // Fixed: changed from 'name' to 'full_name'
                     'speciality' => $doctor->speciality,
                     'qualification' => $doctor->qualification ?? 'MD Specialist',
                     'fee' => $doctor->consultation_fee ? $doctor->consultation_fee . ' MMK' : 'Contact for price',
@@ -126,7 +122,6 @@ class ServiceController extends Controller
     
     private function getAvailability($speciality)
     {
-        // You can store availability in the doctors table or use this mapping
         $availabilityMap = [
             'Cardiology' => 'Mon-Fri: 10AM-6PM',
             'Pediatrics' => 'Mon-Sat: 8AM-4PM',
@@ -146,8 +141,6 @@ class ServiceController extends Controller
     
     private function getRating($speciality)
     {
-        // You can add ratings to your doctors table or use this
-        // For now, return a static rating based on speciality
         $ratingMap = [
             'Pediatrics' => '4.9',
             'Cardiology' => '4.8',
@@ -172,6 +165,12 @@ class ServiceController extends Controller
             'service_fee' => 'required|string|max:100',
             'description' => 'nullable|string'
         ]);
+        
+        // Get authenticated user ID
+        $userId = auth()->id();
+        
+        // Add created_by to validated data
+        $validated['created_by'] = $userId;
         
         Service::create($validated);
         

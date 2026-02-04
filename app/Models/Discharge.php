@@ -5,19 +5,28 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Doctor extends Model
+class Discharge extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'full_name',
-        'speciality',
-        'phone_number',
-        'email',
-        'status',
-        'max_patients',
+        'appointment_id',
+        'patient_name',
+        'doctor_name',
+        'services',
+        'total',
+        'paid',
+        'balance',
+        'payment_method',
         'created_by',
         'updated_by'
+    ];
+
+    protected $casts = [
+        'services' => 'array',
+        'total' => 'decimal:2',
+        'paid' => 'decimal:2',
+        'balance' => 'decimal:2',
     ];
 
     protected static function boot()
@@ -37,15 +46,18 @@ class Doctor extends Model
         });
     }
 
-    // Relationship with creator
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    // Relationship with updater
     public function updater()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class, 'appointment_id');
     }
 }

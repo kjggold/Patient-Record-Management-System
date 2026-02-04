@@ -30,20 +30,20 @@
             <a href="#"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
         @endif
 
+        @if (Route::has('discharge.index'))
+            <a href="{{ route('discharge.index') }}" class="{{ request()->routeIs('services.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-house-medical-circle-check"></i> Discharge
+            </a>
+        @else
+            <a href="#"><i class="fa-solid fa-house-medical-circle-check"></i> Discharge</a>
+        @endif
+
         @if (Route::has('services.index'))
             <a href="{{ route('services.index') }}" class="{{ request()->routeIs('services.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-stethoscope"></i> Services
             </a>
         @else
             <a href="#"><i class="fa-solid fa-stethoscope"></i> Services</a>
-        @endif
-
-        @if (Route::has('payments.index'))
-            <a href="{{ route('payments.index') }}" class="{{ request()->routeIs('payments.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-credit-card"></i> Payments
-            </a>
-        @else
-            <a href="#"><i class="fa-solid fa-credit-card"></i> Payments</a>
         @endif
 
         <!-- Logout -->
@@ -96,7 +96,7 @@
 
     .sidebar nav a:hover,
     .sidebar nav a.active {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(5, 96, 224, 0.1);
     }
 
     /* Logout color */

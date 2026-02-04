@@ -3,49 +3,19 @@
 @section('title', 'Patients')
 
 @section('content')
-    <div class="app">
-        <!-- SIDEBAR -->
+    <div class="app flex min-h-screen">
+        {{-- Side bar --}}
         @include('layouts.sidebar')
 
         <!-- MAIN CONTENT -->
         <main class="flex-1 p-6">
 
-            <!-- HEADER -->
-            <div class="flex w-full sm:w-auto gap-2 mb-6">
-                <h1 class="text-2xl font-semibold text-slate-700">Patient Lists</h1>
-            </div>
+            <h1 class="text-2xl font-semibold text-slate-700 mb-4">Patient Lists</h1>
 
-            <!-- Top Actions -->
             <div class="flex justify-end items-center mb-6 gap-3">
-                <div class="flex gap-2">
-                    <form method="GET" action="{{ route('patients.index') }}" class="flex gap-2">
-                        <input 
-                            type="text" 
-                            name="search" 
-                            placeholder="Search by name..." 
-                            class="border rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            value="{{ request('search') }}"
-                        >
-                        <button 
-                            type="submit" 
-                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                        >
-                            Search
-                        </button>
-                        
-                        @if(request('search'))
-                            <a 
-                                href="{{ route('patients.index') }}" 
-                                class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition"
-                            >
-                                Clear
-                            </a>
-                        @endif
-                    </form>                   
-                </div>
+                <input type="text" id="searchInput" placeholder="Search by name..." class="border rounded px-3 py-2 w-64">
 
-                <!-- + Add Patient Button -->
-                <button type="button" class="add-patient-btn" onclick="openAddModal()">
+                <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
                     + Add Patient
                 </button>
             </div>
@@ -72,28 +42,32 @@
                                 <td class="px-4 py-3">{{ $p->phone_number }}</td>
 
                                 <td class="px-4 py-3">
-                                    @if($p->doctor)
+                                    @if ($p->doctor)
                                         {{ $p->doctor->full_name }}
-                                        @if($p->doctor->speciality)
+                                        @if ($p->doctor->speciality)
                                             <span class="text-xs text-gray-500">({{ $p->doctor->speciality }})</span>
                                         @endif
-                                        @else
-                                            <span class="text-gray-400">Not Assigned</span>
+                                    @else
+                                        <span class="text-gray-400">Not Assigned</span>
                                     @endif
                                 </td>
 
                                 <td class="px-4 py-3 text-center space-x-2">
-                                    <button class="text-amber-600 hover:underline" onclick="openViewModal()">View</button>
-                                    <a href="{{ route('patients.edit', $p->id) }}" class="text-amber-600 hover:underline">Edit</a>
+                                    <button class="text-blue-600 hover:underline">View</button>
+                                    
+                                    <button onclick="window.location.href='{{ route('patients.edit', $p->id) }}'" 
+                                            class="text-amber-600 hover:underline">
+                                        Edit
+                                    </a>
                                     <form
-                                        action="/patients/{{ $patient->id }}"
+                                        action="/patients/{{ $p->id }}"
                                         method="POST"
                                         onsubmit="return confirm('Are you sure you want to delete this patient?')"
                                     >
                                         @csrf
                                         @method('DELETE')
 
-                                        <button class="bg-red-500 text-white px-3 py-1 rounded">
+                                        <button class="text-red-600 hover:underline">
                                             Delete
                                         </button>
                                     </form>
@@ -107,7 +81,6 @@
                     </tbody>
                 </table>
             </div>
-
         </main>
     </div>
 
@@ -119,10 +92,9 @@
                 @foreach ($patients as $p)
                     <div><b>ID:</b> {{ $p->id }}</div>
                     <div><b>Name:</b>{{ $p->full_name }}</div>
-                    <div><b>National ID:</b>{{ $p->national_id_passport }}</div>
                     <div><b>Age:</b>{{ $p->age }}</div>
                     <div><b>Gender:</b> {{ $p->sex_gender }}</div>
-                    <div><b>Birth Date:</b>{{ $p->date_of_birth_day }}/{{ $p->date_of_birth_month }}/{{ $p->date_of_birth_year }}</div>
+                    <div><b>Birth Date:</b>{{ $p->date_of_birth }}</div> 
                     <div><b>Phone:</b> {{ $p->phone_number }}</div>
                     <div><b>Address:</b>{{ $p->address }}</div>
                     <div><b>Known Medical Conditioins:</b>{{ $p->known_medical_conditions }}</div>
@@ -152,20 +124,8 @@
                 <h2 class="section-title">Patient Information</h2>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Patient ID</label>
-                        <div class="patient-id">AUTOGENERATED</div>
-                    </div>
-                    <div class="form-group">
                         <label class="required">Full Name</label>
                         <input type="text" name="full_name" placeholder="Enter Full Name" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="required">National ID / Passport</label>
-                        <input type="text" name="national_id_passport" placeholder="Enter National ID or Passport Number"
-                            required>
                     </div>
                     <div class="form-group">
                         <label class="required">Age</label>
@@ -176,24 +136,14 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="required">Date of Birth</label>
-                        <div class="dob-inputs">
-                            <input type="number" name="date_of_birth_day" placeholder="D" min="1" max="31"
-                                required>
-                            <input type="number" name="date_of_birth_month" placeholder="M" min="1" max="12"
-                                required>
-                            <input type="number" name="date_of_birth_year" placeholder="Y" min="1900" max="2026"
-                                required>
-                        </div>
+                        <input type="date" name="date_of_birth" required>
                     </div>
                     <div class="form-group">
                         <label class="required">Sex / Gender</label>
-                        <select name="sex_gender" required>
-                            <option value="" disabled selected>Select</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                            <option value="prefer_not_to_say">Prefer not to say</option>
-                        </select>
+                        <div class="radio-group">
+                            <label><input type="radio" name="sex_gender" value="male" checked>Male</label>
+                            <label><input type="radio" name="sex_gender" value="female">Female</label>
+                        </div>
                     </div>
                 </div>
 
@@ -211,16 +161,25 @@
                 <!-- Medical History Section -->
                 <h2 class="section-title">Medical History</h2>
                 <div class="form-row">
-                    <div class="form-group">
+                    <div class="form-group" style="flex: 1 1 100%; min-width: 100%;">
                         <label>Known Medical Conditions</label>
                         <link href='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/19.2.4/autocomplete-lhc.min.css' rel="stylesheet">
                         <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
                         <script src='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/19.2.4/autocomplete-lhc.min.js'></script>
-                        <textarea id="known_medical_conditions" name="known_medical_conditions" rows="2" placeholder="List known medical conditions"></textarea>
+                        <textarea id="known_medical_conditions" name="known_medical_conditions" rows="4"
+                            placeholder="Type to search medical conditions. Press Enter or click to add multiple conditions."
+                            style="width: 100%; height: 120px; resize: vertical;"></textarea>
+                        <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple conditions</small>
                     </div>
-                    <div class="form-group">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1 1 100%; min-width: 100%;">
                         <label>Allergies</label>
-                        <textarea id= "allergies" name="allergies" rows="2" placeholder="List any allergies"></textarea>
+                        <textarea id="allergies" name="allergies" rows="4"
+                            placeholder="Type to search allergies. Press Enter or click to add multiple allergies."
+                            style="width: 100%; height: 120px; resize: vertical;"></textarea>
+                        <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple allergies</small>
                     </div>
                 </div>
 
@@ -434,7 +393,9 @@
             text-align: center;
         }
     </style>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
     <!-- SCRIPTS -->
     <script>
         function openViewModal() {
@@ -454,9 +415,343 @@
         function closeAddModal() {
             document.getElementById('addModal').classList.add('hidden');
         }
+    $(document).ready(function() {
+        let medicalConditions = [];
+        let allergies = [];
+        
+        // Cache for autocomplete data
+        let medicalConditionsCache = null;
+        let allergiesCache = null;
+        
+        // Load data from JSON files
+        function loadMedicalConditions() {
+            if (medicalConditionsCache) {
+                return Promise.resolve(medicalConditionsCache);
+            }
+            
+            return $.ajax({
+                url: '{{ asset("data/medical-conditions.json") }}',
+                dataType: 'json',
+                cache: true
+            }).then(function(data) {
+                medicalConditionsCache = data;
+                console.log('Medical conditions loaded:', data.length);
+                return data;
+            }).fail(function() {
+                console.warn('Failed to load medical conditions, using fallback');
+                medicalConditionsCache = getFallbackConditions();
+                return medicalConditionsCache;
+            });
+        }
+        
+        function loadAllergies() {
+            if (allergiesCache) {
+                return Promise.resolve(allergiesCache);
+            }
+            
+            return $.ajax({
+                url: '{{ asset("data/allergies.json") }}',
+                dataType: 'json',
+                cache: true
+            }).then(function(data) {
+                allergiesCache = data;
+                console.log('Allergies loaded:', data.length);
+                return data;
+            }).fail(function() {
+                console.warn('Failed to load allergies, using fallback');
+                allergiesCache = getFallbackAllergies();
+                return allergiesCache;
+            });
+        }
+        
+        // Fallback data in case JSON files fail
+        function getFallbackConditions() {
+            return [
+                "Hypertension", "Diabetes", "Asthma", "Arthritis", "Migraine",
+                "Anxiety", "Depression", "High Cholesterol", "Heart Disease",
+                "Allergic Rhinitis", "GERD", "Osteoporosis", "COPD"
+            ];
+        }
+        
+        function getFallbackAllergies() {
+            return [
+                "Penicillin", "Sulfa Drugs", "NSAIDs", "Aspirin", "Ibuprofen",
+                "Codeine", "Latex", "Pollen", "Dust Mites", "Peanuts"
+            ];
+        }
+        
+        // Initialize Medical Conditions Autocomplete
+        $('#known_medical_conditions').autocomplete({
+            source: function(request, response) {
+                loadMedicalConditions().then(function(data) {
+                    const term = request.term.toLowerCase();
+                    const filtered = data.filter(function(item) {
+                        return item.toLowerCase().includes(term);
+                    });
+                    response(filtered.slice(0, 20)); // Limit to 20 results
+                });
+            },
+            minLength: 1,
+            delay: 50,
+            select: function(event, ui) {
+                const condition = ui.item.value;
+                if (condition && !medicalConditions.includes(condition)) {
+                    medicalConditions.push(condition);
+                    updateMedicalConditionsDisplay();
+                }
+                $(this).val('');
+                return false;
+            },
+            open: function() {
+                $(this).autocomplete('widget').css('z-index', 999999);
+            }
+        }).on('keypress', function(e) {
+            // Add condition on Enter key
+            if (e.which == 13) {
+                const condition = $(this).val().trim();
+                if (condition && !medicalConditions.includes(condition)) {
+                    medicalConditions.push(condition);
+                    updateMedicalConditionsDisplay();
+                }
+                $(this).val('');
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Initialize Allergies Autocomplete
+        $('#allergies').autocomplete({
+            source: function(request, response) {
+                loadAllergies().then(function(data) {
+                    const term = request.term.toLowerCase();
+                    const filtered = data.filter(function(item) {
+                        return item.toLowerCase().includes(term);
+                    });
+                    response(filtered.slice(0, 20)); // Limit to 20 results
+                });
+            },
+            minLength: 1,
+            delay: 50,
+            select: function(event, ui) {
+                const allergy = ui.item.value;
+                if (allergy && !allergies.includes(allergy)) {
+                    allergies.push(allergy);
+                    updateAllergiesDisplay();
+                }
+                $(this).val('');
+                return false;
+            },
+            open: function() {
+                $(this).autocomplete('widget').css('z-index', 999999);
+            }
+        }).on('keypress', function(e) {
+            // Add allergy on Enter key
+            if (e.which == 13) {
+                const allergy = $(this).val().trim();
+                if (allergy && !allergies.includes(allergy)) {
+                    allergies.push(allergy);
+                    updateAllergiesDisplay();
+                }
+                $(this).val('');
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Function to update medical conditions display
+        function updateMedicalConditionsDisplay() {
+            const container = $('#known_medical_conditions').parent();
+            // Remove existing tags container
+            container.find('.tags-container').remove();
+            
+            if (medicalConditions.length > 0) {
+                // Create tags container
+                const tagsHtml = '<div class="tags-container mt-2">' +
+                    medicalConditions.map((condition, index) => 
+                        `<span class="condition-tag">${condition} <span class="remove" data-index="${index}">×</span></span>`
+                    ).join('') +
+                    '</div>';
+                
+                container.append(tagsHtml);
+                
+                // Update hidden input for form submission
+                container.find('input[name="known_medical_conditions_hidden"]').remove();
+                container.append(`<input type="hidden" name="known_medical_conditions_hidden" value="${medicalConditions.join('|')}">`);
+            }
+            
+            // Add click handlers for remove buttons
+            container.on('click', '.condition-tag .remove', function() {
+                const index = $(this).data('index');
+                medicalConditions.splice(index, 1);
+                updateMedicalConditionsDisplay();
+            });
+        }
+        
+        // Function to update allergies display
+        function updateAllergiesDisplay() {
+            const container = $('#allergies').parent();
+            // Remove existing tags container
+            container.find('.tags-container').remove();
+            
+            if (allergies.length > 0) {
+                // Create tags container
+                const tagsHtml = '<div class="tags-container mt-2">' +
+                    allergies.map((allergy, index) => 
+                        `<span class="allergy-tag">${allergy} <span class="remove" data-index="${index}">×</span></span>`
+                    ).join('') +
+                    '</div>';
+                
+                container.append(tagsHtml);
+                
+                // Update hidden input for form submission
+                container.find('input[name="allergies_hidden"]').remove();
+                container.append(`<input type="hidden" name="allergies_hidden" value="${allergies.join('|')}">`);
+            }
+            
+            // Add click handlers for remove buttons
+            container.on('click', '.allergy-tag .remove', function() {
+                const index = $(this).data('index');
+                allergies.splice(index, 1);
+                updateAllergiesDisplay();
+            });
+        }
+        
+        // Form submission handler
+        $('#patientForm').on('submit', function(e) {
+            // Set the textarea values to the joined arrays
+            $('#known_medical_conditions').val(medicalConditions.join(', '));
+            $('#allergies').val(allergies.join(', '));
+            return true;
+        });
+        
+        // Load data immediately when modal opens
+        $(document).on('click', '[onclick*="openAddModal"]', function() {
+            // Preload data for faster response
+            loadMedicalConditions();
+            loadAllergies();
+        });
+        
+        // Modal functions
+        function openViewModal() {
+            document.getElementById('viewModal').classList.remove('hidden');
+            document.getElementById('viewModal').classList.add('flex');
+        }
+        
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.add('hidden');
+        }
+        
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+            document.getElementById('addModal').classList.add('flex');
+            // Reset arrays when opening modal
+            medicalConditions = [];
+            allergies = [];
+            // Clear any existing tags
+            $('.tags-container').remove();
+        }
+        
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+    });
 
-        new Def.Autocompleter.Search('known_medical_conditions', 'https://clinicaltables.nlm.nih.gov/api/conditions/v3/search');
-        new Def.Autocompleter.Search('allergies', 'https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
-    </script>
+    // Age and Date of Birth synchronization
+function setupAgeDateSync() {
+    const ageInput = document.querySelector('input[name="age"]');
+    const dobInput = document.querySelector('input[name="date_of_birth"]');
+    
+    if (!ageInput || !dobInput) return;
+    
+    // When age is entered, calculate date of birth
+    // ageInput.addEventListener('input', function() {
+    //     const age = parseInt(this.value);
+    //     if (!isNaN(age) && age >= 0 && age <= 120) {
+    //         const today = new Date();
+    //         const birthYear = today.getFullYear() - age;
+            
+    //         // Calculate approximate birth date (using June 30 as mid-year)
+    //         const birthDate = new Date(birthYear, 5, 30); // June 30th
+            
+    //         // Format as YYYY-MM-DD for date input
+    //         const formattedDate = birthDate.toISOString().split('T')[0];
+    //         dobInput.value = formattedDate;
+    //     } else if (this.value === '') {
+    //         dobInput.value = '';
+    //     }
+    // });
+    
+    // When date of birth is selected, calculate age
+    dobInput.addEventListener('change', function() {
+        const dob = new Date(this.value);
+        if (this.value && !isNaN(dob.getTime())) {
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            
+            // Adjust if birthday hasn't occurred yet this year
+            const monthDiff = today.getMonth() - dob.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            
+            if (age >= 0 && age <= 120) {
+                ageInput.value = age;
+            } else {
+                ageInput.value = '';
+            }
+        } else if (this.value === '') {
+            ageInput.value = '';
+        }
+    });
+    
+    // Also add a button to calculate age from DOB
+    addCalculateAgeButton(ageInput, dobInput);
+}
+
+// Add a calculate button for manual calculation
+function addCalculateAgeButton(ageInput, dobInput) {
+    const dobGroup = dobInput.closest('.form-group');
+    if (!dobGroup) return;
+    
+    // Check if button already exists
+    if (dobGroup.querySelector('.calculate-age-btn')) return;
+    
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'calculate-age-btn mt-2 text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded hover:bg-blue-200';
+    button.textContent = 'Calculate Age from Date';
+    
+    button.addEventListener('click', function() {
+        const dob = new Date(dobInput.value);
+        if (!dobInput.value || isNaN(dob.getTime())) {
+            alert('Please select a valid date of birth first.');
+            return;
+        }
+        
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        
+        // Adjust if birthday hasn't occurred yet this year
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        
+        if (age >= 0 && age <= 120) {
+            ageInput.value = age;
+        } else {
+            alert('Invalid date of birth. Age must be between 0 and 120.');
+        }
+    });
+    
+    dobGroup.appendChild(button);
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    setupAgeDateSync();
+});
+</script>
+    
 
 @endsection

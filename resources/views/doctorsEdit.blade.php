@@ -61,19 +61,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Experience (Years) <span class="required">*</span></label>
-                            <input type="number" 
-                                   name="experience" 
-                                   placeholder="Enter Years of Experience" 
-                                   min="0" 
-                                   value="{{ old('experience', $doctor->experience) }}"
-                                   required>
-                            @error('experience')
-                                <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
                             <label>Phone <span class="required">*</span></label>
                             <input type="tel" 
                                    name="phone_number" 
@@ -99,18 +86,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Consultation Fee <span class="required">*</span></label>
-                            <input type="text" 
-                                   name="consultation_fee" 
-                                   placeholder="Enter Consultation Fee" 
-                                   value="{{ old('consultation_fee', $doctor->consultation_fee) }}"
-                                   required>
-                            @error('consultation_fee')
-                                <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
                             <label>Status <span class="required">*</span></label>
                             <select name="status" required>
                                 <option value="" {{ !old('status', $doctor->status) ? 'selected' : '' }}>Select Status</option>
@@ -118,6 +93,19 @@
                                 <option value="On Leave" {{ old('status', $doctor->status) == 'On Leave' ? 'selected' : '' }}>On Leave</option>
                             </select>
                             @error('status')
+                                <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label>Maximum Patients Per Day<span class="required">*</span></label>
+                            <input type="number" 
+                                   name="max_patients" 
+                                   placeholder="Enter maximum" 
+                                   min="0" 
+                                   value="{{ old('max_patients', $doctor->max_patients) }}"
+                                   required>
+                            @error('max_patients')
                                 <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
                             @enderror
                         </div>
