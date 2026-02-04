@@ -9,6 +9,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\DischargeController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminUserApprovalController;
 
 
 // Public
@@ -48,6 +49,15 @@ Route::post('/discharge', [DischargeController::class, 'store'])->name('discharg
         'discharge' => DischargeController::class,
     ]);
 });
+
+// Admin approval links (from email, signed URLs)
+Route::get('/admin/users/{user}/approve', [AdminUserApprovalController::class, 'approve'])
+    ->name('admin.users.approve')
+    ->middleware('signed');
+
+Route::get('/admin/users/{user}/decline', [AdminUserApprovalController::class, 'decline'])
+    ->name('admin.users.decline')
+    ->middleware('signed');
 
 // Add medical services route
 Route::get('/medical-services', function () {

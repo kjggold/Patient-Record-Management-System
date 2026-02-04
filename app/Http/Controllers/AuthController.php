@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Models\AuthEvent;
 use App\Models\User;
+use App\Mail\NewUserRegistrationMail;
 
 class AuthController extends Controller
 {
@@ -37,6 +39,15 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
+
+            // Block login if user not yet approved
+            if (Auth::user()->status !== 'active') {
+                Auth::logout();
+
+                return back()
+                    ->withErrors(['email' => 'Your account is pending approval by the main admin.'])
+                    ->onlyInput('email');
+            }
 
             // Log successful login
             AuthEvent::create([
@@ -89,15 +100,23 @@ class AuthController extends Controller
                 ->with('open_modal', 'register');
         }
 
+        // Create user as pending; password cast will hash
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
+            'role'     => 'user',
+            'status'   => 'pending',
         ]);
 
-        Auth::login($user);
+        // Find main admin (by role) to notify
+        $mainAdmin = User::where('role', 'main_admin')->first();
 
-        // Log registration
+        if ($mainAdmin) {
+            Mail::to($mainAdmin->email)->send(new NewUserRegistrationMail($user, $mainAdmin));
+        }
+
+        // Optionally still log registration attempt
         AuthEvent::create([
             'event_type' => 'register',
             'user_id'    => $user->id,
@@ -107,7 +126,9 @@ class AuthController extends Controller
             'success'    => true,
         ]);
 
-        return redirect()->route('dashboard');
+        // Do not log the user in yet – wait for approval
+        return redirect()->route('login')
+            ->with('status', 'Registration submitted. Waiting for main admin approval.');
     }
 
     // Dashboard
