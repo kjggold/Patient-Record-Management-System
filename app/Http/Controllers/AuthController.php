@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Crypt;
 use App\Models\AuthEvent;
+use App\Models\RegistrationRequest;
 use App\Models\User;
 use App\Mail\NewUserRegistrationMail;
 
@@ -59,7 +61,7 @@ class AuthController extends Controller
                 'success'    => true,
             ]);
 
-            return redirect()->intended(route('dashboard'));
+            return redirect()->route('dashboard')->with('status', 'Login successful.');
         }
 
         // Log failed login
@@ -89,7 +91,7 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
+            'email'    => 'required|string|email|max:255|unique:users|unique:registration_requests,email',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -100,34 +102,34 @@ class AuthController extends Controller
                 ->with('open_modal', 'register');
         }
 
-        // Create user as pending; password cast will hash
-        $user = User::create([
+        // Create a registration request (no user row yet)
+        $regRequest = RegistrationRequest::create([
             'name'     => $request->name,
             'email'    => $request->email,
-            'password' => $request->password,
-            'role'     => 'user',
-            'status'   => 'pending',
+            'encrypted_password' => Crypt::encryptString($request->password),
+            'ip_address' => $request->ip(),
+            'user_agent' => (string) $request->userAgent(),
         ]);
 
         // Find main admin (by role) to notify
         $mainAdmin = User::where('role', 'main_admin')->first();
 
         if ($mainAdmin) {
-            Mail::to($mainAdmin->email)->send(new NewUserRegistrationMail($user, $mainAdmin));
+            Mail::to($mainAdmin->email)->send(new NewUserRegistrationMail($regRequest, $mainAdmin));
         }
 
         // Optionally still log registration attempt
         AuthEvent::create([
             'event_type' => 'register',
-            'user_id'    => $user->id,
-            'email'      => $user->email,
+            'user_id'    => null,
+            'email'      => $regRequest->email,
             'ip_address' => $request->ip(),
             'user_agent' => (string) $request->userAgent(),
             'success'    => true,
         ]);
 
-        // Do not log the user in yet – wait for approval
-        return redirect()->route('login')
+        // Do not log the user in yet – wait for approval (show message on register page)
+        return redirect()->route('register')
             ->with('status', 'Registration submitted. Waiting for main admin approval.');
     }
 

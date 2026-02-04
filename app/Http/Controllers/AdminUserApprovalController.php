@@ -2,39 +2,61 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RegistrationRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class AdminUserApprovalController extends Controller
 {
     /**
-     * Approve a pending user (via signed URL from email).
+     * Approve a registration request (via signed URL from email).
      */
-    public function approve(Request $request, User $user)
+    public function approve(Request $request, RegistrationRequest $registrationRequest)
     {
-        // Only main admin should use this link
-        // (link is signed, but we also ensure we don't re-approve)
-        if ($user->status !== 'pending') {
-            return redirect()->route('login')->with('status', 'User already processed.');
+        // If this request was already processed/deleted, show a friendly message.
+        if (!$registrationRequest->exists) {
+            return view('auth.approval-result', [
+                'title' => 'Already Processed',
+                'message' => 'This registration request was already processed.',
+                'status' => 'info',
+            ]);
         }
 
-        $user->update(['status' => 'active']);
+        // Create user only on approve.
+        $plainPassword = Crypt::decryptString($registrationRequest->encrypted_password);
+        $user = User::create([
+            'name'     => $registrationRequest->name,
+            'email'    => $registrationRequest->email,
+            'password' => $plainPassword, // hashed by cast
+            'role'     => 'user',
+            'status'   => 'active',
+        ]);
 
-        return redirect()->route('login')->with('status', "User {$user->email} approved.");
+        // Remove request after processing
+        $registrationRequest->delete();
+
+        return view('auth.approval-result', [
+            'title' => 'Registration Successful',
+            'message' => "Registration successful for {$user->email}. The account is now created and the user can log in and access the dashboard.",
+            'status' => 'success',
+        ]);
     }
 
     /**
-     * Decline a pending user (via signed URL from email).
+     * Decline a registration request (via signed URL from email).
      */
-    public function decline(Request $request, User $user)
+    public function decline(Request $request, RegistrationRequest $registrationRequest)
     {
-        if ($user->status !== 'pending') {
-            return redirect()->route('login')->with('status', 'User already processed.');
-        }
+        // Decline means: do not create user; remove the request from DB.
+        $email = $registrationRequest->email;
+        $registrationRequest->delete();
 
-        $user->update(['status' => 'rejected']);
-
-        return redirect()->route('login')->with('status', "User {$user->email} declined.");
+        return view('auth.approval-result', [
+            'title' => 'Registration Declined',
+            'message' => "Registration declined for {$email}. No user account was created.",
+            'status' => 'warning',
+        ]);
     }
 }
 

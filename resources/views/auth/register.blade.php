@@ -43,6 +43,24 @@
             <div
                 class="glass-card bg-white bg-opacity-90 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md animate-fadeIn">
 
+                <a href="{{ route('welcome') }}" class="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-2xl font-bold" aria-label="Cancel and return to welcome">
+                    &times;
+                </a>
+
+                @if (session('status'))
+                    <div class="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 text-sm">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="mb-4 rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm">
+                        @foreach ($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
+
                 <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Create Account</h2>
                 <p class="text-gray-700 mb-6 text-center">Register to access your clinic dashboard</p>
 
@@ -79,12 +97,18 @@
                     </button>
                 </form>
 
-                <p class="mt-6 text-center text-sm text-gray-700">
-                    Already have an account?
-                    <a href="{{ route('login') }}" class="text-blue-600 font-semibold ml-1 hover:text-blue-700">
-                        Back to login
-                    </a>
-                </p>
+                @if (!session('status'))
+                    <p class="mt-6 text-center text-sm text-gray-700">
+                        Already have an account?
+                        <a href="{{ route('login') }}" class="text-blue-600 font-semibold ml-1 hover:text-blue-700">
+                            Back to login
+                        </a>
+                    </p>
+                @else
+                    <p class="mt-6 text-center text-sm text-gray-500">
+                        Please wait until the main admin approves your registration. You’ll be able to log in after approval.
+                    </p>
+                @endif
             </div>
         </div>
 

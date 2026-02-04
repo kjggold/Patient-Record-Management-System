@@ -32,7 +32,7 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 // Protected dashboard + resources
 Route::middleware('auth')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/appointments/discharge', [AppointmentController::class, 'discharge'])->name('appointments.discharge');
 Route::post('/appointments/complete-discharge',
     [AppointmentController::class,'completeDischarge']
@@ -51,12 +51,12 @@ Route::post('/discharge', [DischargeController::class, 'store'])->name('discharg
 });
 
 // Admin approval links (from email, signed URLs)
-Route::get('/admin/users/{user}/approve', [AdminUserApprovalController::class, 'approve'])
-    ->name('admin.users.approve')
+Route::get('/admin/registrations/{registrationRequest}/approve', [AdminUserApprovalController::class, 'approve'])
+    ->name('admin.registrations.approve')
     ->middleware('signed');
 
-Route::get('/admin/users/{user}/decline', [AdminUserApprovalController::class, 'decline'])
-    ->name('admin.users.decline')
+Route::get('/admin/registrations/{registrationRequest}/decline', [AdminUserApprovalController::class, 'decline'])
+    ->name('admin.registrations.decline')
     ->middleware('signed');
 
 // Add medical services route
