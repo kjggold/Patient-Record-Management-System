@@ -115,8 +115,6 @@
     <!-- ADD PATIENT MODAL -->
     <div id="addModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 overflow-auto py-10">
         <div class="patient-form-container">
-            <h1 class="form-title">Patient Registration</h1>
-
             <form method="POST" action="{{ route('patients.store') }}" id="patientForm">
                 @csrf
 
@@ -159,26 +157,17 @@
                 </div>
 
                 <!-- Medical History Section -->
-                <h2 class="section-title">Medical History</h2>
                 <div class="form-row">
-                    <div class="form-group" style="flex: 1 1 100%; min-width: 100%;">
+                    <div class="form-group">
                         <label>Known Medical Conditions</label>
-                        <link href='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/19.2.4/autocomplete-lhc.min.css' rel="stylesheet">
-                        <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
-                        <script src='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/19.2.4/autocomplete-lhc.min.js'></script>
-                        <textarea id="known_medical_conditions" name="known_medical_conditions" rows="4"
-                            placeholder="Type to search medical conditions. Press Enter or click to add multiple conditions."
-                            style="width: 100%; height: 120px; resize: vertical;"></textarea>
+                        <input type="text" id="known_medical_conditions" name="known_medical_conditions" rows="2"
+                            placeholder="Type to search medical conditions.">
                         <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple conditions</small>
                     </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group" style="flex: 1 1 100%; min-width: 100%;">
+                    <div class="form-group">
                         <label>Allergies</label>
-                        <textarea id="allergies" name="allergies" rows="4"
-                            placeholder="Type to search allergies. Press Enter or click to add multiple allergies."
-                            style="width: 100%; height: 120px; resize: vertical;"></textarea>
+                        <input id="allergies" name="allergies" rows="2"
+                            placeholder="Type to search allergies.">
                         <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple allergies</small>
                     </div>
                 </div>
@@ -276,8 +265,8 @@
         .section-title {
             color: #1f3b57;
             font-size: 20px;
-            margin: 25px 0 15px 0;
-            padding-bottom: 8px;
+            margin: 14px 0 10px 0;   /* ↓ tighter top & bottom */
+                padding-bottom: 6px;
             border-bottom: 2px solid #e0f0ff;
             font-weight: 600;
         }
@@ -305,10 +294,10 @@
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 12px 14px;
+            padding: 8px 12px;   /* ↓ smaller padding */
             border-radius: 10px;
             border: 2px solid #c8e1f3;
-            font-size: 15px;
+            font-size: 14px;     /* ↓ slightly smaller text */
             background-color: #fff;
         }
 
@@ -349,10 +338,10 @@
 
         .register-btn {
             flex: 1;
-            padding: 14px;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            padding: 10px 14px;  /* ↓ less vertical padding */
+                font-size: 15px;     /* ↓ slightly smaller */
+                border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
             background: linear-gradient(to right, #3b82f6, #2563eb);
@@ -368,10 +357,10 @@
 
         .cancel-btn {
             flex: 1;
-            padding: 14px;
             border: none;
+            padding: 10px 14px;  /* ↓ less vertical padding */
+            font-size: 15px;     /* ↓ slightly smaller */
             border-radius: 12px;
-            font-size: 16px;
             font-weight: 600;
             background-color: #f1f5f9;
             color: #64748b;

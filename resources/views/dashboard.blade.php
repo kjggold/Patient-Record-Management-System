@@ -3,6 +3,7 @@
 @section('title', 'Dashboard - MediCore')
 
 @section('content')
+
     <div class="flex min-h-screen">
 
         {{-- Sidebar --}}
@@ -59,19 +60,67 @@
             </section>
 
             <!-- CHARTS -->
-            <section class="flex flex-col lg:flex-row gap-6 mb-8">
-                <div class="flex-1 bg-white rounded-xl shadow p-4">
-                    <h3 class="font-semibold mb-2">Patient Overview</h3>
-                    <canvas id="patientChart"></canvas>
+            <section class="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6 mb-8">
+                <div class="flex-1 bg-white rounded-xl shadow p-4 min-h-[420px]">
+
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Patient Overview</h3>
+                    </div>
+                    <div class="h-[340px]">  <!-- Adjust height as needed -->
+                        <canvas id="patientChart"></canvas>
+                    </div>
                 </div>
-                <div class="flex-1 bg-white rounded-xl shadow p-4">
-                    <h3 class="font-semibold mb-2">Revenue</h3>
-                    <canvas id="revenueChart"></canvas>
+                <!-- Quick Actions (replacing Revenue graph) -->
+                <div class="flex-1 bg-white rounded-xl shadow p-5 min-h-[420px]">
+
+                    <h3 class="text-xl font-semibold mb-4">Quick Actions</h3>
+
+                    <!-- Same structure as bottom -->
+                    <div class="flex flex-col gap-3 h-full">
+
+                        <div class="rounded-lg bg-gray-50 p-2">
+                            <button onclick="openAddModal()"
+                                class="w-full h-14 flex items-center gap-3 px-4 rounded-lg
+                                    bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
+                                <i class="fa-solid fa-user-plus"></i>
+                                Add Doctor
+                            </button>
+                        </div>
+
+                        <div class="rounded-lg bg-gray-50 p-2">
+                            <button onclick="openPatientModal()"
+                                class="w-full h-14 flex items-center gap-3 px-4 rounded-lg
+                                    bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
+                                <i class="fa-solid fa-user-plus"></i>
+                                Add Patient
+                            </button>
+                        </div>
+
+                        <div class="rounded-lg bg-gray-50 p-2">
+                            <button
+                                class="w-full h-14 flex items-center gap-3 px-4 rounded-lg
+                                    bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
+                                <i class="fa-solid fa-calendar-plus"></i>
+                                Add Appointment
+                            </button>
+                        </div>
+
+                        <div class="rounded-lg bg-gray-50 p-2">
+                            <button onclick="openAddServiceModal()"
+                                class="w-full h-14 flex items-center gap-3 px-4 rounded-lg
+                                    bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
+                                <i class="fa-solid fa-file-invoice-dollar"></i>
+                                Add Service
+                            </button>
+                        </div>
+
+                    </div>
                 </div>
+
             </section>
 
             <!-- GRID: Appointments & Quick Actions -->
-            <section class="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6">
+            <section class="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6">
                 <!-- Appointments -->
                 <div class="bg-white rounded-xl shadow p-5">
                     <h3 class="font-semibold mb-4">Today's Appointments</h3>
@@ -84,90 +133,201 @@
                         </div>
                     @endforeach
                 </div>
-
-                <!-- Quick Actions -->
-                <div class="bg-white rounded-xl shadow p-5 flex flex-col gap-3">
-                    <h3 class="font-semibold mb-2">Quick Actions</h3>
-                    <button
-                        class="flex items-center gap-2 p-3 rounded-lg bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
-                        <i class="fa-solid fa-user-plus"></i> Add Patient
-                    </button>
-                    <button
-                        class="flex items-center gap-2 p-3 rounded-lg bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
-                        <i class="fa-solid fa-calendar-plus"></i> Add Appointment
-                    </button>
-                    <button
-                        class="flex items-center gap-2 p-3 rounded-lg bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> Generate Bill
-                    </button>
-                </div>
             </section>
         </main>
     </div>
+
+    @include('add-modals.doctor-modal')
+    @include('add-modals.patient-modal')
+    @include('add-modals.service-modal')
 @endsection
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const patientCtx = document.getElementById('patientChart').getContext('2d');
-        new Chart(patientCtx, {
-            type: 'bar',
-            data: {
-                labels: ['4 Jul', '5 Jul', '6 Jul', '7 Jul', '8 Jul', '9 Jul', '10 Jul', '11 Jul'],
-                datasets: [{
-                        label: 'Child',
-                        data: [100, 120, 80, 105, 90, 115, 100, 105],
-                        backgroundColor: '#22d3ee'
+        let patientChart = null;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        // Pass PHP data to JavaScript
+        const patientStats = {
+            labels: {!! json_encode($patientStats['labels'] ?? ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7', 'Day 8']) !!},
+            childData: {!! json_encode($patientStats['childData'] ?? [0, 0, 0, 0, 0, 0, 0, 0]) !!},
+            adultData: {!! json_encode($patientStats['adultData'] ?? [0, 0, 0, 0, 0, 0, 0, 0]) !!},
+            elderlyData: {!! json_encode($patientStats['elderlyData'] ?? [0, 0, 0, 0, 0, 0, 0, 0]) !!}
+        };
+
+        async function loadPatientChart(days = 7) {
+            try {
+                const response = await fetch(`/dashboard/patient-chart?days=${days}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch chart data');
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderPatientChart(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading chart:', error);
+                // Fallback to static data
+                renderStaticChart();
+            }
+        }
+
+        function renderPatientChart(chartData) {
+            const ctx = document.getElementById('patientChart').getContext('2d');
+            
+            if (patientChart) {
+                patientChart.destroy();
+            }
+
+            patientChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: chartData.datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw} patients`;
+                                }
+                            }
+                        }
                     },
-                    {
-                        label: 'Adult',
-                        data: [120, 110, 100, 132, 115, 140, 130, 132],
-                        backgroundColor: '#3b82f6'
-                    },
-                    {
-                        label: 'Elderly',
-                        data: [30, 40, 35, 38, 40, 45, 40, 38],
-                        backgroundColor: '#38bdf8'
-                    },
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top'
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            },
+                            title: {
+                                display: true,
+                                text: 'Number of Patients'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
                     }
                 }
+            });
+        }
+
+        function renderStaticChart() {
+            const ctx = document.getElementById('patientChart').getContext('2d');
+            
+            if (patientChart) {
+                patientChart.destroy();
             }
+
+            patientChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: patientStats.labels,
+                    datasets: [
+                        {
+                            label: 'Child (0-17)',
+                            data: patientStats.childData,
+                            backgroundColor: '#22d3ee'
+                        },
+                        {
+                            label: 'Adult (18-64)',
+                            data: patientStats.adultData,
+                            backgroundColor: '#3b82f6'
+                        },
+                        {
+                            label: 'Elderly (65+)',
+                            data: patientStats.elderlyData,
+                            backgroundColor: '#38bdf8'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        
+        // Initialize patient chart on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Always load 7-day chart
+            loadPatientChart(7);
+
+            // Optional: auto-refresh every 5 minutes
+            setInterval(() => {
+                loadPatientChart(7);
+            }, 300000);
         });
 
-        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-        new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-                labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                datasets: [{
-                        label: 'Income',
-                        data: [800, 1000, 900, 1495, 1100, 1200, 1150],
-                        borderColor: '#0f172a',
-                        fill: false
-                    },
-                    {
-                        label: 'Expense',
-                        data: [400, 600, 500, 700, 550, 650, 600],
-                        borderColor: '#22d3ee',
-                        fill: false
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    }
-                }
-            }
-        });
+        function openPatientModal() {
+            document.getElementById('patientModal').classList.remove('hidden');
+            document.getElementById('patientModal').classList.add('flex');
+        }
+
+        function closePatientModal() {
+            document.getElementById('patientModal').classList.add('hidden');
+            document.getElementById('patientModal').classList.remove('flex');
+        }
+
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+            document.getElementById('addModal').classList.add('flex');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('addModal').classList.remove('flex');
+        }
+
+        function openAddServiceModal()
+        {
+            document.getElementById('addServiceModal').classList.remove('hidden');
+            document.getElementById('addServiceModal').classList.add('flex');
+        }
+
+        function closeAddServiceModal()
+        {
+            document.getElementById('addServiceModal').classList.add('hidden');
+            document.getElementById('addServiceModal').classList.remove('flex');
+        }
     </script>
+
+@endpush
+
+@push('styles')
+    <style>
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        #patientChart, #revenueChart {
+            width: 100% !important;
+            height: 300px !important;
+        }
+    </style>
 @endpush

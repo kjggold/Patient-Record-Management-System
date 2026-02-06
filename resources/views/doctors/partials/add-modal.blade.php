@@ -1,5 +1,7 @@
 <!-- ADD DOCTOR MODAL - Compact and screen-fitting -->
-<div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+<div id="addModal"
+     class="fixed inset-0 bg-black/40 hidden flex items-center justify-center z-50">
+
     <div class="min-h-screen flex items-center justify-center p-4">
         <div class="doctor-card">
             <!-- Header with close icon -->
