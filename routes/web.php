@@ -50,6 +50,12 @@ Route::post('/discharge', [DischargeController::class, 'store'])->name('discharg
     ]);
 });
 
+// Or specifically for the show method
+Route::get('/patients/{patient}', [PatientController::class, 'show'])
+    ->name('patients.show');
+
+Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
+
 // Admin approval links (from email, signed URLs)
 Route::get('/admin/registrations/{registrationRequest}/approve', [AdminUserApprovalController::class, 'approve'])
     ->name('admin.registrations.approve')

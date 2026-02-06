@@ -46,6 +46,14 @@
             <a href="#"><i class="fa-solid fa-stethoscope"></i> Services</a>
         @endif
 
+        @if (Route::has('patientHistory.index'))
+        <a href="{{ route('patientHistory.index') }}" class="{{ request()->routeIs('patientHistory.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-user"></i> Patient History
+        </a>
+    @else
+        <a href="#"><i class="fa-solid fa-user"></i> Patient History</a>
+    @endif
+
         <!-- Logout -->
         <form method="POST" action="{{ route('logout') }}" class="logout-form">
             @csrf

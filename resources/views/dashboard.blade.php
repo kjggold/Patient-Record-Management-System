@@ -15,15 +15,87 @@
                 <h1 class="text-center md:text-left text-xl font-bold text-blue-900 w-full md:w-auto">
                     Welcome to MediCore Patient Record System
                 </h1>
-                <input type="text" placeholder="Search patient, doctor..."
-                    class="border border-blue-100 rounded-lg p-2 w-full md:w-1/3">
-                <div class="flex items-center gap-3">
-                    <span class="font-medium text-gray-900">Admin</span>
-                    <div
-                        class="w-10 h-10 flex items-center justify-center rounded-full bg-cyan-400 text-white font-bold shadow-md">
-                        A
+
+
+
+                <!-- User Profile with Dropdown -->
+                @auth
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" @click.away="open = false"
+                        class="flex items-center gap-3 focus:outline-none">
+                        @php
+                            $user = auth()->user();
+                            $userName = $user->name ?? $user->email;
+
+                            // Generate initials
+                            $initials = 'U';
+                            if(!empty($userName)) {
+                                $parts = explode(' ', trim($userName));
+                                if(count($parts) >= 2) {
+                                    $initials = strtoupper($parts[0][0] . end($parts)[0]);
+                                } else {
+                                    $initials = strtoupper(substr($userName, 0, 1));
+                                }
+                            }
+                        @endphp
+
+                        <!-- User Avatar -->
+                        <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-200 to-blue-400 text-white font-bold shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                            title="{{ $userName }}">
+                            {{ $initials }}
+                        </div>
+                    </button>
+
+                    <!-- Dropdown Menu with See-Through Glass Effect -->
+                    <div x-show="open" x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute right-0 mt-2 w-56 rounded-xl z-50 overflow-hidden"
+                        style="display: none;
+                               background: rgba(255, 255, 255, 0.15);
+                               backdrop-filter: blur(25px) saturate(180%);
+                               -webkit-backdrop-filter: blur(25px) saturate(180%);
+                               border: 1px solid rgba(255, 255, 255, 0.25);
+                               box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);">
+
+                        <!-- Frosted glass overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5"></div>
+
+                        <div class="relative z-10">
+                            <!-- User Info Section with transparent background -->
+                            <div class="p-4 border-b border-white/20">
+                                <div class="space-y-1">
+                                    <p class="font-semibold text-black text-sm drop-shadow-lg">{{ $userName }}</p>
+                                    <p class="text-xs text-black/90 drop-shadow">{{ $user->email }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Logout Button with glass effect -->
+                            <div class="p-3">
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit"
+                                            class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-red bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg border border-red/20 transition-all duration-200 hover:shadow-lg hover:border-white/30">
+                                        <i class="fa-solid fa-right-from-bracket"></i>
+                                        <span>Log Out</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            @else
+                <div class="flex items-center gap-3">
+                    <span class="font-medium text-gray-900">Guest</span>
+                    <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-300 text-gray-600 font-bold shadow-md"
+                        title="Guest">
+                        G
+                    </div>
+                </div>
+            @endauth
             </header>
 
             <!-- KPI CARDS -->
@@ -64,10 +136,10 @@
                     <h3 class="font-semibold mb-2">Patient Overview</h3>
                     <canvas id="patientChart"></canvas>
                 </div>
-                <div class="flex-1 bg-white rounded-xl shadow p-4">
+                {{-- <div class="flex-1 bg-white rounded-xl shadow p-4">
                     <h3 class="font-semibold mb-2">Revenue</h3>
                     <canvas id="revenueChart"></canvas>
-                </div>
+                </div> --}}
             </section>
 
             <!-- GRID: Appointments & Quick Actions -->

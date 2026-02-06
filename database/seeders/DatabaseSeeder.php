@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => env('MAIN_ADMIN_EMAIL', 'winlaeshweyee636@gmailcom')],
             [
-                'name'     => 'Main Admin',
+                'name'     => 'WinLae',
                 'password' => 'mainadmin123', // hashed cast
                 'role'     => 'main_admin',
                 'status'   => 'active',
@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'eaindrakyaw887@gmail.com'],
             [
-                'name'     => 'Admin One',
+                'name'     => 'Eaindra',
                 'password' => 'admin1234',
                 'role'     => 'admin',
                 'status'   => 'active',
@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'phooiechennie@gmail.com'],
             [
-                'name'     => 'Admin Two',
+                'name'     => 'Phoo',
                 'password' => 'admin1234',
                 'role'     => 'admin',
                 'status'   => 'active',

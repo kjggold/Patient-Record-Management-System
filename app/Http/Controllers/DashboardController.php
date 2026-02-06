@@ -17,6 +17,17 @@ class DashboardController extends Controller
 
     public function index()
     {
+         // Debug: Check if user is authenticated
+    if (!auth()->check()) {
+        abort(403, 'Not authenticated');
+    }
+
+    // Get authenticated user
+    $user = auth()->user();
+
+    // Debug: Check user data
+    \Log::info('Dashboard accessed by user: ' . $user->id . ' - ' . $user->name);
+
         // Total patients
         $totalPatients = Patient::count();
 
@@ -52,6 +63,16 @@ class DashboardController extends Controller
 
         $doctorChange = $lastMonthDoctors > 0 ? round((($currentMonthDoctors - $lastMonthDoctors) / $lastMonthDoctors) * 100, 1) : ($currentMonthDoctors > 0 ? 100 : 0);
 
-        return view('dashboard', compact('totalPatients', 'activeDoctors', 'childPatients', 'adultPatients', 'elderlyPatients', 'recentPatients', 'patientChange', 'doctorChange'));
+        return view('dashboard', compact(
+            'user',           // ← This must be included
+            'totalPatients',
+            'activeDoctors',
+            'childPatients',
+            'adultPatients',
+            'elderlyPatients',
+            'recentPatients',
+            'patientChange',
+            'doctorChange'
+        ));
     }
 }
