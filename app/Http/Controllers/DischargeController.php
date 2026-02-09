@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use App\Models\Appointment;
 use App\Models\Discharge;
 use Illuminate\Http\Request;
@@ -15,35 +16,40 @@ class DischargeController extends Controller
     }
 
     public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'appointment_id' => 'required|exists:appointments,id',
-                'services' => 'required|array',
-                'services.*.name' => 'required|string',
-                'services.*.price' => 'required|numeric',
-                'total' => 'required|numeric',
-                'discount' => 'nullable|numeric',
-                'paid' => 'nullable|numeric',
-            ]);
+{
+    $data = $request->json()->all();
 
-            // Get appointment info
-            $appointment = Appointment::findOrFail($validated['appointment_id']);
-
-            $discharge = Discharge::create([
-                'appointment_id' => $appointment->id,
-                'patient_name' => $appointment->patient->full_name ?? '',
-                'doctor_name' => $appointment->doctor->full_name ?? '',
-                'services' => json_encode($validated['services']), // store as JSON
-                'total' => $validated['total'],
-                'discount' => $validated['discount'] ?? 0,
-                'paid' => $validated['paid'] ?? 0,
-                'balance' => ($validated['paid'] ?? 0) - ($validated['total'] - ($validated['discount'] ?? 0)),
-            ]);
-
-            return response()->json(['success' => true, 'discharge' => $discharge]);
-        } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+    if (!isset($data['appointment_id'], $data['services'], $data['total'], $data['paid'], $data['balance'])) {
+        return response()->json(['success' => false, 'message' => 'Missing required fields']);
     }
+
+    DB::beginTransaction();
+    try {
+        $appointment = Appointment::with(['patient', 'doctor', 'service'])->find($data['appointment_id']);
+        if (!$appointment) {
+            return response()->json(['success' => false, 'message' => 'Appointment not found']);
+        }
+
+        // Save discharge (without touching appointments table)
+        $discharge = Discharge::create([
+            'appointment_id' => $appointment->id,
+            'patient_name'   => $appointment->patient->full_name ?? 'Unknown',
+            'doctor_name'    => $appointment->doctor->full_name ?? 'Unknown',
+            'services'       => json_encode($data['services']),
+            'total'          => $data['total'],
+            'discount'       => $data['discount'] ?? 0,
+            'paid'           => $data['paid'],
+            'balance'        => $data['balance'],
+        ]);
+
+        DB::commit();
+        return response()->json(['success' => true]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+
+
 }

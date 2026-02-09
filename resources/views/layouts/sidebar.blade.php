@@ -32,10 +32,10 @@
 
         @if (Route::has('discharge.index'))
             <a href="{{ route('discharge.index') }}" class="{{ request()->routeIs('discharge.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-house-medical-circle-check"></i> Discharge
+                <i class="fa-solid fa-house-medical-circle-check"></i> Discharges
             </a>
         @else
-            <a href="#"><i class="fa-solid fa-house-medical-circle-check"></i> Discharge</a>
+            <a href="#"><i class="fa-solid fa-house-medical-circle-check"></i> Discharges</a>
         @endif
 
         @if (Route::has('services.index'))

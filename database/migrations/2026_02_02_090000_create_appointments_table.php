@@ -9,15 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('appointments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
-            $table->foreignId('doctor_id')->nullable()->constrained('doctors')->onDelete('cascade');
-            $table->foreignId('service_id')->nullable()->constrained('services')->onDelete('cascade');
-            $table->date('appointment_date');
-            $table->string('phone')->nullable();
-            $table->boolean('discharged')->default(false); // optional
-            $table->timestamps();
-        });
+    $table->id()->startingValue(3001); // Laravel 9+
+    $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('service_id')->constrained()->cascadeOnDelete();
+    $table->date('appointment_date');
+    $table->timestamps();
+});
+
     }
 
     public function down(): void

@@ -249,6 +249,27 @@
             padding-top: 4px;
             margin-top: 4px;
         }
+
+        /* Notification Toast */
+        #notification {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #notification div {
+            background: #22c55e;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
     </style>
 
     <div class="app flex min-h-screen">
@@ -259,7 +280,8 @@
             </div>
 
             <div class="flex justify-end items-center mb-6 gap-3">
-                <input type="text" placeholder="Search by id..." class="border rounded px-3 py-2 w-64">
+                <input type="text" id="searchInput" placeholder="Search by ID or Patient Name..."
+                    class="border rounded px-3 py-2 w-64">
                 <button type="button" onclick="openAddModal()"
                     class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">+Add Appointment</button>
             </div>
@@ -295,6 +317,11 @@
                 </table>
             </div>
         </main>
+    </div>
+
+    {{-- Notification Toast --}}
+    <div id="notification">
+        <div id="notificationMessage"></div>
     </div>
 
     {{-- Add Appointment Modal --}}
@@ -339,7 +366,6 @@
                         <label>Appointment Date</label>
                         <input type="date" name="appointment_date" required>
                     </div>
-
                 </div>
                 <div class="add-form-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeAddModal()">Cancel</button>
@@ -435,10 +461,9 @@
         const slipPayable = document.getElementById('slipPayable');
         const slipPaid = document.getElementById('slipPaid');
         const slipBalance = document.getElementById('slipBalance');
-
-        const dischargeBody = document.getElementById('dischargeBody');
-        const statTotal = document.getElementById('statTotal');
-        const statRevenue = document.getElementById('statRevenue');
+        const searchInput = document.getElementById('searchInput');
+        const notificationMessage = document.getElementById('notificationMessage');
+        const notification = document.getElementById('notification');
 
         function openAddModal() {
             document.getElementById('addModal').classList.add('modal-open');
@@ -450,21 +475,17 @@
 
         function openDischargeModal(id, patient, doctor, service, date, price) {
             dischargeModal.style.display = 'flex';
-
             dischargeAppointmentId.value = id;
             dischargeAppointmentIdText.textContent = id;
-
             dischargePatientName.textContent = patient;
             dischargeDoctorName.textContent = doctor;
             dischargeServiceName.textContent = service;
             dischargeDate.textContent = date;
 
             serviceTableBody.innerHTML = '';
-            addServiceRow(service, price);
-
+            addServiceRow(service, parseFloat(price) || 0);
             dischargeDiscount.value = 0;
             dischargePaid.value = 0;
-
             updateTotals();
         }
 
@@ -477,8 +498,8 @@
                 const list = document.getElementById('posServiceList');
                 const option = Array.from(list.options).find(o => o.value === this.value);
                 if (option) {
-                    this.closest('tr').querySelector('input[name="price[]"]').value =
-                        option.dataset.price || 0;
+                    this.closest('tr').querySelector('input[name="price[]"]').value = parseFloat(option.dataset
+                        .price || 0);
                     updateTotals();
                 }
             });
@@ -487,175 +508,100 @@
         function addServiceRow(name = '', price = 0) {
             const row = document.createElement('tr');
             row.innerHTML = `
-            <td>
-                <input type="text" name="services[]" class="serviceInput"
-                       list="posServiceList" value="${name}">
-            </td>
-            <td>
-                <input type="number" name="price[]" value="${price}" min="0"
-                       oninput="updateTotals()">
-            </td>
-            <td>
-                <button type="button"
-                        onclick="this.closest('tr').remove();updateTotals();"
-                        style="background:red;color:white;border:none;padding:2px 6px;border-radius:4px;cursor:pointer;">x</button>
-            </td>
+            <td><input type="text" name="services[]" value="${name}" placeholder="Service Name"></td>
+            <td><input type="number" name="price[]" value="${price}" min="0"></td>
+            <td><button type="button" onclick="this.closest('tr').remove(); updateTotals();" style="background:red;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">Remove</button></td>
         `;
             serviceTableBody.appendChild(row);
-            bindServiceAutoPrice(row.querySelector('.serviceInput'));
+            bindServiceAutoPrice(row.querySelector('input[name="services[]"]'));
         }
 
         function updateTotals() {
-            let total = 0;
-            serviceTableBody.querySelectorAll('tr').forEach(row => {
-                total += parseFloat(row.querySelector('input[name="price[]"]').value) || 0;
-            });
+            // Collect all service prices
+            const prices = Array.from(serviceTableBody.querySelectorAll('input[name="price[]"]'))
+                .map(i => parseFloat(i.value) || 0);
 
+            const total = prices.reduce((a, b) => a + b, 0);
             const discount = parseFloat(dischargeDiscount.value) || 0;
-            const paid = parseFloat(dischargePaid.value) || 0;
             const payable = total - discount;
+            const paid = parseFloat(dischargePaid.value) || 0;
             const balance = paid - payable;
 
-            slipTotal.textContent = total.toFixed(2);
-            slipDiscount.textContent = discount.toFixed(2);
-            slipPayable.textContent = payable.toFixed(2);
-            slipPaid.textContent = paid.toFixed(2);
-            slipBalance.textContent = balance.toFixed(2);
+            // Display in kyats without decimal truncation
+            slipTotal.textContent = total.toLocaleString('en-US'); // e.g., 92,000
+            slipDiscount.textContent = discount.toLocaleString('en-US');
+            slipPayable.textContent = payable.toLocaleString('en-US');
+            slipPaid.textContent = paid.toLocaleString('en-US');
+            slipBalance.textContent = balance.toLocaleString('en-US');
 
-            dischargeBalance.value = balance.toFixed(2);
+            // Set the balance input
+            dischargeBalance.value = balance;
         }
 
         dischargeDiscount.addEventListener('input', updateTotals);
         dischargePaid.addEventListener('input', updateTotals);
 
-        function completeDischarge() {
-            const id = dischargeAppointmentId.value;
+        function showNotification(message, duration = 3000) {
+            notificationMessage.textContent = message;
+            const toast = notification.firstElementChild;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
 
-            const services = [];
-            serviceTableBody.querySelectorAll('tr').forEach(row => {
-                services.push({
-                    name: row.querySelector('input[name="services[]"]').value,
-                    price: parseFloat(row.querySelector('input[name="price[]"]').value) || 0
-                });
-            });
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, duration);
+        }
 
-            const total = parseFloat(slipTotal.textContent) || 0;
-            const discount = parseFloat(dischargeDiscount.value) || 0;
-            const paid = parseFloat(dischargePaid.value) || 0;
-            const balance = parseFloat(dischargeBalance.value) || 0;
+        async function completeDischarge() {
+            const data = {
+                appointment_id: dischargeAppointmentId.value,
+                services: Array.from(serviceTableBody.querySelectorAll('input[name="services[]"]'))
+                    .map((el, i) => ({
+                        name: el.value,
+                        price: parseFloat(serviceTableBody.querySelectorAll('input[name="price[]"]')[i]
+                            .value) || 0
+                    })),
+                total: Array.from(serviceTableBody.querySelectorAll('input[name="price[]"]'))
+                    .reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0),
+                discount: parseFloat(dischargeDiscount.value) || 0,
+                paid: parseFloat(dischargePaid.value) || 0,
+                balance: parseFloat(dischargeBalance.value) || 0
+            };
 
-            fetch(`{{ url('/appointments') }}/${id}/discharge`, {
+            try {
+                const res = await fetch('{{ route('discharges.store') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify({
-                        services,
-                        total,
-                        discount,
-                        paid,
-                        balance
-                    })
-                })
-                .then(async res => {
-                    const data = await res.json();
-                    if (!res.ok || !data.success) throw new Error(data.message || 'Error during discharge.');
-
-                    // Remove appointment row instantly
-                    document.getElementById(`row-${id}`).remove();
-
-                    // Close modal
-                    closeDischargeModal();
-
-                    // Append new discharge row directly
-                    const newRow = document.createElement('tr');
-                    newRow.id = `discharge_${id}`;
-                    let servicesHtml = '';
-                    services.forEach(s => {
-                        servicesHtml += `${s.name} - ${s.price}<br>`;
-                    });
-
-                    const payableBalance = paid - (total - discount);
-                    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-                    newRow.innerHTML = `
-                <td>${id}</td>
-                <td>${dischargePatientName.textContent}</td>
-                <td>
-                    <span class="service-preview" onclick="toggleService('srv_${id}')">View services</span>
-                    <div id="srv_${id}" class="service-box">${servicesHtml}</div>
-                </td>
-                <td>${total.toFixed(2)}</td>
-                <td>${discount.toFixed(2)}</td>
-                <td>${paid.toFixed(2)}</td>
-                <td>${payableBalance.toFixed(2)}</td>
-                <td>${now}</td>
-                <td><button class="action-btn" onclick="printSingle(${id})">Print</button></td>
-            `;
-                    dischargeBody.prepend(newRow);
-
-                    // Update stats
-                    recalcStats();
-                })
-                .catch(err => alert(err.message));
-        }
-
-        function recalcStats() {
-            let totalDischarges = 0;
-            let revenue = 0;
-
-            dischargeBody.querySelectorAll('tr').forEach(row => {
-                if (row.style.display !== 'none') {
-                    totalDischarges++;
-                    const total = parseFloat(row.cells[3].innerText) || 0;
-                    const discount = parseFloat(row.cells[4].innerText) || 0;
-                    revenue += total - discount;
-                }
-            });
-
-            statTotal.innerText = totalDischarges;
-            statRevenue.innerText = revenue.toFixed(2);
-        }
-
-        window.toggleService = function(id) {
-            const el = document.getElementById(id);
-            el.style.display = (el.style.display === '' || el.style.display === 'none') ? 'block' : 'none';
-        }
-
-        window.printSingle = function(id) {
-            let tr = document.getElementById(`discharge_${id}`);
-            if (!tr) return;
-
-            let html = `<h2>Discharge Receipt</h2>`;
-            html += `<p><b>Appointment:</b> ${tr.cells[0].innerText}</p>`;
-            html += `<p><b>Patient:</b> ${tr.cells[1].innerText}</p><hr>`;
-            const servicesBox = tr.querySelector('.service-box');
-            if (servicesBox) html += `<p>${servicesBox.innerHTML}</p>`;
-            html += `<hr><p>Total: ${tr.cells[3].innerText}</p>`;
-            html += `<p>Discount: ${tr.cells[4].innerText}</p>`;
-            html += `<p>Paid: ${tr.cells[5].innerText}</p>`;
-            html += `<p>Change / Due: ${tr.cells[6].innerText}</p>`;
-            html += `<p style="margin-top:12px;">${tr.cells[7].innerText}</p>`;
-
-            const w = window.open('', '_blank');
-            w.document.write(
-                `<html><head><title>Receipt</title><style>body{font-family:Arial;padding:20px;}</style></head><body>${html}<script>window.print();<\/script></body></html>`
-            );
-            w.document.close();
-        }
-
-        // Datalist -> hidden id
-        document.querySelectorAll('#patientNameInput, #doctorNameInput, #serviceNameInput')
-            .forEach(input => {
-                input.addEventListener('input', function() {
-                    const list = document.getElementById(this.list.id);
-                    const option = Array.from(list.options).find(o => o.value === this.value);
-                    if (option) this.nextElementSibling.value = option.dataset.id || '';
+                    body: JSON.stringify(data)
                 });
-            });
-    </script>
 
+                const result = await res.json();
+                if (result.success) {
+                    showNotification('✅ Discharge completed successfully!');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification('❌ Error completing discharge: ' + (result.message || ''), 4000);
+                }
+            } catch (err) {
+                console.error(err);
+                showNotification('❌ Error completing discharge', 4000);
+            }
+        }
+
+        // Search function
+        searchInput.addEventListener('input', function() {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('#appointmentsBody tr').forEach(row => {
+                const id = row.children[0].textContent.toLowerCase();
+                const patient = row.children[1].textContent.toLowerCase();
+                row.style.display = (id.includes(q) || patient.includes(q)) ? '' : 'none';
+            });
+        });
+    </script>
 
 @endsection

@@ -139,12 +139,9 @@
                                 $services = is_array($row->services)
                                     ? $row->services
                                     : json_decode($row->services, true);
-
                                 $services = $services ?? [];
-
                                 $balance = $row->paid - ($row->total - ($row->discount ?? 0));
                             @endphp
-
 
                             <tr id="discharge_{{ $row->id }}">
                                 <td>{{ $row->appointment_id }}</td>
@@ -158,10 +155,10 @@
                                         @endforeach
                                     </div>
                                 </td>
-                                <td>{{ number_format($row->total, 2) }}</td>
-                                <td>{{ number_format($row->discount, 2) }}</td>
-                                <td>{{ number_format($row->paid, 2) }}</td>
-                                <td>{{ number_format($balance, 2) }}</td>
+                                <td data-value="{{ $row->total }}">{{ number_format($row->total, 0, '.', ',') }}</td>
+                                <td data-value="{{ $row->discount }}">{{ number_format($row->discount, 0, '.', ',') }}</td>
+                                <td data-value="{{ $row->paid }}">{{ number_format($row->paid, 0, '.', ',') }}</td>
+                                <td data-value="{{ $balance }}">{{ number_format($balance, 0, '.', ',') }}</td>
                                 <td>{{ $row->created_at }}</td>
                                 <td><button class="action-btn" onclick="printSingle({{ $row->id }})">Print</button>
                                 </td>
@@ -202,8 +199,8 @@
                     const patientName = row.cells[1].innerText.toLowerCase();
                     const appointmentId = row.cells[0].innerText;
                     const dateTime = row.cells[7].innerText;
-                    const total = parseFloat(row.cells[3].innerText) || 0;
-                    const discount = parseFloat(row.cells[4].innerText) || 0;
+                    const total = parseFloat(row.cells[3].dataset.value) || 0;
+                    const discount = parseFloat(row.cells[4].dataset.value) || 0;
 
                     let show = true;
                     if (search) show = patientName.includes(search) || appointmentId.includes(search);
@@ -218,7 +215,7 @@
                 });
 
                 statTotal.innerText = visibleCount;
-                statRevenue.innerText = revenue.toFixed(2);
+                statRevenue.innerText = revenue.toLocaleString(); // formatted with commas
                 emptyBox.classList.toggle('hidden', visibleCount > 0);
             }
 
@@ -266,4 +263,5 @@
             setInterval(fetchDischarges, 5000); // every 5s
         });
     </script>
+
 @endsection
