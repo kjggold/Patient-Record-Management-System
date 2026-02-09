@@ -10,9 +10,7 @@ use App\Http\Controllers\DischargeController;
 use App\Http\Controllers\AuthController;
 
 // Public
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+Route::get('/', fn() => view('welcome'))->name('welcome');
 
 // Authentication
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -25,32 +23,16 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Appointments
-    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
-    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
-Route::post(
-    '/appointments/complete-discharge',
-    [AppointmentController::class, 'completeDischarge']
-)->name('appointments.completeDischarge');
-    // Discharge AJAX
-    Route::get('/appointments/{id}/discharge', [AppointmentController::class, 'getDischargeData']);
-    Route::post('/appointments/{id}/discharge', [AppointmentController::class, 'completeDischarge']);
+    Route::resource('appointments', AppointmentController::class)
+        ->only(['index','store','create','update','destroy','show','edit']);
 
-    // Discharge page
+    // ✅ Discharge route for AJAX
+    Route::post('/appointments/{appointment}/discharge', [AppointmentController::class, 'discharge'])
+        ->name('appointments.discharge');
+
     Route::get('/discharge', [DischargeController::class, 'index'])->name('discharge.index');
-    Route::post('/discharges', [DischargeController::class, 'store'])->name('discharges.store');
 
-    // Services
-    Route::get('/services/search', [ServiceController::class, 'search'])->name('services.search');
-
-    // API
-    Route::get('/api/discharged-appointments',[DischargeController::class, 'completedIds']);
-
-    Route::resources([
-        'patients' => PatientController::class,
-        'doctors' => DoctorController::class,
-        'appointments' => AppointmentController::class,
-        'services' => ServiceController::class,
-        'discharge' => DischargeController::class,
-    ]);
+    Route::resource('patients', PatientController::class);
+    Route::resource('doctors', DoctorController::class);
+    Route::resource('services', ServiceController::class);
 });

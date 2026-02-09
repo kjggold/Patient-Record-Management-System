@@ -11,7 +11,6 @@ class Appointment extends Model
         'doctor_id',
         'service_id',
         'appointment_date',
-        'phone',
     ];
 
     public function patient() {
@@ -24,5 +23,9 @@ class Appointment extends Model
 
     public function service() {
         return $this->belongsTo(Service::class);
+    }
+
+    public function discharge() {
+        return $this->hasOne(Discharge::class);
     }
 }

@@ -102,13 +102,11 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
                 <div class="stat-card">
                     <div class="stat-title">Total Discharges</div>
-                    <div id="statTotal" class="stat-value">{{ count($discharges) }}</div>
+                    <div id="statTotal" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Total Revenue</div>
-                    <div id="statRevenue" class="stat-value">
-                        {{ number_format($discharges->sum(fn($d) => $d->total - ($d->discount ?? 0)), 2) }}
-                    </div>
+                    <div id="statRevenue" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Search & Date</div>
@@ -138,9 +136,16 @@
                     <tbody id="dischargeBody">
                         @foreach ($discharges as $row)
                             @php
-                                $services = $row->services ?? [];
-                                $balance = ($row->paid ?? 0) - ($row->total - ($row->discount ?? 0));
+                                $services = is_array($row->services)
+                                    ? $row->services
+                                    : json_decode($row->services, true);
+
+                                $services = $services ?? [];
+
+                                $balance = $row->paid - ($row->total - ($row->discount ?? 0));
                             @endphp
+
+
                             <tr id="discharge_{{ $row->id }}">
                                 <td>{{ $row->appointment_id }}</td>
                                 <td>{{ $row->patient_name ?? '-' }}</td>
@@ -149,13 +154,13 @@
                                         services</span>
                                     <div id="srv_{{ $row->id }}" class="service-box">
                                         @foreach ($services as $s)
-                                            {{ $s['name'] ?? '-' }} - {{ number_format($s['price'] ?? 0, 2) }}<br>
+                                            {{ $s['name'] ?? '-' }} - {{ $s['price'] ?? 0 }}<br>
                                         @endforeach
                                     </div>
                                 </td>
                                 <td>{{ number_format($row->total, 2) }}</td>
-                                <td>{{ number_format($row->discount ?? 0, 2) }}</td>
-                                <td>{{ number_format($row->paid ?? 0, 2) }}</td>
+                                <td>{{ number_format($row->discount, 2) }}</td>
+                                <td>{{ number_format($row->paid, 2) }}</td>
                                 <td>{{ number_format($balance, 2) }}</td>
                                 <td>{{ $row->created_at }}</td>
                                 <td><button class="action-btn" onclick="printSingle({{ $row->id }})">Print</button>
@@ -182,7 +187,6 @@
 
             window.toggleService = function(id) {
                 const el = document.getElementById(id);
-                if (!el) return;
                 el.style.display = (el.style.display === '' || el.style.display === 'none') ? 'block' : 'none';
             }
 
@@ -224,7 +228,7 @@
             renderDischarges();
 
             window.printSingle = function(id) {
-                const tr = document.getElementById(`discharge_${id}`);
+                let tr = document.getElementById(`discharge_${id}`);
                 if (!tr) return;
 
                 let html = `<h2>Discharge Receipt</h2>`;
@@ -244,6 +248,22 @@
                 );
                 w.document.close();
             }
+
+            // -----------------------------
+            // Auto-refresh discharges every 5 seconds
+            async function fetchDischarges() {
+                const res = await fetch("{{ route('discharge.index') }}");
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(await res.text(), 'text/html');
+                const newRows = doc.querySelectorAll('#dischargeBody tr');
+
+                dischargeBody.innerHTML = '';
+                newRows.forEach(r => dischargeBody.appendChild(r.cloneNode(true)));
+
+                renderDischarges();
+            }
+
+            setInterval(fetchDischarges, 5000); // every 5s
         });
     </script>
 @endsection

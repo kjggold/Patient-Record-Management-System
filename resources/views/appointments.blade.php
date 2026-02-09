@@ -4,56 +4,57 @@
 
 @section('content')
     <style>
+        /* Keep all your existing styles exactly as they were */
         :root {
             --main: #22d3ee;
             --accent: #0d6efd;
             --bg: #f4f9ff;
             --card: #ffffff;
             --text: #0f172a;
-            --danger: #dc2626;
         }
 
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            font-family: "Segoe UI", sans-serif
+            font-family: "Segoe UI", sans-serif;
         }
 
         body {
-            background: var(--bg)
-        }
-
-        .app {
-            display: flex;
-            min-height: 100vh
+            background: var(--bg);
         }
 
         main {
             flex: 1;
-            padding: 30px
+            padding: 30px;
+        }
+
+        .overflow-x-auto {
+            overflow-x: auto;
         }
 
         .responsive-table th,
         .responsive-table td {
             padding: .75rem;
+            text-align: left;
             font-size: 14px;
         }
 
         .action-btn {
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .action-btn.edit {
             color: #0284c7;
-            margin-right: 10px
         }
 
         .action-btn.discharge {
-            color: var(--danger)
+            color: #dc2626;
         }
 
-        #addModal,
-        #dischargeModal {
+        /* Add Modal */
+        #addModal {
             display: none;
             position: fixed;
             inset: 0;
@@ -142,151 +143,157 @@
             background: #cbd5e1;
         }
 
-        #dischargeModal .pos {
-            width: 1000px;
-            max-width: 95%;
+        /* Discharge Modal */
+        #dischargeModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            overflow: auto;
+        }
+
+        #dischargeModal .modal-container {
+            display: flex;
+            max-width: 1000px;
+            width: 100%;
             background: #fff;
-            border-radius: 14px;
-            display: grid;
-            grid-template-columns: 1fr 1.3fr;
+            border-radius: 16px;
             overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .2);
         }
 
-        .pos-left {
-            padding: 20px;
-            border-right: 1px solid #e5e7eb;
-            background: #f8fafc;
-        }
-
-        .pos-right {
+        #dischargeModal .left-panel {
+            flex: 0 0 30%;
+            background: #f0f4f8;
             padding: 20px;
         }
 
-        .pos-left h3,
-        .pos-right h3 {
-            font-size: 18px;
+        #dischargeModal .right-panel {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        #dischargeModal .left-panel h3,
+        #dischargeModal .right-panel h3 {
             font-weight: 700;
+            margin-bottom: 10px;
             color: #0284c7;
-            margin-bottom: 15px;
         }
 
-        .info-row {
-            margin-bottom: 8px;
-            font-size: 14px
+        #dischargeModal .left-panel p {
+            margin: 6px 0;
+            font-weight: 500;
         }
 
-        .pos-table {
+        #dischargeModal table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 10px;
         }
 
-        .pos-table th,
-        .pos-table td {
-            border: 1px solid #e5e7eb;
-            padding: 8px;
-            font-size: 13px;
+        #dischargeModal table th,
+        #dischargeModal table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
         }
 
-        .pos-table input {
+        #dischargeModal table input {
             width: 100%;
-            border: none;
-            outline: none;
-            font-size: 13px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid #cfe6ff;
         }
 
-        .add-service {
-            width: 100%;
-            padding: 8px;
-            background: #0284c7;
+        #dischargeModal .add-service {
+            background: #0d6efd;
             color: #fff;
+            width: 100%;
+            margin-bottom: 10px;
             border: none;
+            padding: 6px;
             border-radius: 6px;
-            margin-top: 8px;
+            cursor: pointer;
         }
 
-        .summary {
+        #dischargeModal .slip {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
             margin-top: 15px;
             font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
-        .summary input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-        }
-
-        .total {
-            font-size: 18px;
+        #dischargeModal .slip h4 {
+            margin-bottom: 8px;
             font-weight: 700;
-            margin-top: 10px;
+            color: #0284c7;
         }
 
-        .pos-actions {
+        #dischargeModal .slip .row {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 15px;
+            justify-content: space-between;
+            margin: 2px 0;
         }
 
-        .pos-actions button {
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-weight: 600;
-            border: none;
-        }
-
-        .cancel {
-            background: #e5e7eb
-        }
-
-        .complete {
-            background: #0284c7;
-            color: #fff
+        #dischargeModal .slip .row.total {
+            font-weight: 700;
+            border-top: 1px dashed #ccc;
+            padding-top: 4px;
+            margin-top: 4px;
         }
     </style>
 
-    <div class="app">
+    <div class="app flex min-h-screen">
         @include('layouts.sidebar')
-
-        <main>
-            <h1 class="text-2xl font-semibold mb-6">Appointments</h1>
-
-            <div class="flex justify-end mb-4">
-                <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg">+ Add Appointment</button>
+        <main class="flex-1 p-6">
+            <div class="flex w-full sm:w-auto gap-2">
+                <h1 class="text-2xl font-semibold text-slate-700">Appointments</h1>
             </div>
 
-            <table class="min-w-full responsive-table bg-white rounded-lg">
-                <thead class="bg-blue-50">
-                    <tr>
-                        <th>ID</th>
-                        <th>Patient</th>
-                        <th>Doctor</th>
-                        <th>Service</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($appointments as $a)
+            <div class="flex justify-end items-center mb-6 gap-3">
+                <input type="text" placeholder="Search by id..." class="border rounded px-3 py-2 w-64">
+                <button type="button" onclick="openAddModal()"
+                    class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">+Add Appointment</button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 responsive-table">
+                    <thead class="bg-blue-50">
                         <tr>
-                            <td>{{ $a->id }}</td>
-                            <td>{{ $a->patient->full_name }}</td>
-                            <td>{{ $a->doctor->full_name }}</td>
-                            <td>{{ $a->service->service_name }}</td>
-                            <td>{{ $a->appointment_date }}</td>
-                            <td>
-                                <span class="action-btn discharge"
-                                    onclick="openDischarge({{ $a->id }},'{{ $a->patient->full_name }}','{{ $a->doctor->full_name }}','{{ $a->appointment_date }}')">
-                                    Discharge
-                                </span>
-                            </td>
+                            <th>ID</th>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Actions</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="appointmentsBody">
+                        @foreach ($appointments as $appointment)
+                            <tr id="row-{{ $appointment->id }}">
+                                <td>{{ $appointment->id }}</td>
+                                <td>{{ $appointment->patient->full_name ?? '-' }}</td>
+                                <td>{{ $appointment->doctor->full_name ?? '-' }}</td>
+                                <td>{{ $appointment->service->service_name ?? '-' }}</td>
+                                <td>{{ $appointment->appointment_date }}</td>
+                                <td class="text-center">
+                                    <span class="action-btn edit">Edit</span>
+                                    <span class="action-btn discharge"
+                                        onclick="openDischargeModal('{{ $appointment->id }}','{{ $appointment->patient->full_name ?? '' }}','{{ $appointment->doctor->full_name ?? '' }}','{{ $appointment->service->service_name ?? '' }}','{{ $appointment->appointment_date }}','{{ $appointment->service->price ?? 0 }}')">Discharge</span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </main>
     </div>
 
@@ -299,7 +306,7 @@
                 <div class="add-form-grid">
                     <div class="add-form-group">
                         <label>Patient Name</label>
-                        <input list="patientList" id="patientNameInput" placeholder="Type patient name" required>
+                        <input list="patientList" id="patientNameInput" placeholder="Type patient name">
                         <input type="hidden" name="patient_id" id="patientIdInput">
                         <datalist id="patientList">
                             @foreach ($patients as $patient)
@@ -307,10 +314,9 @@
                             @endforeach
                         </datalist>
                     </div>
-
                     <div class="add-form-group">
                         <label>Doctor</label>
-                        <input list="doctorList" id="doctorNameInput" placeholder="Type doctor name" required>
+                        <input list="doctorList" id="doctorNameInput" placeholder="Type doctor name">
                         <input type="hidden" name="doctor_id" id="doctorIdInput">
                         <datalist id="doctorList">
                             @foreach ($doctors as $doctor)
@@ -318,10 +324,9 @@
                             @endforeach
                         </datalist>
                     </div>
-
                     <div class="add-form-group">
                         <label>Service</label>
-                        <input list="serviceList" id="serviceNameInput" placeholder="Type service name" required>
+                        <input list="serviceList" id="serviceNameInput" placeholder="Type service name">
                         <input type="hidden" name="service_id" id="serviceIdInput">
                         <datalist id="serviceList">
                             @foreach ($services as $service)
@@ -330,18 +335,12 @@
                             @endforeach
                         </datalist>
                     </div>
-
                     <div class="add-form-group">
                         <label>Appointment Date</label>
                         <input type="date" name="appointment_date" required>
                     </div>
 
-                    <div class="add-form-group">
-                        <label>Phone</label>
-                        <input type="phone" name="phone" placeholder="Type phone number" required>
-                    </div>
                 </div>
-
                 <div class="add-form-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeAddModal()">Cancel</button>
                     <button type="submit" class="btn btn-save">Save Appointment</button>
@@ -350,209 +349,313 @@
         </div>
     </div>
 
-    {{-- DISCHARGE POS --}}
+    {{-- Discharge Modal --}}
     <div id="dischargeModal">
-        <div class="pos">
-            <div class="pos-left">
+        <div class="modal-container">
+            <div class="left-panel">
                 <h3>Patient Info</h3>
-                <div class="info-row"><b>ID:</b> <span id="d_id"></span></div>
-                <div class="info-row"><b>Name:</b> <span id="d_patient"></span></div>
-                <div class="info-row"><b>Doctor:</b> <span id="d_doctor"></span></div>
-                <div class="info-row"><b>Date:</b> <span id="d_date"></span></div>
+                <p><strong>Appointment ID:</strong> <span id="dischargeAppointmentIdText"></span></p>
+                <p><strong>Patient Name:</strong> <span id="dischargePatientName"></span></p>
+                <p><strong>Doctor Name:</strong> <span id="dischargeDoctorName"></span></p>
+                <p><strong>Service:</strong> <span id="dischargeServiceName"></span></p>
+                <p><strong>Date:</strong> <span id="dischargeDate"></span></p>
             </div>
+            <div class="right-panel">
+                <h3>Mini POS / Services</h3>
+                <form id="dischargeForm">
+                    <input type="hidden" id="dischargeAppointmentId">
+                    <table id="serviceTable">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <button type="button" class="add-service" onclick="addServiceRow()">+ Add Service</button>
 
-            <div class="pos-right">
-                <h3>Services</h3>
-                <table class="pos-table">
-                    <thead>
-                        <tr>
-                            <th>Service</th>
-                            <th>Price</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="posBody"></tbody>
-                </table>
+                    <div class="add-form-grid">
+                        <div class="add-form-group">
+                            <label>Discount</label>
+                            <input type="number" id="dischargeDiscount" value="0" min="0">
+                        </div>
+                        <div class="add-form-group">
+                            <label>Paid</label>
+                            <input type="number" id="dischargePaid" value="0" min="0">
+                        </div>
+                        <div class="add-form-group">
+                            <label>Balance / Change</label>
+                            <input type="number" id="dischargeBalance" readonly>
+                        </div>
+                    </div>
 
-                <button class="add-service" onclick="addRow()">+ Add Service</button>
+                    <div class="slip">
+                        <h4>Receipt / Slip</h4>
+                        <div id="slipItems"></div>
+                        <div class="row total"><span>Total:</span> <span id="slipTotal">0.00</span></div>
+                        <div class="row"><span>Discount:</span> <span id="slipDiscount">0.00</span></div>
+                        <div class="row total"><span>Payable:</span> <span id="slipPayable">0.00</span></div>
+                        <div class="row"><span>Paid:</span> <span id="slipPaid">0.00</span></div>
+                        <div class="row total"><span>Balance / Change:</span> <span id="slipBalance">0.00</span></div>
+                    </div>
 
-                <div class="summary">
-                    <label>Discount</label>
-                    <input type="number" id="discount" value="0" oninput="calc()">
-
-                    <label>Paid</label>
-                    <input type="number" id="paid" value="0" oninput="calc()">
-
-                    <div class="total">Total: <span id="total">0</span></div>
-                    <div>Balance: <span id="balance">0</span></div>
-                </div>
-
-                <div class="pos-actions">
-                    <button class="cancel" onclick="closeDischarge()">Cancel</button>
-                    <button class="complete" onclick="submitDischarge()">Complete</button>
-                </div>
+                    <div style="margin-top:10px; display:flex; justify-content:flex-end; gap:14px;">
+                        <button type="button" class="btn btn-cancel" onclick="closeDischargeModal()">Cancel</button>
+                        <button type="button" class="btn btn-save" onclick="completeDischarge()">Complete
+                            Discharge</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
+    {{-- POS datalist --}}
+    <datalist id="posServiceList">
+        @foreach ($services as $service)
+            <option value="{{ $service->service_name }}" data-price="{{ $service->price }}"></option>
+        @endforeach
+    </datalist>
+
     <script>
-        /* -------------------- ADD APPOINTMENT AUTOCOMPLETE -------------------- */
+        const dischargeModal = document.getElementById('dischargeModal');
+        const dischargeAppointmentId = document.getElementById('dischargeAppointmentId');
+        const dischargeAppointmentIdText = document.getElementById('dischargeAppointmentIdText');
+        const dischargePatientName = document.getElementById('dischargePatientName');
+        const dischargeDoctorName = document.getElementById('dischargeDoctorName');
+        const dischargeServiceName = document.getElementById('dischargeServiceName');
+        const dischargeDate = document.getElementById('dischargeDate');
+        const serviceTableBody = document.querySelector('#serviceTable tbody');
+        const dischargeDiscount = document.getElementById('dischargeDiscount');
+        const dischargePaid = document.getElementById('dischargePaid');
+        const dischargeBalance = document.getElementById('dischargeBalance');
+        const slipTotal = document.getElementById('slipTotal');
+        const slipDiscount = document.getElementById('slipDiscount');
+        const slipPayable = document.getElementById('slipPayable');
+        const slipPaid = document.getElementById('slipPaid');
+        const slipBalance = document.getElementById('slipBalance');
 
-        function bindDatalist(inputId, listId, hiddenId) {
-            const input = document.getElementById(inputId);
-            const list = document.getElementById(listId);
-            const hidden = document.getElementById(hiddenId);
-
-            input.addEventListener('input', () => {
-                const val = input.value.trim();
-                let found = false;
-
-                for (const opt of list.options) {
-                    if (opt.value === val) {
-                        hidden.value = opt.dataset.id;
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    hidden.value = '';
-                }
-            });
-        }
-
-        bindDatalist('patientNameInput', 'patientList', 'patientIdInput');
-        bindDatalist('doctorNameInput', 'doctorList', 'doctorIdInput');
-        bindDatalist('serviceNameInput', 'serviceList', 'serviceIdInput');
-
-        document.getElementById('addAppointmentForm').addEventListener('submit', function(e) {
-
-            if (!patientIdInput.value || !doctorIdInput.value || !serviceIdInput.value) {
-                e.preventDefault();
-                alert('Please select patient, doctor and service from the list.');
-            }
-        });
-
-        /* -------------------- MODALS -------------------- */
-
-        let dischargeId = 0;
-        let services = [];
+        const dischargeBody = document.getElementById('dischargeBody');
+        const statTotal = document.getElementById('statTotal');
+        const statRevenue = document.getElementById('statRevenue');
 
         function openAddModal() {
-            addModal.classList.add('modal-open')
+            document.getElementById('addModal').classList.add('modal-open');
         }
 
         function closeAddModal() {
-            addModal.classList.remove('modal-open')
+            document.getElementById('addModal').classList.remove('modal-open');
         }
 
-        function openDischarge(id, p, d, date) {
+        function openDischargeModal(id, patient, doctor, service, date, price) {
+            dischargeModal.style.display = 'flex';
 
-            dischargeId = id;
+            dischargeAppointmentId.value = id;
+            dischargeAppointmentIdText.textContent = id;
 
-            d_id.innerText = id;
-            d_patient.innerText = p;
-            d_doctor.innerText = d;
-            d_date.innerText = date;
+            dischargePatientName.textContent = patient;
+            dischargeDoctorName.textContent = doctor;
+            dischargeServiceName.textContent = service;
+            dischargeDate.textContent = date;
 
-            services = [];
-            posBody.innerHTML = '';
+            serviceTableBody.innerHTML = '';
+            addServiceRow(service, price);
 
-            discount.value = 0;
-            paid.value = 0;
+            dischargeDiscount.value = 0;
+            dischargePaid.value = 0;
 
-            addRow();
-
-            dischargeModal.classList.add('modal-open');
+            updateTotals();
         }
 
-        function closeDischarge() {
-            dischargeModal.classList.remove('modal-open')
+        function closeDischargeModal() {
+            dischargeModal.style.display = 'none';
         }
 
-        /* -------------------- MINI POS -------------------- */
-
-        function addRow() {
-            services.push({
-                name: '',
-                price: 0
+        function bindServiceAutoPrice(input) {
+            input.addEventListener('change', function() {
+                const list = document.getElementById('posServiceList');
+                const option = Array.from(list.options).find(o => o.value === this.value);
+                if (option) {
+                    this.closest('tr').querySelector('input[name="price[]"]').value =
+                        option.dataset.price || 0;
+                    updateTotals();
+                }
             });
-            render();
         }
 
-        function removeRow(i) {
-            services.splice(i, 1);
-            render();
-        }
-
-        function render() {
-
-            posBody.innerHTML = '';
-
-            services.forEach((s, i) => {
-
-                posBody.innerHTML += `
-        <tr>
+        function addServiceRow(name = '', price = 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
             <td>
-                <input value="${s.name}"
-                       oninput="services[${i}].name=this.value">
+                <input type="text" name="services[]" class="serviceInput"
+                       list="posServiceList" value="${name}">
             </td>
             <td>
-                <input type="number" value="${s.price}"
-                       oninput="services[${i}].price=+this.value;calc()">
+                <input type="number" name="price[]" value="${price}" min="0"
+                       oninput="updateTotals()">
             </td>
             <td>
-                <button type="button" onclick="removeRow(${i})">×</button>
+                <button type="button"
+                        onclick="this.closest('tr').remove();updateTotals();"
+                        style="background:red;color:white;border:none;padding:2px 6px;border-radius:4px;cursor:pointer;">x</button>
             </td>
-        </tr>
         `;
+            serviceTableBody.appendChild(row);
+            bindServiceAutoPrice(row.querySelector('.serviceInput'));
+        }
+
+        function updateTotals() {
+            let total = 0;
+            serviceTableBody.querySelectorAll('tr').forEach(row => {
+                total += parseFloat(row.querySelector('input[name="price[]"]').value) || 0;
             });
 
-            calc();
+            const discount = parseFloat(dischargeDiscount.value) || 0;
+            const paid = parseFloat(dischargePaid.value) || 0;
+            const payable = total - discount;
+            const balance = paid - payable;
+
+            slipTotal.textContent = total.toFixed(2);
+            slipDiscount.textContent = discount.toFixed(2);
+            slipPayable.textContent = payable.toFixed(2);
+            slipPaid.textContent = paid.toFixed(2);
+            slipBalance.textContent = balance.toFixed(2);
+
+            dischargeBalance.value = balance.toFixed(2);
         }
 
-        function calc() {
+        dischargeDiscount.addEventListener('input', updateTotals);
+        dischargePaid.addEventListener('input', updateTotals);
 
-            let total = services.reduce((t, s) => t + (Number(s.price) || 0), 0);
-            let discountVal = +discount.value || 0;
-            let paidVal = +paid.value || 0;
+        function completeDischarge() {
+            const id = dischargeAppointmentId.value;
 
-            totalEl = document.getElementById('total');
-            balanceEl = document.getElementById('balance');
+            const services = [];
+            serviceTableBody.querySelectorAll('tr').forEach(row => {
+                services.push({
+                    name: row.querySelector('input[name="services[]"]').value,
+                    price: parseFloat(row.querySelector('input[name="price[]"]').value) || 0
+                });
+            });
 
-            totalEl.innerText = total.toFixed(2);
-            balanceEl.innerText = (paidVal - (total - discountVal)).toFixed(2);
-        }
+            const total = parseFloat(slipTotal.textContent) || 0;
+            const discount = parseFloat(dischargeDiscount.value) || 0;
+            const paid = parseFloat(dischargePaid.value) || 0;
+            const balance = parseFloat(dischargeBalance.value) || 0;
 
-        /* -------------------- SUBMIT DISCHARGE -------------------- */
-
-        function submitDischarge() {
-
-            if (services.length === 0) {
-                alert('Add at least one service.');
-                return;
-            }
-
-            fetch("{{ route('appointments.completeDischarge') }}", {
+            fetch(`{{ url('/appointments') }}/${id}/discharge`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        appointment_id: dischargeId,
-                        services: services,
-                        discount: discount.value,
-                        paid: paid.value
+                        services,
+                        total,
+                        discount,
+                        paid,
+                        balance
                     })
                 })
-                .then(r => r.json())
-                .then(res => {
-                    location.reload();
+                .then(async res => {
+                    const data = await res.json();
+                    if (!res.ok || !data.success) throw new Error(data.message || 'Error during discharge.');
+
+                    // Remove appointment row instantly
+                    document.getElementById(`row-${id}`).remove();
+
+                    // Close modal
+                    closeDischargeModal();
+
+                    // Append new discharge row directly
+                    const newRow = document.createElement('tr');
+                    newRow.id = `discharge_${id}`;
+                    let servicesHtml = '';
+                    services.forEach(s => {
+                        servicesHtml += `${s.name} - ${s.price}<br>`;
+                    });
+
+                    const payableBalance = paid - (total - discount);
+                    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+                    newRow.innerHTML = `
+                <td>${id}</td>
+                <td>${dischargePatientName.textContent}</td>
+                <td>
+                    <span class="service-preview" onclick="toggleService('srv_${id}')">View services</span>
+                    <div id="srv_${id}" class="service-box">${servicesHtml}</div>
+                </td>
+                <td>${total.toFixed(2)}</td>
+                <td>${discount.toFixed(2)}</td>
+                <td>${paid.toFixed(2)}</td>
+                <td>${payableBalance.toFixed(2)}</td>
+                <td>${now}</td>
+                <td><button class="action-btn" onclick="printSingle(${id})">Print</button></td>
+            `;
+                    dischargeBody.prepend(newRow);
+
+                    // Update stats
+                    recalcStats();
                 })
-                .catch(() => {
-                    alert('Discharge failed.');
-                });
+                .catch(err => alert(err.message));
         }
+
+        function recalcStats() {
+            let totalDischarges = 0;
+            let revenue = 0;
+
+            dischargeBody.querySelectorAll('tr').forEach(row => {
+                if (row.style.display !== 'none') {
+                    totalDischarges++;
+                    const total = parseFloat(row.cells[3].innerText) || 0;
+                    const discount = parseFloat(row.cells[4].innerText) || 0;
+                    revenue += total - discount;
+                }
+            });
+
+            statTotal.innerText = totalDischarges;
+            statRevenue.innerText = revenue.toFixed(2);
+        }
+
+        window.toggleService = function(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === '' || el.style.display === 'none') ? 'block' : 'none';
+        }
+
+        window.printSingle = function(id) {
+            let tr = document.getElementById(`discharge_${id}`);
+            if (!tr) return;
+
+            let html = `<h2>Discharge Receipt</h2>`;
+            html += `<p><b>Appointment:</b> ${tr.cells[0].innerText}</p>`;
+            html += `<p><b>Patient:</b> ${tr.cells[1].innerText}</p><hr>`;
+            const servicesBox = tr.querySelector('.service-box');
+            if (servicesBox) html += `<p>${servicesBox.innerHTML}</p>`;
+            html += `<hr><p>Total: ${tr.cells[3].innerText}</p>`;
+            html += `<p>Discount: ${tr.cells[4].innerText}</p>`;
+            html += `<p>Paid: ${tr.cells[5].innerText}</p>`;
+            html += `<p>Change / Due: ${tr.cells[6].innerText}</p>`;
+            html += `<p style="margin-top:12px;">${tr.cells[7].innerText}</p>`;
+
+            const w = window.open('', '_blank');
+            w.document.write(
+                `<html><head><title>Receipt</title><style>body{font-family:Arial;padding:20px;}</style></head><body>${html}<script>window.print();<\/script></body></html>`
+            );
+            w.document.close();
+        }
+
+        // Datalist -> hidden id
+        document.querySelectorAll('#patientNameInput, #doctorNameInput, #serviceNameInput')
+            .forEach(input => {
+                input.addEventListener('input', function() {
+                    const list = document.getElementById(this.list.id);
+                    const option = Array.from(list.options).find(o => o.value === this.value);
+                    if (option) this.nextElementSibling.value = option.dataset.id || '';
+                });
+            });
     </script>
+
+
 @endsection
