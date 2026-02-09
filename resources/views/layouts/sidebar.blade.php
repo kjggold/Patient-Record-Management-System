@@ -31,7 +31,7 @@
         @endif
 
         @if (Route::has('discharge.index'))
-            <a href="{{ route('discharge.index') }}" class="{{ request()->routeIs('services.*') ? 'active' : '' }}">
+            <a href="{{ route('discharge.index') }}" class="{{ request()->routeIs('discharge.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-house-medical-circle-check"></i> Discharge
             </a>
         @else
@@ -94,7 +94,7 @@
         text-align: left;
     }
 
-    .sidebar nav a:hover,
+    /* .sidebar nav a:hover, */
     .sidebar nav a.active {
         background: rgba(5, 96, 224, 0.1);
     }

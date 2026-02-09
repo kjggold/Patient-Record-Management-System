@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers; // <- very important
+namespace App\Http\Controllers;
 
 use App\Models\Discharge;
 use Illuminate\Http\Request;
@@ -9,25 +9,20 @@ class DischargeController extends Controller
 {
     public function index()
     {
-        $discharges = Discharge::latest()->get();
+        $discharges = Discharge::with('appointment.patient', 'appointment.doctor')->get();
         return view('discharge', compact('discharges'));
     }
 
-    public function store(Request $request)
+    // Optional: fetch discharged appointments IDs for JS usage
+    public function completedIds()
     {
-        $data = $request->validate([
-            'appointment_id' => 'required',
-            'patient_name' => 'required',
-            'doctor_name' => 'required',
-            'services' => 'required|array',
-            'total' => 'required|numeric',
-            'paid' => 'required|numeric',
-            'balance' => 'required|numeric',
-            'payment_method' => 'required',
-        ]);
+        return Discharge::pluck('appointment_id');
+    }
 
-        Discharge::create($data);
-
-        return response()->json(['success' => true]);
+    // Optional: for AJAX fetch
+    public function fetchAll()
+    {
+        $discharges = Discharge::with('appointment.patient', 'appointment.doctor')->get();
+        return response()->json($discharges);
     }
 }

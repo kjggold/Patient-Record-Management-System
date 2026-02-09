@@ -2,94 +2,118 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Doctor;
-use App\Models\Patient;
-use App\Models\Service;
 use App\Models\Appointment;
+use App\Models\Patient;
+use App\Models\Doctor;
+use App\Models\Service;
+use App\Models\Discharge;
+use App\Models\DischargeService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
-    public function __construct()
+    /**
+     * Display a listing of the appointments.
+     */
+    public function index()
     {
-        $this->middleware('auth'); // Protect appointments
-    }
+        $appointments = Appointment::with(['patient', 'doctor', 'service'])
+            ->orderBy('appointment_date', 'asc')
+            ->get();
 
-    public function index(Request $request)
-    {
-        $doctors = Doctor::all();
         $patients = Patient::all();
+        $doctors  = Doctor::all();
         $services = Service::all();
 
-        // Load appointments with relationships
-        $query = Appointment::with(['doctor', 'patient', 'service']);
-
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->whereHas('patient', function ($q) use ($search) {
-                $q->where('full_name', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $appointments = $query->paginate(10);
-
-        return view('appointments', compact('doctors', 'patients', 'services', 'appointments'));
+        return view('appointments', compact(
+            'appointments',
+            'patients',
+            'doctors',
+            'services'
+        ));
     }
 
+    /**
+     * Store a newly created appointment.
+     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'service_id' => 'required|exists:services,id',
+        $request->validate([
+            'patient_id'       => 'required|exists:patients,id',
+            'doctor_id'        => 'required|exists:doctors,id',
+            'service_id'       => 'required|exists:services,id',
             'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
+            'phone'            => 'required'
         ]);
 
         Appointment::create([
-            'patient_id' => $validated['patient_id'],
-            'doctor_id' => $validated['doctor_id'],
-            'service_id' => $validated['service_id'],
-            'appointment_date' => $validated['appointment_date'],
-            'appointment_time' => $validated['appointment_time'],
-            'status' => 'Scheduled',
+            'patient_id'       => $request->patient_id,
+            'doctor_id'        => $request->doctor_id,
+            'service_id'       => $request->service_id,
+            'appointment_date' => $request->appointment_date,
+            'phone'            => $request->phone,
         ]);
 
-        return redirect()->back()->with('success', 'Appointment added successfully!');
+        return redirect()->back();
     }
 
+    /**
+     * ===============================
+     * DISCHARGE (your missing logic)
+     * ===============================
+     */
     public function completeDischarge(Request $request)
-{
-    $appointment = Appointment::where('code',$request->appointment_code)->firstOrFail();
+    {
+        $request->validate([
+            'appointment_id' => 'required|exists:appointments,id',
+            'services'       => 'required|array|min:1',
+            'discount'       => 'nullable|numeric',
+            'paid'           => 'nullable|numeric',
+        ]);
 
-    $appointment->payment_status = 'paid';
-    $appointment->save();
+        DB::beginTransaction();
 
-    return response()->json(['success'=>true]);
-}
+        try {
 
-public function discharge(Request $request)
-{
-    $appointment = Appointment::find($request->appointment_id);
-    if(!$appointment) return response()->json(['error'=>'Appointment not found'], 404);
+            $total = collect($request->services)->sum(function ($s) {
+                return (float) ($s['price'] ?? 0);
+            });
 
-    $appointment->status = 'Discharged';
-    $appointment->save();
+            $discharge = Discharge::create([
+                'appointment_id' => $request->appointment_id,
+                'total'          => $total,
+                'discount'       => $request->discount ?? 0,
+                'paid'           => $request->paid ?? 0,
+            ]);
 
-    Payment::create([
-        'appointment_id'=>$appointment->id,
-        'services'=>$request->services_json,
-        'paid_amount'=>$request->paid_amount,
-        'discount'=>$request->discount_amount,
-        'payment_method'=>$request->payment_method,
-        'remarks'=>$request->remarks,
-    ]);
+            foreach ($request->services as $row) {
 
-return response()->json([
-    'success' => true,
-    'paid_amount' => number_format($request->paid_amount),
-    'payment_method' => $request->payment_method,
-    'time' => now()->format('H:i')
-]);
-}
+                $service = Service::where(
+                    'service_name',
+                    $row['name'] ?? ''
+                )->first();
+
+                DischargeService::create([
+                    'discharge_id' => $discharge->id,
+                    'service_id'   => $service?->id,
+                    'service_name' => $row['name'] ?? null,
+                    'price'        => $row['price'] ?? 0,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json(['success' => true]);
+
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

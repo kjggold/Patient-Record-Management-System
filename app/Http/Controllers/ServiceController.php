@@ -178,4 +178,12 @@ class ServiceController extends Controller
         return redirect()->route('services.index')
             ->with('success', 'Service added successfully!');
     }
+
+    public function search(Request $request)
+{
+    $query = $request->get('q', '');
+    $services = Service::where('service_name', 'like', "%{$query}%")->get();
+    return response()->json($services);
+}
+
 }

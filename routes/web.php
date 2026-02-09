@@ -9,9 +9,8 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\DischargeController;
 use App\Http\Controllers\AuthController;
 
-
 // Public
-Route::get('/welcome', function () {
+Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
@@ -22,16 +21,30 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Protected dashboard + resources
+// Protected
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-Route::post('/appointments/discharge', [AppointmentController::class, 'discharge'])->name('appointments.discharge');
-Route::post('/appointments/complete-discharge',
-    [AppointmentController::class,'completeDischarge']
-)->name('appointments.completeDischarge');
 
-Route::get('/discharge', [DischargeController::class, 'index'])->name('discharge.index');
-Route::post('/discharge', [DischargeController::class, 'store'])->name('discharge.store');
+    // Appointments
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+Route::post(
+    '/appointments/complete-discharge',
+    [AppointmentController::class, 'completeDischarge']
+)->name('appointments.completeDischarge');
+    // Discharge AJAX
+    Route::get('/appointments/{id}/discharge', [AppointmentController::class, 'getDischargeData']);
+    Route::post('/appointments/{id}/discharge', [AppointmentController::class, 'completeDischarge']);
+
+    // Discharge page
+    Route::get('/discharge', [DischargeController::class, 'index'])->name('discharge.index');
+    Route::post('/discharges', [DischargeController::class, 'store'])->name('discharges.store');
+
+    // Services
+    Route::get('/services/search', [ServiceController::class, 'search'])->name('services.search');
+
+    // API
+    Route::get('/api/discharged-appointments',[DischargeController::class, 'completedIds']);
 
     Route::resources([
         'patients' => PatientController::class,

@@ -1,103 +1,249 @@
 @extends('layouts.app')
 
-@section('title', 'Discharge | MediCore')
+@section('title', 'Discharges | MediCore')
 
 @section('content')
+
+    <style>
+        /* Existing CSS */
+        .stat-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .05);
+        }
+
+        .stat-title {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .table-card {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(52, 5, 5, 0.06);
+        }
+
+        .discharge-table th {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            padding: 12px;
+        }
+
+        .discharge-table td {
+            padding: 12px;
+            font-size: 14px;
+            border-top: 1px solid #4e79ce;
+            vertical-align: top;
+        }
+
+        .badge-paid {
+            background: #22c55e;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .service-preview {
+            color: #0d6efd;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .service-box {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 8px 10px;
+            line-height: 1.6;
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .action-btn {
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: #0b5ed7;
+        }
+
+        .empty-box {
+            padding: 60px 20px;
+            text-align: center;
+            color: #64748b;
+        }
+    </style>
+
     <div class="app flex min-h-screen">
         @include('layouts.sidebar')
+        <main class="flex-1 p-6">
+            <div class="mb-6">
+                <h1 class="text-2xl font-semibold text-slate-700">Discharged Patients</h1>
+                <p class="text-sm text-slate-500 mt-1">Completed appointments and payments</p>
+            </div>
 
-        <main class="flex-1 p-6 bg-gray-50">
-            <div class="mb-2">
-                <h1 class="text-2xl font-semibold text-slate-700">Discharge</h1>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                <div class="stat-card">
+                    <div class="stat-title">Total Discharges</div>
+                    <div id="statTotal" class="stat-value">{{ count($discharges) }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Revenue</div>
+                    <div id="statRevenue" class="stat-value">
+                        {{ number_format($discharges->sum(fn($d) => $d->total - ($d->discount ?? 0)), 2) }}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Search & Date</div>
+                    <div class="flex gap-2 mt-2">
+                        <input id="searchInput" type="text" placeholder="Patient or ID"
+                            class="border rounded-lg px-3 py-2 w-full">
+                        <input id="dateFilter" type="date" class="border rounded-lg px-3 py-2">
+                    </div>
+                </div>
             </div>
-            <div class="flex justify-end mb-6">
-                <input type="text" id="searchDischarge" placeholder="Search by patient or ID..."
-                    class="border rounded-lg px-4 py-2 w-80 focus:ring-2 focus:ring-[#22d3ee] focus:outline-none">
-            </div>
-            <div class="overflow-x-auto bg-white rounded-xl shadow-md">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-[#22d3ee]/20">
+
+            <div class="table-card">
+                <table class="min-w-full discharge-table">
+                    <thead class="bg-blue-50">
                         <tr>
-                            <th class="px-4 py-2 text-left font-medium text-gray-700">ID</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-700">Patient</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-700">Doctor</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-700">Services</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-700">Total</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-700">Paid</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-700">Balance</th>
-                            <th class="px-4 py-2 text-center font-medium text-gray-700">Status</th>
-                            <th class="px-4 py-2 text-center font-medium text-gray-700">Action</th>
+                            <th>Appointment</th>
+                            <th>Patient</th>
+                            <th>Services</th>
+                            <th>Total</th>
+                            <th>Discount</th>
+                            <th>Paid</th>
+                            <th>Change / Due</th>
+                            <th>Time</th>
+                            <th></th>
                         </tr>
                     </thead>
-                    <tbody id="dischargeBody" class="divide-y divide-gray-100">
-                        @foreach ($discharges as $d)
-                            <tr class="hover:bg-[#f0f8ff]">
-                                <td class="px-4 py-2">{{ $d->appointment_id }}</td>
-                                <td class="px-4 py-2">{{ $d->patient_name }}</td>
-                                <td class="px-4 py-2">{{ $d->doctor_name }}</td>
-                                <td class="px-4 py-2">
-                                    @foreach ($d->services as $s)
-                                        <span
-                                            class="inline-block bg-[#22d3ee]/20 text-[#0d6efd] px-2 py-1 rounded-full text-xs mr-1">{{ $s['name'] }}</span>
-                                    @endforeach
+                    <tbody id="dischargeBody">
+                        @foreach ($discharges as $row)
+                            @php
+                                $services = $row->services ?? [];
+                                $balance = ($row->paid ?? 0) - ($row->total - ($row->discount ?? 0));
+                            @endphp
+                            <tr id="discharge_{{ $row->id }}">
+                                <td>{{ $row->appointment_id }}</td>
+                                <td>{{ $row->patient_name ?? '-' }}</td>
+                                <td>
+                                    <span class="service-preview" onclick="toggleService('srv_{{ $row->id }}')">View
+                                        services</span>
+                                    <div id="srv_{{ $row->id }}" class="service-box">
+                                        @foreach ($services as $s)
+                                            {{ $s['name'] ?? '-' }} - {{ number_format($s['price'] ?? 0, 2) }}<br>
+                                        @endforeach
+                                    </div>
                                 </td>
-                                <td class="px-4 py-2">{{ $d->total }}</td>
-                                <td class="px-4 py-2">{{ $d->paid }}</td>
-                                <td class="px-4 py-2">{{ $d->balance }}</td>
-                                <td class="px-4 py-2 text-center">
-                                    @if ($d->balance <= 0)
-                                        <span class="text-green-600 font-semibold">Completed</span>
-                                    @else
-                                        <span class="text-red-600 font-semibold">Pending</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-2 text-center">
-                                    <button onclick="viewDischarge('{{ $d->id }}')"
-                                        class="bg-[#0d6efd] text-white px-3 py-1 rounded-lg hover:bg-[#084298]">View</button>
+                                <td>{{ number_format($row->total, 2) }}</td>
+                                <td>{{ number_format($row->discount ?? 0, 2) }}</td>
+                                <td>{{ number_format($row->paid ?? 0, 2) }}</td>
+                                <td>{{ number_format($balance, 2) }}</td>
+                                <td>{{ $row->created_at }}</td>
+                                <td><button class="action-btn" onclick="printSingle({{ $row->id }})">Print</button>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
+                <div id="emptyBox" class="empty-box {{ count($discharges) === 0 ? '' : 'hidden' }}">
+                    No discharged records found.
+                </div>
             </div>
         </main>
     </div>
 
-    {{-- Optional modal for viewing detailed discharge info --}}
-    <div id="dischargeViewModal" class="fixed inset-0 bg-black/40 hidden justify-center items-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-3xl w-full p-6 overflow-auto">
-            <h2 class="text-xl font-bold text-[#0d6efd] mb-4">Discharge Details</h2>
-            <div id="dischargeDetails">
-                {{-- Dynamic content loaded via JS --}}
-            </div>
-            <div class="flex justify-end mt-4 gap-2">
-                <button onclick="closeDischargeModal()"
-                    class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Close</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        function viewDischarge(id) {
-            const modal = document.getElementById('dischargeViewModal');
-            const detailsDiv = document.getElementById('dischargeDetails');
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const dateFilter = document.getElementById('dateFilter');
+            const statTotal = document.getElementById('statTotal');
+            const statRevenue = document.getElementById('statRevenue');
+            const dischargeBody = document.getElementById('dischargeBody');
+            const emptyBox = document.getElementById('emptyBox');
 
-            // Example dynamic content - replace with AJAX fetch if needed
-            detailsDiv.innerHTML = `<p>Loading details for ID ${id}...</p>`;
-            modal.classList.remove('hidden');
-        }
+            window.toggleService = function(id) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.style.display = (el.style.display === '' || el.style.display === 'none') ? 'block' : 'none';
+            }
 
-        function closeDischargeModal() {
-            document.getElementById('dischargeViewModal').classList.add('hidden');
-        }
+            function renderDischarges() {
+                const rows = Array.from(dischargeBody.querySelectorAll('tr'));
+                const search = searchInput.value.toLowerCase();
+                const filterDate = dateFilter.value;
 
-        // Optional: Add search filter
-        document.getElementById('searchDischarge').addEventListener('input', function(e) {
-            const query = e.target.value.toLowerCase();
-            document.querySelectorAll('#dischargeBody tr').forEach(tr => {
-                const text = tr.innerText.toLowerCase();
-                tr.style.display = text.includes(query) ? '' : 'none';
-            });
+                let visibleCount = 0;
+                let revenue = 0;
+
+                rows.forEach(row => {
+                    const patientName = row.cells[1].innerText.toLowerCase();
+                    const appointmentId = row.cells[0].innerText;
+                    const dateTime = row.cells[7].innerText;
+                    const total = parseFloat(row.cells[3].innerText) || 0;
+                    const discount = parseFloat(row.cells[4].innerText) || 0;
+
+                    let show = true;
+                    if (search) show = patientName.includes(search) || appointmentId.includes(search);
+                    if (filterDate) show = show && (new Date(dateTime).toISOString().slice(0, 10) ===
+                        filterDate);
+
+                    row.style.display = show ? '' : 'none';
+                    if (show) {
+                        visibleCount++;
+                        revenue += (total - discount);
+                    }
+                });
+
+                statTotal.innerText = visibleCount;
+                statRevenue.innerText = revenue.toFixed(2);
+                emptyBox.classList.toggle('hidden', visibleCount > 0);
+            }
+
+            searchInput.addEventListener('input', renderDischarges);
+            dateFilter.addEventListener('change', renderDischarges);
+
+            renderDischarges();
+
+            window.printSingle = function(id) {
+                const tr = document.getElementById(`discharge_${id}`);
+                if (!tr) return;
+
+                let html = `<h2>Discharge Receipt</h2>`;
+                html += `<p><b>Appointment:</b> ${tr.cells[0].innerText}</p>`;
+                html += `<p><b>Patient:</b> ${tr.cells[1].innerText}</p><hr>`;
+                const servicesBox = tr.querySelector('.service-box');
+                if (servicesBox) html += `<p>${servicesBox.innerHTML}</p>`;
+                html += `<hr><p>Total: ${tr.cells[3].innerText}</p>`;
+                html += `<p>Discount: ${tr.cells[4].innerText}</p>`;
+                html += `<p>Paid: ${tr.cells[5].innerText}</p>`;
+                html += `<p>Change / Due: ${tr.cells[6].innerText}</p>`;
+                html += `<p style="margin-top:12px;">${tr.cells[7].innerText}</p>`;
+
+                const w = window.open('', '_blank');
+                w.document.write(
+                    `<html><head><title>Receipt</title><style>body{font-family:Arial;padding:20px;}</style></head><body>${html}<script>window.print();<\/script></body></html>`
+                );
+                w.document.close();
+            }
         });
     </script>
 @endsection
