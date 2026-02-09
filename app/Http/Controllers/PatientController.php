@@ -33,13 +33,22 @@ class PatientController extends Controller
             'date_of_birth' => 'required|date',
             'phone_number' => 'required|string|unique:patients,phone_number',
             'address' => 'required|string',
-            'known_medical_conditions' => 'nullable|string',
-            'allergies' => 'nullable|string',
+            'known_medical_conditions' => 'nullable|array',
+            'allergies' => 'nullable|array',
             'blood_type' => 'nullable|string',
             'alcohol_consumption' => 'required|string|in:none,occasional,regular',
             'assigned_doctor' => 'required|exists:doctors,id',
             'registration_date' => 'required|date',
         ]);
+
+        // Convert arrays to strings for storage
+        $validated['known_medical_conditions'] = !empty($validated['known_medical_conditions'])
+            ? implode(', ', $validated['known_medical_conditions'])
+            : 'None';
+
+        $validated['allergies'] = !empty($validated['allergies'])
+            ? implode(', ', $validated['allergies'])
+            : 'None';
 
         // Get authenticated user ID
         $userId = auth()->id();
@@ -51,22 +60,17 @@ class PatientController extends Controller
             'date_of_birth' => $validated['date_of_birth'],
             'phone_number' => $validated['phone_number'],
             'address' => $validated['address'],
-            'known_medical_conditions' => $validated['known_medical_conditions'] ?? 'None',
-            'allergies' => $validated['allergies'] ?? 'None',
+            'known_medical_conditions' => $validated['known_medical_conditions'],
+            'allergies' => $validated['allergies'],
             'blood_type' => $validated['blood_type'] ?? 'Unknown',
             'alcohol_consumption' => $validated['alcohol_consumption'],
             'assigned_doctor' => $validated['assigned_doctor'],
             'registration_date' => $validated['registration_date'],
             'created_by' => $userId,
         ]);
-        // Check if any data was actually changed
-        if ($patient->wasChanged()) {
-            return redirect()->route('patients.edit', $patient->id)
-                ->with('success', 'Patient information updated successfully!');
-        } else {
-            return redirect()->route('patients.edit', $patient->id)
-                ->with('info', 'No changes were made to the patient information.');
-        }
+
+        return redirect()->route('patients.index')
+            ->with('success', 'Patient registered successfully!');
     }
 
     public function edit(Patient $patient)
@@ -77,16 +81,15 @@ class PatientController extends Controller
 
     public function update(Request $request, Patient $patient)
     {
-        // Fixed validation - remove non-existent fields
         $validated = $request->validate([
-            'full_name' => 'required|string|max:100',
+            'full_name' => 'required|string|max:255',
             'age' => 'required|integer|min:0|max:120',
             'sex_gender' => 'required|string|in:male,female',
             'date_of_birth' => 'required|date',
             'phone_number' => 'required|string|max:20|unique:patients,phone_number,' . $patient->id,
             'address' => 'required|string|max:255',
             'known_medical_conditions' => 'nullable|string',
-            'allergies' => 'nullable|string|max:255',
+            'allergies' => 'nullable|string',
             'blood_type' => 'required|string|in:A+,A-,B+,B-,O+,O-,AB+,AB-,unknown',
             'alcohol_consumption' => 'required|string|in:none,occasional,regular',
             'assigned_doctor' => 'required|exists:doctors,id',
@@ -129,25 +132,9 @@ class PatientController extends Controller
     }
 
     public function destroy(Patient $patient)
-{
-    try {
-        $patientName = $patient->full_name;
-
-        // Delete the patient
+    {
         $patient->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => "Patient '{$patientName}' has been deleted successfully."
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Error deleting patient: ' . $e->getMessage());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to delete patient. Please try again.'
-        ], 500);
+        return redirect('patients')->with('success', 'Patient deleted successfully.');
     }
-}
 }

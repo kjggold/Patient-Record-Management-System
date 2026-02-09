@@ -57,11 +57,23 @@
                                 </td>
                                 <td class="px-4 py-3 text-center space-x-2">
                                     <button class="text-amber-600 hover:text-amber-700 hover:underline" onclick="openViewModal({{ $p->id }})">View</button>
-                                    <button class="text-amber-600 hover:text-amber-700 hover:underline" onclick="openEditModal({{ $p->id }})">Edit</button>
-                                    <button class="text-red-600 hover:text-red-700 hover:underline"
-                                            onclick="deletePatient({{ $p->id }}, '{{ addslashes($p->full_name) }}')">
-                                        Delete
-                                    </button>
+                                    <button onclick="window.location.href='{{ route('patients.edit', $p->id) }}'"
+                                        class="text-amber-600 hover:underline">
+                                    Edit
+                                </a>
+                                <form
+
+                                        action="/patients/{{ $p->id }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Are you sure you want to delete this patient?')"
+                                    >
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button class="text-red-600 hover:underline">
+                                            Delete
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @empty
@@ -930,75 +942,65 @@
         }
 
         function deletePatient(patientId, patientName) {
-            if (confirm(`Are you sure you want to delete patient "${patientName}"? This action cannot be undone.`)) {
-                // Show loading state on the delete button
-                const deleteBtn = event.target;
-                const originalText = deleteBtn.textContent;
-                deleteBtn.textContent = 'Deleting...';
-                deleteBtn.disabled = true;
-                deleteBtn.classList.add('opacity-50');
-
-                // Send delete request
-                fetch(`/patients/${patientId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Delete failed with status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        // Show success message
-                        showNotification('Patient deleted successfully!', 'success');
-
-                        // Remove the table row with animation
-                        const row = event.target.closest('tr');
-                        if (row) {
-                            row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                            row.style.opacity = '0';
-                            row.style.transform = 'translateX(-20px)';
-
-                            setTimeout(() => {
-                                row.remove();
-
-                                // Check if table is empty
-                                const remainingRows = document.querySelectorAll('#patientsTable tbody tr');
-                                if (remainingRows.length === 0) {
-                                    location.reload(); // Reload to show "No patients found" message
-                                } else {
-                                    // Update pagination info if needed
-                                    updatePaginationCount();
-                                }
-                            }, 300);
-                        } else {
-                            // If row not found, reload the page
-                            setTimeout(() => {
-                                location.reload();
-                            }, 1000);
-                        }
-                    } else {
-                        throw new Error(data.message || 'Delete failed');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error deleting patient:', error);
-                    showNotification('Error deleting patient. Please try again.', 'error');
-
-                    // Reset delete button
-                    deleteBtn.textContent = originalText;
-                    deleteBtn.disabled = false;
-                    deleteBtn.classList.remove('opacity-50');
-                });
+    if (confirm(`Are you sure you want to delete patient "${patientName}"? This action cannot be undone.`)) {
+        // Send delete request
+        fetch(`/patients/${patientId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             }
-        }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Delete failed with status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showNotification(data.message || 'Patient deleted successfully!', 'success');
 
+                // Remove the table row with animation
+                const row = event.target.closest('tr');
+                if (row) {
+                    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(-20px)';
+
+                    setTimeout(() => {
+                        row.remove();
+
+                        // Check if table is empty
+                        const remainingRows = document.querySelectorAll('#patientsTable tbody tr');
+                        const hasEmptyRow = remainingRows.length === 1 &&
+                                            remainingRows[0].querySelector('td[colspan]');
+
+                        if (remainingRows.length === 0 || hasEmptyRow) {
+                            location.reload(); // Reload to show "No patients found" message
+                        } else {
+                            // Update pagination info if needed
+                            updatePaginationCount();
+                        }
+                    }, 300);
+                } else {
+                    // If row not found, reload the page
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+            } else {
+                throw new Error(data.message || 'Delete failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting patient:', error);
+            showNotification('Error deleting patient. Please try again.', 'error');
+        });
+    }
+}
         // Close modals when clicking outside
         document.addEventListener('click', function(e) {
             const addModal = document.getElementById('addModal');

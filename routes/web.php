@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PatientHistoryController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use App\Http\Controllers\DashboardController;
@@ -41,13 +42,29 @@ Route::post('/appointments/complete-discharge',
 Route::get('/discharge', [DischargeController::class, 'index'])->name('discharge.index');
 Route::post('/discharge', [DischargeController::class, 'store'])->name('discharge.store');
 
+Route::get('/patientHistory', [PatientHistoryController::class, 'index'])->name('patientHistory.index');
+
     Route::resources([
         'patients' => PatientController::class,
         'doctors' => DoctorController::class,
         'appointments' => AppointmentController::class,
         'services' => ServiceController::class,
         'discharge' => DischargeController::class,
+        'patientHistory'=> PatientHistoryController::class,
+
     ]);
+
+
+});
+Route::middleware(['auth'])->group(function () {
+    // Patient History Routes
+    Route::prefix('patient-history')->name('patient-history.')->group(function () {
+        Route::get('/', [PatientHistoryController::class, 'index'])->name('index');
+        Route::get('/{patient}', [PatientHistoryController::class, 'show'])->name('show');
+        Route::post('/{patient}/schedule', [PatientHistoryController::class, 'schedule'])->name('schedule');
+        Route::get('/{patient}/download-report', [PatientHistoryController::class, 'downloadReport'])->name('download-report');
+        Route::post('/filter-by-date', [PatientHistoryController::class, 'filterByDate'])->name('filter-by-date');
+    });
 });
 
 // Or specifically for the show method
