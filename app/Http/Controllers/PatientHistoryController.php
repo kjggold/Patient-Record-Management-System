@@ -17,7 +17,7 @@ class PatientHistoryController extends Controller
     {
         // Default values
         $dateType = $request->get('date_type', 'all');
-        $selectedDate = $request->get('date', today()->format('Y-m-d'));
+        $selectedDate = $request->get('selected_date', today()->format('Y-m-d'));
 
         // Simple query without any subqueries
         $query = Patient::query();
@@ -37,8 +37,30 @@ class PatientHistoryController extends Controller
             $query->where('assigned_doctor', $request->doctor_id);
         }
 
-        // Get patients with pagination
-        $patients = $query->orderBy('full_name')->paginate($request->get('per_page', 15));
+        // DATE FILTERING LOGIC - Only show patients with appointments on selected date
+        if ($dateType != 'all') {
+            $query->whereExists(function($q) use ($dateType, $selectedDate) {
+                $q->select(DB::raw(1))
+                  ->from('appointments')
+                  ->whereColumn('appointments.patient_id', 'patients.id')
+                  ->orWhereColumn('appointments.patient_name', 'patients.full_name');
+
+                if ($dateType == 'today') {
+                    $q->whereDate('appointments.created_at', today());
+                } elseif ($dateType == 'yesterday') {
+                    $q->whereDate('appointments.created_at', today()->subDay());
+                } elseif ($dateType == 'week') {
+                    $q->whereBetween('appointments.created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+                } elseif ($dateType == 'month') {
+                    $q->whereMonth('appointments.created_at', now()->month);
+                } elseif ($dateType == 'custom') {
+                    $q->whereDate('appointments.created_at', $selectedDate);
+                }
+            });
+        }
+
+        // Get patients with pagination - FIXED to 12 per page
+        $patients = $query->orderBy('full_name')->paginate(12);
 
         // Get doctors and services
         $doctors = Doctor::where('status', 'active')->orderBy('full_name')->get();
@@ -69,7 +91,6 @@ class PatientHistoryController extends Controller
 
             // Get filtered appointments based on date type
             $patient->filteredAppointments = $this->getFilteredAppointments($patient, $dateType, $selectedDate);
-            
         }
 
         return view('patient-history.index', compact(
@@ -233,6 +254,8 @@ class PatientHistoryController extends Controller
             ]);
         } elseif ($dateType == 'month') {
             $query->whereMonth('created_at', Carbon::now()->month);
+        } elseif ($dateType == 'custom') {
+            $query->whereDate('created_at', $selectedDate);
         }
         // For 'all', no date filter
 
