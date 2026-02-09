@@ -106,7 +106,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Total Revenue</div>
-                    <div id="statRevenue" class="stat-value">0</div>
+                    <div id="statRevenue" class="stat-value">0 MMK</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Search & Date</div>
@@ -122,13 +122,13 @@
                 <table class="min-w-full discharge-table">
                     <thead class="bg-blue-50">
                         <tr>
-                            <th>Appointment</th>
+                            <th>Appointment_ID</th>
                             <th>Patient</th>
                             <th>Services</th>
                             <th>Total</th>
                             <th>Discount</th>
                             <th>Paid</th>
-                            <th>Change / Due</th>
+                            <th>Change</th>
                             <th>Time</th>
                             <th></th>
                         </tr>
@@ -139,8 +139,17 @@
                                 $services = is_array($row->services)
                                     ? $row->services
                                     : json_decode($row->services, true);
+
                                 $services = $services ?? [];
-                                $balance = $row->paid - ($row->total - ($row->discount ?? 0));
+
+                                $balanceAmount = $row->paid - ($row->total - ($row->discount ?? 0));
+                                if ($balanceAmount > 0) {
+                                    $balanceText = ' ' . number_format(abs($balanceAmount), 0) . ' MMK';
+                                } elseif ($balanceAmount < 0) {
+                                    $balanceText = 'Due: ' . number_format(abs($balanceAmount), 0) . ' MMK';
+                                } else {
+                                    $balanceText = 'Settled';
+                                }
                             @endphp
 
                             <tr id="discharge_{{ $row->id }}">
@@ -151,14 +160,14 @@
                                         services</span>
                                     <div id="srv_{{ $row->id }}" class="service-box">
                                         @foreach ($services as $s)
-                                            {{ $s['name'] ?? '-' }} - {{ $s['price'] ?? 0 }}<br>
+                                            {{ $s['name'] ?? '-' }} - {{ number_format($s['price'] ?? 0) }}<br>
                                         @endforeach
                                     </div>
                                 </td>
-                                <td data-value="{{ $row->total }}">{{ number_format($row->total, 0, '.', ',') }}</td>
-                                <td data-value="{{ $row->discount }}">{{ number_format($row->discount, 0, '.', ',') }}</td>
-                                <td data-value="{{ $row->paid }}">{{ number_format($row->paid, 0, '.', ',') }}</td>
-                                <td data-value="{{ $balance }}">{{ number_format($balance, 0, '.', ',') }}</td>
+                                <td>{{ number_format($row->total, 0) }} MMK</td>
+                                <td>{{ number_format($row->discount, 0) }} MMK</td>
+                                <td>{{ number_format($row->paid, 0) }} MMK</td>
+                                <td>{{ $balanceText }}</td>
                                 <td>{{ $row->created_at }}</td>
                                 <td><button class="action-btn" onclick="printSingle({{ $row->id }})">Print</button>
                                 </td>
@@ -199,8 +208,8 @@
                     const patientName = row.cells[1].innerText.toLowerCase();
                     const appointmentId = row.cells[0].innerText;
                     const dateTime = row.cells[7].innerText;
-                    const total = parseFloat(row.cells[3].dataset.value) || 0;
-                    const discount = parseFloat(row.cells[4].dataset.value) || 0;
+                    const total = parseFloat(row.cells[3].innerText.replace(/,/g, '')) || 0;
+                    const discount = parseFloat(row.cells[4].innerText.replace(/,/g, '')) || 0;
 
                     let show = true;
                     if (search) show = patientName.includes(search) || appointmentId.includes(search);
@@ -215,7 +224,7 @@
                 });
 
                 statTotal.innerText = visibleCount;
-                statRevenue.innerText = revenue.toLocaleString(); // formatted with commas
+                statRevenue.innerText = revenue.toLocaleString() + ' MMK';
                 emptyBox.classList.toggle('hidden', visibleCount > 0);
             }
 
@@ -236,7 +245,7 @@
                 html += `<hr><p>Total: ${tr.cells[3].innerText}</p>`;
                 html += `<p>Discount: ${tr.cells[4].innerText}</p>`;
                 html += `<p>Paid: ${tr.cells[5].innerText}</p>`;
-                html += `<p>Change / Due: ${tr.cells[6].innerText}</p>`;
+                html += `<p>Balance: ${tr.cells[6].innerText}</p>`;
                 html += `<p style="margin-top:12px;">${tr.cells[7].innerText}</p>`;
 
                 const w = window.open('', '_blank');
@@ -246,8 +255,6 @@
                 w.document.close();
             }
 
-            // -----------------------------
-            // Auto-refresh discharges every 5 seconds
             async function fetchDischarges() {
                 const res = await fetch("{{ route('discharge.index') }}");
                 const parser = new DOMParser();
@@ -263,5 +270,4 @@
             setInterval(fetchDischarges, 5000); // every 5s
         });
     </script>
-
 @endsection
