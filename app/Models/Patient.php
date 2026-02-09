@@ -28,13 +28,32 @@ class Patient extends Model
         'registration_date'
     ];
 
+    // Relationship with doctor
     public function doctor()
     {
         return $this->belongsTo(Doctor::class, 'assigned_doctor', 'id');
     }
 
+    // Accessor for doctor name
     public function getDoctorNameAttribute()
     {
         return $this->doctor ? $this->doctor->full_name : 'Not Assigned';
+    }
+
+    // Accessor for formatted date of birth
+    public function getDateOfBirthFormattedAttribute()
+    {
+        if ($this->date_of_birth_day && $this->date_of_birth_month && $this->date_of_birth_year) {
+            try {
+                return \Carbon\Carbon::createFromDate(
+                    $this->date_of_birth_year,
+                    $this->date_of_birth_month,
+                    $this->date_of_birth_day
+                )->format('F j, Y');
+            } catch (\Exception $e) {
+                return "Invalid date";
+            }
+        }
+        return 'Not specified';
     }
 }

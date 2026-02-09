@@ -61,9 +61,20 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('patient-history')->name('patient-history.')->group(function () {
         Route::get('/', [PatientHistoryController::class, 'index'])->name('index');
         Route::get('/{patient}', [PatientHistoryController::class, 'show'])->name('show');
-        Route::post('/{patient}/schedule', [PatientHistoryController::class, 'schedule'])->name('schedule');
-        Route::get('/{patient}/download-report', [PatientHistoryController::class, 'downloadReport'])->name('download-report');
-        Route::post('/filter-by-date', [PatientHistoryController::class, 'filterByDate'])->name('filter-by-date');
+
+        // Appointment Actions
+        Route::post('/{patient}/appointments', [PatientHistoryController::class, 'createAppointment'])->name('create-appointment');
+        Route::post('/appointments/{appointment}/status', [PatientHistoryController::class, 'updateAppointmentStatus'])->name('update-appointment-status');
+
+        // Payment Actions
+        Route::post('/appointments/{appointment}/payments', [PatientHistoryController::class, 'addPayment'])->name('add-payment');
+
+        // Patient Actions
+        Route::put('/{patient}/update', [PatientHistoryController::class, 'updatePatientInfo'])->name('update-patient-info');
+        Route::get('/{patient}/download-report', [PatientHistoryController::class, 'downloadPatientReport'])->name('download-report');
+
+        // Statistics
+        Route::get('/statistics', [PatientHistoryController::class, 'getPatientStatistics'])->name('statistics');
     });
 });
 
