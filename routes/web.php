@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
         ->name('appointments.discharge');
 
     Route::get('/discharge', [DischargeController::class, 'index'])->name('discharge.index');
+Route::post('/discharge', [DischargeController::class, 'store'])->name('discharge.store');
 
     Route::post('/discharges/store', [DischargeController::class, 'store'])->name('discharges.store');
 
