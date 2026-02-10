@@ -1,123 +1,137 @@
 @extends('layouts.app')
 
-@section('title', 'Patient History')
+@section('title', 'Doctors')
 
 @section('content')
+
     @php
         use App\Models\Patient;
         use App\Models\Appointment;
+        use Illuminate\Support\Facades\DB;
 
         // Calculate statistics based on selected date - Show patients with appointments on that date
         if ($dateType == 'all') {
             $totalPatients = Patient::count();
         } else {
-            $totalPatients = Patient::whereHas('appointments', function($query) use ($dateType, $selectedDate) {
+            // Use whereExists instead of whereHas since appointments() relationship doesn't exist
+            $totalPatients = Patient::whereExists(function($query) use ($dateType, $selectedDate) {
+                $query->select(DB::raw(1))
+                      ->from('appointments')
+                      ->whereColumn('appointments.patient_id', 'patients.id')
+                      ->orWhereColumn('appointments.patient_name', 'patients.full_name');
+
                 if ($dateType == 'today') {
-                    $query->whereDate('appointment_date', today());
+                    $query->whereDate('appointments.created_at', today());
                 } elseif ($dateType == 'yesterday') {
-                    $query->whereDate('appointment_date', today()->subDay());
+                    $query->whereDate('appointments.created_at', today()->subDay());
                 } elseif ($dateType == 'week') {
-                    $query->whereBetween('appointment_date', [now()->startOfWeek(), now()->endOfWeek()]);
+                    $query->whereBetween('appointments.created_at', [now()->startOfWeek(), now()->endOfWeek()]);
                 } elseif ($dateType == 'month') {
-                    $query->whereMonth('appointment_date', now()->month);
-                } elseif ($dateType == 'custom' && $selectedDate) {
-                    $query->whereDate('appointment_date', $selectedDate);
+                    $query->whereMonth('appointments.created_at', now()->month);
+                } elseif ($dateType == 'custom') {
+                    $query->whereDate('appointments.created_at', $selectedDate);
                 }
             })->count();
         }
     @endphp
 
-    <div class="app flex min-h-screen">
-        {{-- Side bar --}}
-        @include('layouts.sidebar')
+<div class="app flex min-h-screen">
+    {{-- Side bar --}}
+    @include('layouts.sidebar')  <!-- ADD THIS LINE -->
 
-        {{-- Main Content --}}
-        <div class="flex-1 p-6 bg-gray-50">
-            {{-- Header with Search --}}
-            <div class="mb-6">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Patient History</h1>
-                        <p class="text-gray-600">Manage patient records, appointments, and medical history</p>
+    {{-- Main Content --}}
+    <div class="flex-1 p-6 bg-gray-50 ml-60"> <!-- This matches Patient History -->
+        {{-- Header with Search on left --}}
+        <div class="mb-6">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Patient History</h1>
+                </div>
+
+                {{-- Three Buttons Group - Now on the right side --}}
+                <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+                    {{-- Total Patients Card --}}
+                    <div class="bg-gradient-to-r from-blue-500/20 to-blue-600/20 backdrop-blur-sm rounded-lg shadow border border-blue-200/50 px-3 py-2 min-w-[160px] relative z-10">
+                        <div class="flex flex-col">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-xs font-medium text-blue-800">Total Patients</p>
+                                    <p class="text-lg font-bold text-blue-900">{{ $totalPatients }}</p>
+                                </div>
+                                <p class="text-xs text-blue-700 font-medium">
+                                    @if($dateType == 'today')
+                                        Today
+                                    @elseif($dateType == 'yesterday')
+                                        Yesterday
+                                    @elseif($dateType == 'week')
+                                        Week
+                                    @elseif($dateType == 'month')
+                                        Month
+                                    @elseif($dateType == 'custom')
+                                        {{ \Carbon\Carbon::parse(request('selected_date'))->format('M j') }}
+                                    @else
+                                        All Time
+                                    @endif
+                                </p>
+                            </div>
+
+                            {{-- Clear Filter Button inside the Total Patients card --}}
+                            @if(request()->anyFilled(['search', 'selected_date']) || $dateType != 'all')
+                                <div class="mt-2 pt-2 border-t border-blue-200/50">
+                                    <a href="{{ route('patient-history.index') }}"
+                                       class="text-xs text-blue-700 hover:text-blue-900 transition flex items-center justify-center">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                        Clear Filter
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
                     </div>
 
-                    <div class="flex items-center space-x-4">
-                        {{-- Search Form --}}
-                        <form method="GET" action="{{ route('patient-history.index') }}" class="flex-1 md:flex-none">
-                            <div class="relative">
-                                <input type="text" name="search" value="{{ request('search') }}"
-                                       placeholder="Search by name, phone, ID..."
-                                       class="w-full md:w-64 px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1114 0 7 7 0 01-14 0z"></path>
-                                </svg>
-                                <input type="hidden" name="date_type" value="{{ request('date_type', 'all') }}">
-                                <input type="hidden" name="selected_date" value="{{ request('selected_date') }}">
-                            </div>
-                        </form>
-
+                    {{-- Calendar and All Time - Stacked vertically --}}
+                    <div class="flex flex-col gap-1.5">
                         {{-- Calendar Date Filter --}}
-                        <form method="GET" action="{{ route('patient-history.index') }}" class="flex items-center space-x-2">
+                        <form method="GET" action="{{ route('patient-history.index') }}" class="w-40">
                             <div class="relative">
                                 <input type="date" name="selected_date" value="{{ request('selected_date', date('Y-m-d')) }}"
-                                       class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                                        onchange="this.form.submit()">
                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                 <input type="hidden" name="date_type" value="custom">
                             </div>
+                        </form>
+
+                        {{-- All Time Button with glass effect --}}
+                        <form method="GET" action="{{ route('patient-history.index') }}" class="w-40">
                             <button type="submit" name="date_type" value="all"
-                                    class="px-4 py-2 {{ $dateType == 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} rounded-lg transition">
+                                    class="w-full px-3 py-1.5 text-sm bg-gradient-to-r from-blue-500/20 to-blue-600/20 backdrop-blur-sm border border-blue-200/50 rounded-lg transition {{ $dateType == 'all' ? 'text-blue-800 font-medium' : 'text-blue-700 hover:from-blue-500/30 hover:to-blue-600/30' }}">
                                 All Time
                             </button>
+                            <input type="hidden" name="search" value="{{ request('search') }}">
                         </form>
                     </div>
                 </div>
             </div>
+        </div>
 
-            {{-- Statistics Card --}}
-            <div class="mb-6">
-                <div class="bg-gradient-to-r from-blue-300 to-blue-300 rounded-xl shadow-lg p-6">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <div class="p-3 bg-white/20 backdrop-blur-sm rounded-xl mr-4">
-                                <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-black-100">Total Patients</p>
-                                <p class="text-3xl font-bold text-black">{{ $totalPatients }}</p>
-                                <p class="text-sm text-black-100 mt-2">
-                                    @if($dateType == 'today')
-                                        📅 Today's Appointments
-                                    @elseif($dateType == 'yesterday')
-                                        📅 Yesterday's Appointments
-                                    @elseif($dateType == 'week')
-                                        📅 This Week's Appointments
-                                    @elseif($dateType == 'month')
-                                        📅 This Month's Appointments
-                                    @elseif($dateType == 'custom')
-                                        📅 {{ \Carbon\Carbon::parse(request('selected_date'))->format('F j, Y') }} Appointments
-                                    @else
-                                        📊 All Patients
-                                    @endif
-                                </p>
-                            </div>
-                        </div>
-
-                        {{-- Clear Filter Button --}}
-                        @if(request()->anyFilled(['search', 'selected_date']) || $dateType != 'all')
-                            <a href="{{ route('patient-history.index') }}"
-                               class="px-4 py-2 text-sm bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition flex items-center shadow-sm">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                Clear Filter
-                            </a>
-                        @endif
-                    </div>
+        {{-- Search Bar - Now on left side under the header --}}
+        <div class="mb-6">
+            <form method="GET" action="{{ route('patient-history.index') }}" class="max-w-md">
+                <div class="relative">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="Search by name, phone, ID..."
+                           class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1114 0 7 7 0 01-14 0z"></path>
+                    </svg>
+                    <input type="hidden" name="date_type" value="{{ request('date_type', 'all') }}">
+                    <input type="hidden" name="selected_date" value="{{ request('selected_date') }}">
                 </div>
-            </div>
+            </form>
+        </div>
+
 
             {{-- Patient Cards Grid - 4 per row with comfortable background --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
@@ -215,7 +229,7 @@
                     <div class="px-4 pb-4 border-t border-gray-100 pt-3">
                         <div class="flex space-x-2">
                             <a href="{{ route('patient-history.show', $patient) }}"
-                                class="flex-1 px-2 py-1.5 bg-blue-400 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition flex items-center justify-center shadow-sm">
+                                class="flex-1 px-2 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition flex items-center justify-center shadow-sm">
                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -234,7 +248,7 @@
                     </div>
                 </div>
                 @empty
-                <div class="col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 bg-white rounded-xl shadow-lg border border-gray-200 p-8 text-center">
+                <div class="col-span-1 sm:col-span-2 lg:grid-cols-3 xl:grid-cols-4 bg-white rounded-xl shadow-lg border border-gray-200 p-8 text-center">
                     <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

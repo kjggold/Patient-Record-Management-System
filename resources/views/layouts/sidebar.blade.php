@@ -31,7 +31,7 @@
         @endif
 
         @if (Route::has('discharge.index'))
-            <a href="{{ route('discharge.index') }}" class="{{ request()->routeIs('services.*') ? 'active' : '' }}">
+            <a href="{{ route('discharge.index') }}" class="{{ request()->routeIs('discharge.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-house-medical-circle-check"></i> Discharge
             </a>
         @else
@@ -48,10 +48,10 @@
 
         @if (Route::has('patientHistory.index'))
         <a href="{{ route('patientHistory.index') }}" class="{{ request()->routeIs('patientHistory.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-user"></i> Patient History
+            <i class="fa-solid fa-history"></i> Patient History
         </a>
     @else
-        <a href="#"><i class="fa-solid fa-user"></i> Patient History</a>
+        <a href="#"><i class="fa-solid fa-history"></i> Patient History</a>
     @endif
 
         <!-- Logout -->
@@ -68,47 +68,106 @@
 </aside>
 
 <style>
-    /* SIDEBAR STYLES */
+    /* SIDEBAR STYLES - Fixed position */
     .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
         width: 220px;
+        height: 100vh;
         background-color: #1e293b;
-        min-height: 100vh;
-        color: black;
-        padding: 20px;
+        color: #f8fafc;
+        padding: 15px;
+        z-index: 1000;
+        overflow-y: auto;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     }
 
     .sidebar .logo {
         font-size: 24px;
         font-weight: 700;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
+        color: #000000;
+        text-align: center;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     /* Sidebar links */
+    .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
     .sidebar nav a {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 14px 12px;
-        border-radius: 12px;
-        font-size: 1rem;
+        padding: 14px 16px;
+        border-radius: 10px;
+        font-size: 15px;
         text-decoration: none;
-        color: black;
+        color: #000000;
         font-weight: 500;
         width: 100%;
         background: none;
         border: none;
         cursor: pointer;
-        transition: 0.2s;
+        transition: all 0.2s ease;
         text-align: left;
     }
 
-    .sidebar nav a:hover,
-    .sidebar nav a.active {
-        background: rgba(5, 96, 224, 0.1);
+    .sidebar nav a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #000000;
+        transform: translateX(5px);
     }
 
-    /* Logout color */
+    .sidebar nav a.active {
+        background: rgba(59, 130, 246, 0.2);
+        color: #000000;
+        border-left: 4px solid #3b82f6;
+    }
+
+    .sidebar nav a i {
+        width: 20px;
+        text-align: center;
+        font-size: 16px;
+    }
+
+    /* Logout styling */
     nav .logout {
-        color: #ef4444;
+        color: #f87171;
+        margin-top: auto;
+    }
+
+    nav .logout:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #fca5a5;
+    }
+
+    .logout-form {
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Scrollbar styling for sidebar */
+    .sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
     }
 </style>
