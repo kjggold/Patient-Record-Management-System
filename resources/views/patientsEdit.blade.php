@@ -8,8 +8,8 @@
         @include('layouts.sidebar')
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 p-6">
-            
+        <main class="flex-1 p-6 ml-60">
+
 
             <!-- Info Message Display -->
             @if(session('info'))

@@ -1,123 +1,250 @@
 @extends('layouts.app')
 
-@section('title', $patient->name . ' - Patient History')
+@section('title', $patient->full_name . ' - Patient Details')
 
 @section('content')
 <div class="app flex min-h-screen">
+    {{-- Side bar --}}
     @include('layouts.sidebar')
 
-    <div class="flex-1 p-6 bg-gray-50">
+    {{-- Main Content --}}
+    <div class="flex-1 p-6 bg-gray-50 ml-60">
+        {{-- Header with Back Button --}}
         <div class="mb-6">
-            <a href="{{ route('patient-history.index') }}" class="text-blue-600 hover:text-blue-800 mb-4 inline-block">
-                ← Back to Patient History
-            </a>
-            <h1 class="text-2xl font-bold text-gray-800">{{ $patient->name }}</h1>
-            <p class="text-gray-600">Complete patient history and details</p>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{{ route('patient-history.index') }}"
+                       class="mr-4 text-sky-600 hover:text-sky-800 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">{{ $patient->full_name }}'s Information</h1>
+                        <p class="text-sm text-gray-600 mt-1">Patient ID: {{ $patient->id }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="px-3 py-1 bg-sky-100 text-sky-700 text-xs font-medium rounded-full">
+                        Total Visits: {{ $patient->total_visits ?? 0 }}
+                    </span>
+                    <a href="{{ route('patient-history.download-report', $patient) }}"
+                       class="px-4 py-2 border border-green-600 text-green-600 text-sm font-medium rounded-lg hover:bg-green-50 transition flex items-center shadow-sm">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Download Report
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {{-- Patient Info Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Patient Information</h2>
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-sm text-gray-500">Email</p>
-                        <p class="font-medium">{{ $patient->email ?? 'N/A' }}</p>
+        {{-- Patient Details Grid --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {{-- Personal Information Card --}}
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-800">Personal Information</h2>
                     </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Phone</p>
-                        <p class="font-medium">{{ $patient->phone ?? 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Date of Birth</p>
-                        <p class="font-medium">{{ $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('M d, Y') : 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Gender</p>
-                        <p class="font-medium">{{ $patient->gender ?? 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Address</p>
-                        <p class="font-medium">{{ $patient->address ?? 'N/A' }}</p>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Full Name</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $patient->full_name }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Date of Birth</p>
+                                    <p class="text-sm font-medium text-gray-800">
+                                        {{ $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('F j, Y') : 'N/A' }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Age</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $patient->age ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Gender</p>
+                                    <p class="text-sm font-medium text-gray-800">
+                                        {{ $patient->sex_gender ? ucfirst($patient->sex_gender) : 'N/A' }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Phone Number</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $patient->phone_number ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Email</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $patient->email ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Address</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $patient->address ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Registration Date</p>
+                                    <p class="text-sm font-medium text-gray-800">
+                                        {{ $patient->registration_date ? \Carbon\Carbon::parse($patient->registration_date)->format('F j, Y') : 'N/A' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Statistics Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Patient Statistics</h2>
-                <div class="space-y-4">
-                    <div class="p-4 bg-blue-50 rounded-lg">
-                        <p class="text-sm text-blue-700">Total Visits</p>
-                        <p class="text-2xl font-bold text-blue-800">{{ $visitCount }}</p>
+            {{-- Medical Information Card --}}
+            <div>
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden h-full">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-800">Medical Information</h2>
                     </div>
-                    <div class="p-4 bg-green-50 rounded-lg">
-                        <p class="text-sm text-green-700">Total Amount</p>
-                        <p class="text-2xl font-bold text-green-800">${{ number_format($totalAmount) }}</p>
-                    </div>
-                    <div class="p-4 bg-purple-50 rounded-lg">
-                        <p class="text-sm text-purple-700">Last Visit</p>
-                        <p class="text-xl font-bold text-purple-800">{{ $lastVisit }}</p>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 mb-1">Blood Type</p>
+                                <p class="text-sm font-medium text-gray-800">{{ $patient->blood_type ?? 'Unknown' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 mb-1">Alcohol Consumption</p>
+                                <p class="text-sm font-medium text-gray-800">
+                                    {{ $patient->alcohol_consumption ? ucfirst($patient->alcohol_consumption) : 'None' }}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 mb-1">Assigned Doctor</p>
+                                <p class="text-sm font-medium text-gray-800">
+                                    @if($patient->doctor)
+                                        Dr. {{ $patient->doctor->full_name }}
+                                        @if($patient->doctor->speciality)
+                                            <span class="text-gray-500">({{ $patient->doctor->speciality }})</span>
+                                        @endif
+                                    @else
+                                        Not Assigned
+                                    @endif
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 mb-1">Last Visit</p>
+                                <p class="text-sm font-medium text-gray-800">{{ $patient->last_visit ?? 'No visits yet' }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            {{-- Medical History Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Medical History</h2>
-                <div class="prose max-w-none">
-                    @if($patient->medical_history)
-                        {!! nl2br(e($patient->medical_history)) !!}
+        {{-- Medical History Cards --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- Medical Conditions Card --}}
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-lg font-semibold text-gray-800">Medical Conditions</h2>
+                </div>
+                <div class="p-6">
+                    @if($patient->known_medical_conditions)
+                        <div class="flex flex-wrap gap-2">
+                            @php
+                                $conditions = is_array($patient->known_medical_conditions)
+                                    ? $patient->known_medical_conditions
+                                    : json_decode($patient->known_medical_conditions, true) ?? [];
+                            @endphp
+                            @foreach($conditions as $condition)
+                                <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">
+                                    {{ $condition }}
+                                </span>
+                            @endforeach
+                        </div>
                     @else
-                        <p class="text-gray-500 italic">No medical history recorded.</p>
+                        <p class="text-sm text-gray-500">No medical conditions recorded</p>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Allergies Card --}}
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-lg font-semibold text-gray-800">Allergies</h2>
+                </div>
+                <div class="p-6">
+                    @if($patient->allergies)
+                        <div class="flex flex-wrap gap-2">
+                            @php
+                                $allergies = is_array($patient->allergies)
+                                    ? $patient->allergies
+                                    : json_decode($patient->allergies, true) ?? [];
+                            @endphp
+                            @foreach($allergies as $allergy)
+                                <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                                    {{ $allergy }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500">No allergies recorded</p>
                     @endif
                 </div>
             </div>
         </div>
 
-        {{-- All Appointments --}}
-        <div class="mt-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">All Appointments</h2>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {{-- Appointment History --}}
+        <div class="mt-6">
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-gray-800">Appointment History</h2>
+                    <span class="text-sm text-gray-500">{{ count($appointments ?? []) }} appointments</span>
+                </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($patient->appointments as $appointment)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $appointment->appointment_date->format('M d, Y') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $appointment->appointment_time }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs rounded-full
-                                        {{ $appointment->type == 'EMERGENCY' ? 'bg-red-100 text-red-800' :
-                                           ($appointment->type == 'FOLLOW UP' ? 'bg-yellow-100 text-yellow-800' :
-                                           'bg-blue-100 text-blue-800') }}">
-                                        {{ $appointment->type }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $appointment->service->name ?? 'N/A' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $appointment->doctor->name ?? 'N/A' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap font-medium">${{ number_format($appointment->amount, 2) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs rounded-full
-                                        {{ $appointment->status == 'completed' ? 'bg-green-100 text-green-800' :
-                                           ($appointment->status == 'cancelled' ? 'bg-red-100 text-red-800' :
-                                           'bg-yellow-100 text-yellow-800') }}">
-                                        {{ ucfirst($appointment->status) }}
-                                    </span>
-                                </td>
-                            </tr>
-                            @endforeach
+                        <tbody class="divide-y divide-gray-200">
+                            @forelse($appointments ?? [] as $appointment)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M j, Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $appointment->doctor->full_name ?? 'N/A' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $appointment->service->name ?? 'N/A' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $statusColors = [
+                                                'scheduled' => 'bg-blue-100 text-blue-800',
+                                                'completed' => 'bg-green-100 text-green-800',
+                                                'cancelled' => 'bg-red-100 text-red-800',
+                                                'no-show' => 'bg-gray-100 text-gray-800',
+                                            ];
+                                            $statusColor = $statusColors[$appointment->status] ?? 'bg-gray-100 text-gray-800';
+                                        @endphp
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusColor }}">
+                                            {{ ucfirst($appointment->status) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        No appointment history found
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -126,3 +253,11 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+    .app {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    }
+</style>
+@endpush

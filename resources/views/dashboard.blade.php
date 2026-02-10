@@ -9,7 +9,7 @@
         @include('layouts.sidebar')
 
         <!-- MAIN DASHBOARD CONTENT -->
-        <main class="flex-1 p-8">
+        <main class="flex-1 p-8 ml-60">
             <!-- HEADER -->
             <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <h1 class="text-center md:text-left text-xl font-bold text-blue-900 w-full md:w-auto">

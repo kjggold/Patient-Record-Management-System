@@ -156,52 +156,55 @@
                 @endif
             </div>
 
-            <!-- ADD SERVICE MODAL -->
-            <div id="addServiceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-                <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
-                    <div class="flex justify-between items-center p-6 border-b">
-                        <h2 class="text-xl font-bold text-gray-800">Add Service</h2>
-                        <button onclick="closeAddServiceModal()"
-                                class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-                    </div>
+            <!-- REMOVED MODAL FROM HERE -->
 
-                    <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px)">
-                        <form id="addServiceForm" method="POST" action="{{ route('services.store') }}">
-                            @csrf
-                            <div class="mb-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="serviceName">Service Name</label>
-                                <input type="text" id="serviceName" name="service_name" placeholder="Enter service name"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    value="{{ old('service_name') }}" required>
-                            </div>
-
-                            <div class="mb-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="serviceFee">Service Fee</label>
-                                <input type="text" id="serviceFee" name="service_fee" placeholder="Enter fee amount"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    value="{{ old('service_fee') }}" required>
-                            </div>
-
-                            <div class="mb-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="serviceDescription">Description
-                                    <span class="text-gray-500 font-normal text-sm">(Optional)</span></label>
-                                <textarea id="serviceDescription" name="description" placeholder="Optional description" rows="3"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('description') }}</textarea>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="p-6 border-t bg-gray-50 flex justify-end gap-3">
-                        <button onclick="closeAddServiceModal()"
-                            class="px-6 py-2.5 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg transition-colors duration-300">Cancel</button>
-                        <button type="submit" form="addServiceForm"
-                            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-300">Save
-                            Service</button>
-                    </div>
-                </div>
-            </div>
         </div> <!-- End of main content -->
     </div> <!-- End of app container -->
+
+    <!-- ADD SERVICE MODAL - MOVED HERE (OUTSIDE ALL CONTAINERS) -->
+    <div id="addServiceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 ml-60">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-xl font-bold text-gray-800">Add Service</h2>
+                <button onclick="closeAddServiceModal()"
+                        class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px)">
+                <form id="addServiceForm" method="POST" action="{{ route('services.store') }}">
+                    @csrf
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="serviceName">Service Name</label>
+                        <input type="text" id="serviceName" name="service_name" placeholder="Enter service name"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value="{{ old('service_name') }}" required>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="serviceFee">Service Fee</label>
+                        <input type="text" id="serviceFee" name="service_fee" placeholder="Enter fee amount"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value="{{ old('service_fee') }}" required>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="serviceDescription">Description
+                            <span class="text-gray-500 font-normal text-sm">(Optional)</span></label>
+                        <textarea id="serviceDescription" name="description" placeholder="Optional description" rows="3"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('description') }}</textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-6 border-t bg-gray-50 flex justify-end gap-3">
+                <button onclick="closeAddServiceModal()"
+                    class="px-6 py-2.5 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg transition-colors duration-300">Cancel</button>
+                <button type="submit" form="addServiceForm"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-300">Save
+                    Service</button>
+            </div>
+        </div>
+    </div>
 
     @push('scripts')
         <script>
@@ -370,11 +373,20 @@
                 const form = document.getElementById('addServiceForm');
                 if (form) form.reset();
                 document.getElementById('addServiceModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
             }
 
             function closeAddServiceModal() {
                 document.getElementById('addServiceModal').classList.add('hidden');
+                document.body.style.overflow = ''; // Restore scrolling
             }
+
+            // Close modal when clicking on backdrop
+            document.getElementById('addServiceModal')?.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAddServiceModal();
+                }
+            });
 
             // Initial clear button setup
             document.addEventListener('DOMContentLoaded', function() {

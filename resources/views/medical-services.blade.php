@@ -8,7 +8,7 @@
         @include('layouts.sidebar')
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-6 ml-60">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-semibold text-slate-700">Medical Services</h1>
                 <a href="{{ route('services.index') }}" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
@@ -82,7 +82,7 @@
     </div>
 
     <!-- SERVICE DETAILS MODAL -->
-    <div id="serviceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div id="serviceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 ml-60">
         <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
             <div class="flex justify-between items-center p-6 border-b">
                 <div>

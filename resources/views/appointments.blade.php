@@ -300,7 +300,7 @@
     <div class="app flex min-h-screen">
         @include('layouts.sidebar')
 
-        <main class="flex-1 p-6 ml-62">
+        <main class="flex-1 p-6 ml-60">
             <div class="flex w-full sm:w-auto gap-2">
                 <h1 class="text-2xl font-semibold text-slate-700">Appointments</h1>
             </div>

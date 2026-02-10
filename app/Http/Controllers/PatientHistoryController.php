@@ -103,29 +103,28 @@ class PatientHistoryController extends Controller
     }
 
     public function show(Patient $patient)
-    {
-        // Get all appointments for this patient
-        $appointments = Appointment::where(function($q) use ($patient) {
-            $q->where('patient_id', $patient->id)
-              ->orWhere('patient_name', $patient->full_name);
-        })
-        ->with(['doctor'])
-        ->orderBy('created_at', 'desc')
+{
+    // Load patient with doctor relationship
+    $patient->load('doctor');
+
+    // Get appointment history
+    $appointments = Appointment::where('patient_id', $patient->id)
+        ->orWhere('patient_name', $patient->full_name)
+        ->with(['doctor', 'service'])
+        ->orderBy('appointment_date', 'desc')
         ->get();
 
-        // Calculate statistics
-        $totalAppointments = $appointments->count();
-        $completedAppointments = $appointments->where('status', 'completed')->count();
-        $pendingAppointments = $appointments->where('status', 'scheduled')->count();
+    // Calculate total visits
+    $patient->total_visits = $appointments->count();
 
-        return view('patient-history.show', compact(
-            'patient',
-            'appointments',
-            'totalAppointments',
-            'completedAppointments',
-            'pendingAppointments'
-        ));
+    // Get last visit date
+    if ($appointments->count() > 0) {
+        $lastVisit = $appointments->sortByDesc('appointment_date')->first();
+        $patient->last_visit = \Carbon\Carbon::parse($lastVisit->appointment_date)->format('M j, Y');
     }
+
+    return view('patient-history.show', compact('patient', 'appointments'));
+}
 
     public function createAppointment(Request $request, Patient $patient)
     {

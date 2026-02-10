@@ -7,7 +7,7 @@
         @include('layouts.sidebar')
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-6 ml-60">
 
             <!-- Header + Add Payment Button -->
             <div class="flex w-full sm:w-auto gap-2">
