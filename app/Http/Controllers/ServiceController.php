@@ -9,18 +9,30 @@ use App\Models\Doctor;
 
 class ServiceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Get services from database for the table
-        $services = Service::all();
+        // Get search query from request
+        $search = $request->get('search');
 
-        // Get clinic services data without relationships
-        $clinicServices = $this->getClinicServicesData();
+        // Start query builder
+        $query = Service::query();
 
-        return view('services', compact('services', 'clinicServices'));
+        // Apply search filter if search term exists
+        if (!empty($search)) {
+            $query->where('service_name', 'like', '%' . $search . '%');
+        }
+
+        // Order and paginate results
+        $services = $query->orderBy('service_name', 'asc')->paginate(10);
+
+        // Append search parameter to pagination links if search exists
+        if (!empty($search)) {
+            $services->appends(['search' => $search]);
+        }
+
+        return view('services', compact('services', 'search'));
     }
-
-    private function getClinicServicesData()
+    public function getClinicServicesData()
     {
         // Get all doctors
         $doctors = Doctor::all();
@@ -178,12 +190,4 @@ class ServiceController extends Controller
         return redirect()->route('services.index')
             ->with('success', 'Service added successfully!');
     }
-
-    public function search(Request $request)
-{
-    $query = $request->get('q', '');
-    $services = Service::where('service_name', 'like', "%{$query}%")->get();
-    return response()->json($services);
-}
-
 }

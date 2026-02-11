@@ -3,7 +3,7 @@
 @section('title', 'Add New Doctor')
 
 @section('content')
-    <div class="flex min-h-screen bg-gray-50">
+    <div class="flex min-h-screen bg-gray-50 ml-60">
         <!-- SIDEBAR -->
         <aside class="sidebar">
             <h2 class="logo">MediCore</h2>

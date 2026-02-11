@@ -6,11 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
 
+    <!-- CSRF token for JS -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Alpine.js for dropdown functionality -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- FontAwesome & ChartJS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- ChartJS (load once globally) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -82,7 +90,7 @@
         /* HEADER */
         .main-header {
             display: flex;
-            justify-between;
+            justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             margin-bottom: 20px;
@@ -97,7 +105,7 @@
         /* CONTROLS */
         .flex-controls {
             display: flex;
-            justify-between;
+            justify-content: space-between;
             flex-wrap: wrap;
             margin-bottom: 15px;
             gap: 10px;
@@ -240,11 +248,16 @@
             background: #b91c1c;
         }
     </style>
-    @stack('head')
+
+    {{-- dashboard @push('styles') will be printed here --}}
+    @stack('styles')
 </head>
 
 <body class="bg-blue">
+
     @yield('content')
+
+    {{-- dashboard @push('scripts') will be printed here --}}
     @stack('scripts')
 </body>
 

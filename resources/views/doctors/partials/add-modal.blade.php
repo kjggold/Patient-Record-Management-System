@@ -16,12 +16,6 @@
             <form method="POST" action="{{ route('doctors.store') }}" id="dbDoctorForm">
                 @csrf
 
-                <!-- Doctor ID -->
-                <div class="form-group">
-                    <label>Doctor ID</label>
-                    <div class="doctor-id">Auto-Generated</div>
-                </div>
-
                 <!-- Form Grid - 2 columns -->
                 <div class="form-grid">
                     <!-- Column 1 -->

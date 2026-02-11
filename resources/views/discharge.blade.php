@@ -144,9 +144,9 @@
 
                                 $balanceAmount = $row->paid - ($row->total - ($row->discount ?? 0));
                                 if ($balanceAmount > 0) {
-                                    $balanceText = ' ' . number_format(abs($balanceAmount), 0) . ' MMK';
+                                    $balanceText = ' ' . number_format(abs($balanceAmount), 0) . ' ';
                                 } elseif ($balanceAmount < 0) {
-                                    $balanceText = 'Due: ' . number_format(abs($balanceAmount), 0) . ' MMK';
+                                    $balanceText = 'Due: ' . number_format(abs($balanceAmount), 0) . ' ';
                                 } else {
                                     $balanceText = 'Settled';
                                 }
@@ -164,9 +164,9 @@
                                         @endforeach
                                     </div>
                                 </td>
-                                <td>{{ number_format($row->total, 0) }} MMK</td>
-                                <td>{{ number_format($row->discount, 0) }} MMK</td>
-                                <td>{{ number_format($row->paid, 0) }} MMK</td>
+                                <td>{{ number_format($row->total, 0) }} </td>
+                                <td>{{ number_format($row->discount, 0) }} </td>
+                                <td>{{ number_format($row->paid, 0) }} </td>
                                 <td>{{ $balanceText }}</td>
                                 <td>{{ $row->created_at }}</td>
                                 <td><button class="action-btn" onclick="printSingle({{ $row->id }})">Print</button>

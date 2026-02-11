@@ -9,8 +9,6 @@ class DoctorController extends Controller
 {
     public function index(Request $request)
     {
-        $doctors=Doctor::all();
-
         $query = Doctor::query();
 
         // Search functionality
@@ -42,5 +40,49 @@ class DoctorController extends Controller
 
         // Redirect back with success message
         return redirect('doctors')->with('success', 'Doctor added successfully!');
+    }
+
+    public function edit($id)
+    {
+        $doctor = Doctor::findOrFail($id);
+
+        return view('doctorsEdit', compact('doctor'));
+    }
+
+    /**
+     * Update the specified doctor in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        $doctor = Doctor::findOrFail($id);
+
+        // Validation rules
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:100',
+            'speciality' => 'required|string|max:100',
+            'experience' => 'nullable|integer|min:0|max:999',
+            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
+            'phone_number' => 'required|string|max:100',
+            'consultation_fee' => 'required|integer|min:0|max:9999999999',
+            'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
+        ]);
+
+        // Update doctor
+        $doctor->update($validated);
+
+        return redirect()->route('doctors.index')
+            ->with('success', 'Doctor updated successfully.');
+    }
+
+    /**
+     * Remove the specified doctor from storage.
+     */
+    public function destroy($id)
+    {
+        $doctor = Doctor::findOrFail($id);
+        $doctor->delete();
+
+        return redirect()->route('doctors.index')
+            ->with('success', 'Doctor deleted successfully.');
     }
 }

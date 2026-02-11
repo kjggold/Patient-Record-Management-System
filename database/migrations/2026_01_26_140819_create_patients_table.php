@@ -15,12 +15,9 @@ return new class extends Migration
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
             $table->string('full_name');
-            $table->string('national_id_passport')->unique();
             $table->integer('age');
             $table->string('sex_gender');
-            $table->integer('date_of_birth_day');
-            $table->integer('date_of_birth_month');
-            $table->integer('date_of_birth_year');
+            $table->date('date_of_birth');
             $table->string('phone_number')->unique();
             $table->string('address');
             $table->string('known_medical_conditions')->default('None');;
@@ -28,18 +25,11 @@ return new class extends Migration
             $table->string('blood_type');
             $table->string('alcohol_consumption');
 
-            // Change this line: use 'assigned_doctor' as the column name
-            $table->unsignedBigInteger('assigned_doctor');
-
-            // Foreign key constraint pointing to doctors.id
-            $table->foreign('assigned_doctor')
-                ->references('id')
-                ->on('doctors')
-                ->onDelete('cascade');
-
             $table->date('registration_date');
             $table->timestamps();
         });
+
+        DB::statement('ALTER TABLE patients AUTO_INCREMENT = 2001;');
     }
 
     /* Reverse the migrations.

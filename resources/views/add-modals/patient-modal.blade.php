@@ -1,428 +1,312 @@
-@extends('layouts.app')
+<!-- ADD PATIENT MODAL -->
+<div id="patientModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 overflow-auto py-10">
+    <div class="patient-form-container">
+        <form method="POST" action="{{ route('patients.store') }}" id="patientForm">
+            @csrf
 
-@section('title', 'Patients')
-
-@section('content')
-    <div class="app flex min-h-screen">
-        {{-- Side bar --}}
-        @include('layouts.sidebar')
-
-        <!-- MAIN CONTENT -->
-        <main class="flex-1 p-6">
-            <h1 class="text-2xl font-semibold text-slate-700 mb-4">Patient Lists</h1>
-
-            <div class="flex justify-end items-center mb-6 gap-3">
-                <!-- Search Input -->
-                <div class="flex gap-2">
-                    <input type="text" id="searchInput" placeholder="Search by id, name, age, phone, doctor..."
-                        class="border rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value="{{ request('search') ?? '' }}" autocomplete="off">
+            <!-- Patient Information Section -->
+            <h2 class="section-title">Patient Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="required">Full Name</label>
+                    <input type="text" name="full_name" placeholder="Enter Full Name" required>
                 </div>
-
-                <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
-                    + Add Patient
-                </button>
+                <div class="form-group">
+                    <label class="required">Age</label>
+                    <input type="number" name="age" placeholder="Enter Age" min="0" max="120" required>
+                </div>
             </div>
 
-            <!-- PATIENT TABLE -->
-            <div class="bg-white rounded-xl shadow overflow-x-auto">
-                <table class="w-full text-sm text-left" id="patientsTable">
-                    <thead class="bg-sky-50 text-slate-600">
-                        <tr>
-                            <th class="px-4 py-3">ID</th>
-                            <th class="px-4 py-3">Name</th>
-                            <th class="px-4 py-3">Age</th>
-                            <th class="px-4 py-3">Phone</th>
-                            <th class="px-4 py-3 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y">
-                        @forelse ($patients as $p)
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-3">{{ $p->id }}</td>
-                                <td class="px-4 py-3 font-medium text-gray-900">{{ $p->full_name }}</td>
-                                <td class="px-4 py-3 text-gray-700">{{ $p->age }}</td>
-                                <td class="px-4 py-3 text-gray-700">{{ $p->phone_number }}</td>
-
-                                <td class="px-4 py-3 text-center space-x-2">
-                                    <button onclick="window.location.href='{{ route('patients.edit', $p->id) }}'"
-                                        class="text-amber-600 hover:underline">
-                                        Edit
-                                    </button>
-
-                                    <form action="/patients/{{ $p->id }}" method="POST"
-                                        onsubmit="return confirm('Are you sure you want to delete this patient?')"
-                                        style="display:inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="text-red-600 hover:underline">
-                                            Delete
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-4 py-3 text-center text-gray-500">No patients found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- PAGINATION -->
-            @if ($patients->hasPages())
-                <div class="mt-6 bg-white rounded-xl shadow px-4 py-4 border-t">
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <!-- Showing info -->
-                        <div class="text-sm text-gray-600">
-                            Showing {{ $patients->firstItem() }} to {{ $patients->lastItem() }} of {{ $patients->total() }}
-                            patients
-                        </div>
-
-                        <!-- Pagination Links -->
-                        <div class="flex items-center gap-1">
-                            @if ($patients->onFirstPage())
-                                <span class="px-3 py-1.5 rounded border text-gray-400 cursor-not-allowed text-sm">
-                                    <i class="fa-solid fa-chevron-left w-3 h-3"></i>
-                                </span>
-                            @else
-                                <a href="{{ $patients->previousPageUrl() }}"
-                                    class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">
-                                    <i class="fa-solid fa-chevron-left w-3 h-3"></i>
-                                </a>
-                            @endif
-
-                            @php
-                                $currentPage = $patients->currentPage();
-                                $lastPage = $patients->lastPage();
-                                $startPage = max(1, $currentPage - 2);
-                                $endPage = min($lastPage, $currentPage + 2);
-                                if ($startPage > 1) {
-                                    $endPage = min($lastPage, $startPage + 4);
-                                }
-                                if ($endPage < $lastPage) {
-                                    $startPage = max(1, $endPage - 4);
-                                }
-                            @endphp
-
-                            @if ($startPage > 1)
-                                <a href="{{ $patients->url(1) }}"
-                                    class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">1</a>
-                                @if ($startPage > 2)
-                                    <span class="px-2 text-gray-400">...</span>
-                                @endif
-                            @endif
-
-                            @for ($page = $startPage; $page <= $endPage; $page++)
-                                @if ($page == $currentPage)
-                                    <span
-                                        class="px-3 py-1.5 rounded border bg-sky-600 text-white font-medium border-sky-600 text-sm">{{ $page }}</span>
-                                @else
-                                    <a href="{{ $patients->url($page) }}"
-                                        class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">{{ $page }}</a>
-                                @endif
-                            @endfor
-
-                            @if ($endPage < $lastPage)
-                                @if ($endPage < $lastPage - 1)
-                                    <span class="px-2 text-gray-400">...</span>
-                                @endif
-                                <a href="{{ $patients->url($lastPage) }}"
-                                    class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">{{ $lastPage }}</a>
-                            @endif
-
-                            @if ($patients->hasMorePages())
-                                <a href="{{ $patients->nextPageUrl() }}"
-                                    class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">
-                                    <i class="fa-solid fa-chevron-right w-3 h-3"></i>
-                                </a>
-                            @else
-                                <span class="px-3 py-1.5 rounded border text-gray-400 cursor-not-allowed text-sm">
-                                    <i class="fa-solid fa-chevron-right w-3 h-3"></i>
-                                </span>
-                            @endif
-                        </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="required">Date of Birth</label>
+                    <input type="date" name="date_of_birth" required>
+                </div>
+                <div class="form-group">
+                    <label class="required">Sex / Gender</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="sex_gender" value="male" checked>Male</label>
+                        <label><input type="radio" name="sex_gender" value="female">Female</label>
                     </div>
                 </div>
-            @endif
+            </div>
 
-            <!-- ADD PATIENT MODAL -->
-            <div id="addModal"
-                class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 overflow-auto py-8">
-                <div class="patient-form-container">
-                    <form method="POST" action="{{ route('patients.store') }}" id="patientForm"
-                        onsubmit="return validateForm()">
-                        @csrf
-
-                        <!-- Patient Information Section -->
-                        <h2 class="section-title">Patient Information</h2>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="required">Full Name</label>
-                                <input type="text" name="full_name" id="full_name" placeholder="Enter Full Name"
-                                    required>
-                            </div>
-                            <div class="form-group">
-                                <label class="required">Age</label>
-                                <input type="number" name="age" id="age" placeholder="Enter Age" min="0"
-                                    max="120" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="required">Date of Birth</label>
-                                <input type="date" name="date_of_birth" id="date_of_birth" required
-                                    onchange="calculateAge()">
-                            </div>
-                            <div class="form-group">
-                                <label class="required">Sex / Gender</label>
-                                <div class="radio-group">
-                                    <label><input type="radio" name="sex_gender" value="male" checked> Male</label>
-                                    <label><input type="radio" name="sex_gender" value="female"> Female</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="required">Phone Number</label>
-                                <input type="tel" name="phone_number" id="phone_number"
-                                    placeholder="Enter Phone Number" required oninput="formatPhoneNumber(this)">
-                            </div>
-                            <div class="form-group">
-                                <label class="required">Address</label>
-                                <input type="text" name="address" id="address" placeholder="Enter Address"
-                                    required>
-                            </div>
-                        </div>
-
-                        <!-- Medical History Section -->
-                        <h2 class="section-title">Medical History</h2>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Known Medical Conditions</label>
-                                <input type="text" id="known_medical_conditions" name="known_medical_conditions"
-                                    placeholder="Type to search medical conditions.">
-                                <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple
-                                    conditions</small>
-                                <div id="conditions-tags" class="mt-2 flex flex-wrap gap-2"></div>
-                            </div>
-                            <div class="form-group">
-                                <label>Allergies</label>
-                                <input id="allergies" name="allergies" placeholder="Type to search allergies.">
-                                <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple
-                                    allergies</small>
-                                <div id="allergies-tags" class="mt-2 flex flex-wrap gap-2"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Blood Type</label>
-                                <select name="blood_type" id="blood_type">
-                                    <option value="" selected>Select</option>
-                                    <option value="A+">A+</option>
-                                    <option value="A-">A-</option>
-                                    <option value="B+">B+</option>
-                                    <option value="B-">B-</option>
-                                    <option value="O+">O+</option>
-                                    <option value="O-">O-</option>
-                                    <option value="AB+">AB+</option>
-                                    <option value="AB-">AB-</option>
-                                    <option value="unknown">Unknown</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Alcohol Consumption</label>
-                                <div class="radio-group">
-                                    <label><input type="radio" name="alcohol_consumption" value="none" checked>
-                                        None</label>
-                                    <label><input type="radio" name="alcohol_consumption" value="occasional">
-                                        Occasional</label>
-                                    <label><input type="radio" name="alcohol_consumption" value="regular">
-                                        Regular</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="required">Registration Date</label>
-                                <input type="date" name="registration_date" id="registration_date" required>
-                            </div>
-                        </div>
-
-                        <div class="button-container">
-                            <button type="button" onclick="closeAddModal()" class="cancel-btn">Cancel</button>
-                            <button type="submit" class="register-btn">Register Patient</button>
-                        </div>
-                    </form>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="required">Phone Number</label>
+                    <input type="tel" name="phone_number" placeholder="Enter Phone Number" required>
+                </div>
+                <div class="form-group">
+                    <label class="required">Address</label>
+                    <input type="text" name="address" placeholder="Enter Address" required>
                 </div>
             </div>
 
-            <style>
-                /* === MODAL & FORM CSS (KEEP ALL AS IS) === */
-                .patient-form-container {
-                    background-color: #f6fcff;
-                    width: 700px;
-                    max-width: 95%;
-                    padding: 20px 25px;
-                    border-radius: 12px;
-                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-                }
+            <!-- Medical History Section -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Known Medical Conditions</label>
+                    <input type="text" id="known_medical_conditions" name="known_medical_conditions" rows="2"
+                        placeholder="Type to search medical conditions.">
+                    <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple
+                        conditions</small>
+                </div>
+                <div class="form-group">
+                    <label>Allergies</label>
+                    <input id="allergies" name="allergies" rows="2" placeholder="Type to search allergies.">
+                    <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple
+                        allergies</small>
+                </div>
+            </div>
 
-                .section-title {
-                    color: #1f3b57;
-                    font-size: 16px;
-                    margin: 12px 0 8px 0;
-                    padding-bottom: 4px;
-                    border-bottom: 1px solid #e0f0ff;
-                    font-weight: 600;
-                }
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Blood Type</label>
+                    <select name="blood_type">
+                        <option value="" selected>Select</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="unknown">Unknown</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Alcohol Consumption</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="alcohol_consumption" value="none" checked> None</label>
+                        <label><input type="radio" name="alcohol_consumption" value="occasional">
+                            Occasional</label>
+                        <label><input type="radio" name="alcohol_consumption" value="regular"> Regular</label>
+                    </div>
+                </div>
+            </div>
 
-                .form-row {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 15px;
-                    margin-bottom: 12px;
-                }
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="required">Registration Date</label>
+                    <input type="date" name="registration_date" required>
+                </div>
+            </div>
 
-                .form-group {
-                    flex: 1;
-                    min-width: 220px;
-                }
-
-                .form-group label {
-                    display: block;
-                    font-weight: 600;
-                    color: #1f3b57;
-                    margin-bottom: 4px;
-                    font-size: 13px;
-                }
-
-                .form-group label.required::after {
-                    content: " *";
-                    color: #ef4444;
-                }
-
-                .form-group input,
-                .form-group select,
-                .form-group textarea {
-                    width: 100%;
-                    padding: 6px 10px;
-                    border-radius: 8px;
-                    border: 1px solid #c8e1f3;
-                    font-size: 13px;
-                    background-color: #fff;
-                }
-
-                .form-group input:focus,
-                .form-group select:focus,
-                .form-group textarea:focus {
-                    border-color: #4a90e2;
-                    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
-                    outline: none;
-                }
-
-                .radio-group {
-                    display: flex;
-                    gap: 15px;
-                    margin-top: 2px;
-                }
-
-                .radio-group label {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    font-weight: normal;
-                    color: #4b5563;
-                    font-size: 13px;
-                }
-
-                .radio-group input[type="radio"] {
-                    width: 14px;
-                    height: 14px;
-                }
-
-                .button-container {
-                    display: flex;
-                    gap: 12px;
-                    margin-top: 20px;
-                }
-
-                .register-btn {
-                    flex: 1;
-                    border: none;
-                    padding: 8px 12px;
-                    font-size: 13px;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    background: linear-gradient(to right, #3b82f6, #2563eb);
-                    color: #fff;
-                    transition: all 0.2s;
-                }
-
-                .register-btn:hover {
-                    background: linear-gradient(to right, #2563eb, #1d4ed8);
-                    transform: translateY(-1px);
-                    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-                }
-
-                .cancel-btn {
-                    flex: 1;
-                    border: none;
-                    padding: 8px 12px;
-                    font-size: 13px;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    background-color: #f1f5f9;
-                    color: #64748b;
-                    border: 1px solid #cbd5e1;
-                    transition: all 0.2s;
-                }
-
-                .cancel-btn:hover {
-                    background-color: #e2e8f0;
-                    transform: translateY(-1px);
-                }
-
-                .text-gray-500.text-xs {
-                    font-size: 11px;
-                    margin-top: 2px;
-                }
-
-                .tag {
-                    background-color: #e0f2fe;
-                    color: #0369a1;
-                    padding: 2px 8px;
-                    border-radius: 12px;
-                    font-size: 12px;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 4px;
-                }
-
-                .tag-remove {
-                    cursor: pointer;
-                    font-size: 14px;
-                    line-height: 1;
-                }
-
-                .tag-remove:hover {
-                    color: #dc2626;
-                }
-
-                #addModal {
-                    align-items: flex-start;
-                    padding-top: 40px;
-                }
-            </style>
-        </main>
+            <div class="button-container">
+                <button type="button" onclick="closePatientModal()" class="cancel-btn">Cancel</button>
+                <button type="submit" class="register-btn">Register Patient</button>
+            </div>
+        </form>
     </div>
-@endsection
+</div>
+
+<style>
+    /* === MODAL & FORM === */
+    #patientModal .patient-form-container {
+        background-color: #f6fcff;
+        width: 700px;
+        max-width: 95%;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    #patientModal .section-title {
+        color: #1f3b57;
+        font-size: 16px;
+        margin: 12px 0 8px 0;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #e0f0ff;
+        font-weight: 600;
+    }
+
+    #patientModal .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 12px;
+    }
+
+    #patientModal .form-group {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    #patientModal .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #1f3b57;
+        margin-bottom: 4px;
+        font-size: 13px;
+    }
+
+    #patientModal .form-group label.required::after {
+        content: " *";
+        color: #ef4444;
+    }
+
+    #patientModal .form-group input,
+    #patientModal .form-group select,
+    #patientModal .form-group textarea {
+        width: 100%;
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1px solid #c8e1f3;
+        font-size: 13px;
+        background-color: #fff;
+    }
+
+    #patientModal .form-group input:focus,
+    #patientModal .form-group select:focus,
+    #patientModal .form-group textarea:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        outline: none;
+    }
+
+    #patientModal .radio-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 2px;
+    }
+
+    #patientModal .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: normal;
+        color: #4b5563;
+        font-size: 13px;
+    }
+
+    #patientModal .radio-group input[type="radio"] {
+        width: 14px;
+        height: 14px;
+    }
+
+    #patientModal .button-container {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    #patientModal .register-btn {
+        flex: 1;
+        border: none;
+        padding: 8px 12px;
+        font-size: 13px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(to right, #3b82f6, #2563eb);
+        color: #fff;
+        transition: all 0.2s;
+    }
+
+    #patientModal .register-btn:hover {
+        background: linear-gradient(to right, #2563eb, #1d4ed8);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    #patientModal .cancel-btn {
+        flex: 1;
+        border: none;
+        padding: 8px 12px;
+        font-size: 13px;
+        border-radius: 8px;
+        font-weight: 600;
+        background-color: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+        transition: all 0.2s;
+    }
+
+    #patientModal .cancel-btn:hover {
+        background-color: #e2e8f0;
+        transform: translateY(-1px);
+    }
+
+    /* Small text helper */
+    #patientModal .text-gray-500.text-xs {
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    /* Tag styling for conditions and allergies */
+    #patientModal .tag {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    #patientModal .tag-remove {
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    #patientModal .tag-remove:hover {
+        color: #dc2626;
+    }
+
+    /* Modal adjustments */
+    #patientModal {
+        align-items: flex-start;
+        padding-top: 40px;
+    }
+
+    /* Animation styles */
+    #patientModal @keyframes slideOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        to {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+    }
+
+    #patientModal .slide-out {
+        animation: slideOut 0.3s ease forwards;
+    }
+
+    /* Notification styles */
+    #patientModal .transition-all {
+        transition: all 0.3s ease;
+    }
+
+    #patientModal .transform {
+        transform: translateX(100%);
+    }
+
+    #patientModal .translate-x-0 {
+        transform: translateX(0);
+    }
+
+    #patientModal .translate-x-full {
+        transform: translateX(100%);
+    }
+
+    @media (max-width: 768px) {
+        #patientModal .patient-form-container {
+            width: 95%;
+            padding: 15px 20px;
+        }
+
+        #patientModal .form-group {
+            min-width: 100%;
+        }
+    }
+</style>
 
 @push('scripts')
     <script>
@@ -762,76 +646,6 @@
                     document.body.classList.add('overflow-hidden');
                 });
         }
-
-        /* ---------------- MODAL FUNCTIONS (FROM OLD - KEEP AS IS) ---------------- */
-
-        function openAddModal() {
-            const form = document.getElementById('patientForm');
-            if (form) form.reset();
-
-            document.getElementById('addModal').classList.remove('hidden');
-            document.getElementById('addModal').classList.add('flex');
-            document.body.classList.add('overflow-hidden');
-
-            // Set today's date as default for registration
-            const today = new Date().toISOString().split('T')[0];
-            document.querySelector('input[name="registration_date"]').value = today;
-
-            // Set min date for date of birth (120 years ago)
-            const minDate = new Date();
-            minDate.setFullYear(minDate.getFullYear() - 120);
-            document.getElementById('date_of_birth').max = today;
-            document.getElementById('date_of_birth').min = minDate.toISOString().split('T')[0];
-
-            // Set max date for registration date to today
-            document.getElementById('registration_date').max = today;
-        }
-
-        function closeAddModal() {
-            document.getElementById('addModal').classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }
-
-        function closeViewModal() {
-            document.getElementById('viewModal').classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }
-
-        function openEditModal(patientId) {
-            // Redirect to edit page or open edit modal
-            window.location.href = `/patients/${patientId}/edit`;
-        }
-
-        // Close modals when clicking outside (FROM OLD)
-        document.addEventListener('click', function(e) {
-            const addModal = document.getElementById('addModal');
-            const viewModal = document.getElementById('viewModal');
-
-            if (addModal && e.target.id === 'addModal') {
-                closeAddModal();
-            }
-            if (viewModal && e.target.id === 'viewModal') {
-                closeViewModal();
-            }
-        });
-
-        // Close modals with Escape key (FROM OLD)
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeAddModal();
-                closeViewModal();
-            }
-        });
-
-        // Initial setup (FROM OLD)
-        document.addEventListener('DOMContentLoaded', function() {
-            // Focus search input if it has value
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput && searchInput.value) {
-                searchInput.focus();
-                searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-            }
-        });
     </script>
 
     <!-- KEEP THE OLD WORKING JQUERY AUTOCOMPLETE SCRIPT -->
@@ -1004,7 +818,7 @@
                     container.find('input[name="known_medical_conditions_hidden"]').remove();
                     container.append(
                         `<input type="hidden" name="known_medical_conditions_hidden" value="${medicalConditions.join('|')}">`
-                    );
+                        );
                 }
 
                 // Add click handlers for remove buttons
@@ -1034,7 +848,7 @@
                     // Update hidden input for form submission
                     container.find('input[name="allergies_hidden"]').remove();
                     container.append(
-                        `<input type="hidden" name="allergies_hidden" value="${allergies.join('|')}">`);
+                    `<input type="hidden" name="allergies_hidden" value="${allergies.join('|')}">`);
                 }
 
                 // Add click handlers for remove buttons
