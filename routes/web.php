@@ -39,11 +39,10 @@ Route::post('/appointments/complete-discharge',
     [AppointmentController::class,'completeDischarge']
 )->name('appointments.completeDischarge');
 
-Route::get('/discharge', [DischargeController::class, 'index'])->name('discharge.index');
-Route::post('/discharge', [DischargeController::class, 'store'])->name('discharge.store');
+Route::get('/discharges', [DischargeController::class, 'index'])->name('discharge.index');
+Route::post('/discharges', [DischargeController::class, 'store'])->name('discharges.store');
 
-Route::get('/patient-history', [PatientHistoryController::class, 'index'])->name('patient-history.index');
-Route::get('/patient-history/{patient}', [PatientHistoryController::class, 'show'])->name('patient-history.show');
+Route::get('/patientHistory', [PatientHistoryController::class, 'index'])->name('patientHistory.index');
 
     Route::resources([
         'patients' => PatientController::class,

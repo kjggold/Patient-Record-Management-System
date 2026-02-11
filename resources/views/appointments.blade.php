@@ -23,172 +23,18 @@
             background: var(--bg);
         }
 
-        .app {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            background: linear-gradient(180deg, #d8eaf8);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-        }
-
-        nav a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 12px;
-            border-radius: 12px;
-            font-size: 1rem;
-            text-decoration: none;
-            color: black;
-            font-weight: 500;
-            transition: 0.2s;
-        }
-
-        nav a:hover,
-        nav a.active {
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        .logout {
-            margin-top: auto;
-            color: #ef4444;
-        }
-
-        /* Main */
         main {
             flex: 1;
             padding: 30px;
         }
 
-        .page-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 20px;
-        }
-
-        /* +Add Appointment Modal */
-        #addModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            background: rgba(0, 0, 0, .5);
-            justify-content: center;
-            align-items: center;
-            overflow: auto;
-            padding: 1rem;
-        }
-
-        .modal-open {
-            display: flex !important;
-        }
-
-        .add-form-card {
-            max-width: 900px;
-            /* increased width for bigger form */
-            width: 90%;
-            background: var(--bg);
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
-
-        .add-form-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: rgb(98, 191, 249);
-        }
-
-        .add-form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 22px;
-        }
-
-        .add-form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .add-form-group label {
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #334155;
-        }
-
-        .add-form-group input,
-        .add-form-group select,
-        .add-form-group textarea {
-            padding: 14px 16px;
-            border-radius: 12px;
-            border: 1px solid #cfe6ff;
-            outline: none;
-            font-size: 15px;
-            width: 100%;
-        }
-
-        textarea {
-            resize: none;
-        }
-
-        .add-form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 14px;
-            margin-top: 30px;
-        }
-
-        .btn {
-            padding: 12px 26px;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-save {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-save:hover {
-            background: #084298;
-        }
-
-        .btn-reset,
-        .btn-cancel {
-            background: #e5e7eb;
-        }
-
-        .btn-reset:hover,
-        .btn-cancel:hover {
-            background: #cbd5e1;
-        }
-
-        /* Table */
         .overflow-x-auto {
             overflow-x: auto;
         }
 
         .responsive-table th,
         .responsive-table td {
-            padding: 0.75rem;
+            padding: .75rem;
             text-align: left;
             font-size: 14px;
         }
@@ -206,108 +52,224 @@
             color: #dc2626;
         }
 
-        /* Discharge Modal Styles */
+        #addModal,
         #dischargeModal {
             display: none;
             position: fixed;
             inset: 0;
             z-index: 50;
-            background: rgba(0, 0, 0, .5);
             justify-content: center;
             align-items: center;
             overflow: auto;
             padding: 1rem;
+            background: rgba(0, 0, 0, .5);
+        }
+
+        .modal-open {
+            display: flex !important;
+        }
+
+        .add-form-card {
+            max-width: 900px;
+            width: 90%;
+            background: var(--bg);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .1);
+        }
+
+        .add-form-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: rgb(98, 191, 249);
+        }
+
+        .add-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 22px;
+        }
+
+        .add-form-group label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #334155;
+            display: block;
+        }
+
+        .add-form-group input,
+        .add-form-group select,
+        .add-form-group textarea {
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid #cfe6ff;
+            outline: none;
+            font-size: 15px;
+            width: 100%;
+        }
+
+        .add-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 26px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .btn-save {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #084298;
+        }
+
+        .btn-cancel {
+            background: #e5e7eb;
+        }
+
+        .btn-cancel:hover {
+            background: #cbd5e1;
         }
 
         #dischargeModal .modal-container {
             display: flex;
-            max-width: 95%;
+            max-width: 1000px;
             width: 100%;
-            background: #f4f9ff;
-            border-radius: .5rem;
+            background: #fff;
+            border-radius: 16px;
             overflow: hidden;
-        }
-
-        #dischargeModal .panel {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            max-height: 80vh;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .2);
         }
 
         #dischargeModal .left-panel {
-            background: #fff;
-            border-right: 1px solid #ddd;
+            flex: 0 0 30%;
+            background: #f0f4f8;
+            padding: 20px;
         }
 
         #dischargeModal .right-panel {
-            background: #f9fafb;
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
         }
 
-        #dischargeModal h2 {
-            text-align: center;
-            color: #0284c7;
+        #dischargeModal .left-panel h3,
+        #dischargeModal .right-panel h3 {
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 10px;
+            color: #0284c7;
+        }
+
+        #dischargeModal .left-panel p {
+            margin: 6px 0;
+            font-weight: 500;
         }
 
         #dischargeModal table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 10px;
         }
 
         #dischargeModal table th,
         #dischargeModal table td {
             border: 1px solid #ddd;
-            padding: 5px;
+            padding: 6px;
+            text-align: left;
         }
 
-        #dischargeModal .modal-actions {
-            display: flex;
-            gap: .5rem;
-            justify-content: flex-end;
-            margin-top: 1rem;
-        }
-
-        #dischargeModal .modal-actions button {
-            padding: .5rem 1rem;
-            border-radius: .25rem;
-            font-weight: 600;
-        }
-
-        #dischargeModal .modal-actions .cancel {
-            background: #e5e7eb;
-        }
-
-        #dischargeModal .modal-actions .complete {
-            background: #0284c7;
-            color: #fff;
-        }
-
-        #dischargeModal .modal-actions .print {
-            background: #10b981;
-            color: #fff;
-        }
-
-        #dischargeModal button.add-service {
+        #dischargeModal table input {
             width: 100%;
-            margin-top: .5rem;
-            background: #0284c7;
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid #cfe6ff;
+        }
+
+        #dischargeModal .add-service {
+            background: #0d6efd;
             color: #fff;
+            width: 100%;
+            margin-bottom: 10px;
+            border: none;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        #dischargeModal .slip {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #dischargeModal .slip h4 {
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #0284c7;
+        }
+
+        #dischargeModal .slip .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 2px 0;
+        }
+
+        #dischargeModal .slip .row.total {
+            font-weight: 700;
+            border-top: 1px dashed #ccc;
+            padding-top: 4px;
+            margin-top: 4px;
+        }
+
+        #notification {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #notification div {
+            background: #22c55e;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
     </style>
 
     <div class="app flex min-h-screen">
         @include('layouts.sidebar')
-
         <main class="flex-1 p-6 ml-60">
             <div class="flex w-full sm:w-auto gap-2">
                 <h1 class="text-2xl font-semibold text-slate-700">Appointments</h1>
             </div>
+
             <div class="flex justify-end items-center mb-6 gap-3">
-                <input type="text" placeholder="Search by id..." class="border rounded px-3 py-2 w-64">
-                <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">+
-                    Add Appointment</button>
+                <input type="text" id="searchInput" placeholder="Search by ID or Patient Name..."
+                    class="border rounded px-3 py-2 w-64">
+                <button type="button" onclick="openAddModal()"
+                    class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">+Add Appointment</button>
             </div>
 
             <div class="overflow-x-auto">
@@ -319,287 +281,561 @@
                             <th>Doctor</th>
                             <th>Service</th>
                             <th>Date</th>
-                            <th>Payment</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="appointmentsBody">
-                        <tr id="row-A001">
-                            <td>A001</td>
-                            <td>John Smith</td>
-                            <td>Dr. Sarah Johnson</td>
-                            <td>General Consultation</td>
-                            <td>2026-01-19</td>
-                            <td class="text-center" id="pay-A001"><span class="badge badge-unpaid">Unpaid</span></td>
-                            <td class="text-center">
-                                <span class="action-btn edit">Edit</span>
-                                <span class="action-btn discharge"
-                                    onclick="openDischargeModal('A001','John Smith','General Consultation',25000)">Discharge</span>
-                            </td>
-                        </tr>
-                        <tr id="row-A002">
-                            <td>A002</td>
-                            <td>Mary Johnson</td>
-                            <td>Dr. May Lin</td>
-                            <td>Child Health</td>
-                            <td>2026-01-20</td>
-                            <td class="text-center" id="pay-A002"><span class="badge badge-unpaid">Unpaid</span></td>
-                            <td class="text-center">
-                                <span class="action-btn edit">Edit</span>
-                                <span class="action-btn discharge"
-                                    onclick="openDischargeModal('A002','Mary Johnson','Child Health',30000)">Discharge</span>
-                            </td>
-                        </tr>
+                        @foreach ($appointments as $appointment)
+                            <tr id="row-{{ $appointment->id }}">
+                                <td>{{ $appointment->id }}</td>
+                                <td>{{ $appointment->patient->full_name ?? '-' }}</td>
+                                <td>{{ $appointment->doctor->full_name ?? '-' }}</td>
+                                <td>{{ $appointment->service->service_name ?? '-' }}</td>
+                                <td>{{ $appointment->appointment_date }}</td>
+                                <td class="text-center">
+                                    <span class="action-btn edit">Edit</span>
+                                    <span class="action-btn discharge"
+                                        onclick="openDischargeModal(
+                                    '{{ $appointment->id }}',
+                                    '{{ $appointment->patient->full_name ?? '' }}',
+                                    '{{ $appointment->doctor->full_name ?? '' }}',
+                                    '{{ $appointment->service->service_name ?? '' }}',
+                                    '{{ $appointment->appointment_date }}',
+                                    '{{ $appointment->service->service_fee ?? 0 }}',
+                                    '{{ $appointment->doctor->consultation_fee ?? 0 }}'
+                                )">Discharge</span>
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
 
-    {{-- +Add Appointment Modal --}}
+    <div id="notification">
+        <div id="notificationMessage"></div>
+    </div>
+
+    {{-- Add Appointment Modal --}}
     <div id="addModal">
-        <div class="add-form-card">
+        <div class="add-form-card ml-60">
             <div class="add-form-title">Appointment Information</div>
-            <form onsubmit="saveAppointment(); return false;">
+            <form id="addAppointmentForm" method="POST" action="{{ route('appointments.store') }}">
+                @csrf
                 <div class="add-form-grid">
                     <div class="add-form-group">
                         <label>Patient Name</label>
-                        <input type="text" id="add_patient" placeholder="Select patient">
+                        <input list="patientList" id="patientNameInput" placeholder="Type patient name" required>
+                        <input type="hidden" name="patient_id" id="patientIdInput">
+                        <datalist id="patientList">
+                            @foreach ($patients as $patient)
+                                <option data-id="{{ $patient->id }}" value="{{ $patient->full_name }}"></option>
+                            @endforeach
+                        </datalist>
                     </div>
                     <div class="add-form-group">
                         <label>Doctor</label>
-                        <select id="add_doctor">
-                            <option>Select doctor</option>
-                            <option>Dr. Sarah Johnson – General</option>
-                            <option>Dr. May Lin – OG</option>
-                            <option>Dr. Kyaw Myint – Cardiology</option>
-                        </select>
+                        <input list="doctorList" id="doctorNameInput" placeholder="Type doctor name" required>
+                        <input type="hidden" name="doctor_id" id="doctorIdInput">
+                        <datalist id="doctorList">
+                            @foreach ($doctors as $doctor)
+                                <option data-id="{{ $doctor->id }}" value="{{ $doctor->full_name }}"></option>
+                            @endforeach
+                        </datalist>
                     </div>
                     <div class="add-form-group">
                         <label>Service</label>
-                        <select id="add_service">
-                            <option>Select service</option>
-                            <option>General Consultation</option>
-                            <option>Child Health</option>
-                            <option>Diabetes Care</option>
-                            <option>Women’s Health</option>
-                        </select>
+                        <input list="serviceList" id="serviceNameInput" placeholder="Type service name" required>
+                        <input type="hidden" name="service_id" id="serviceIdInput">
+                        <datalist id="serviceList">
+                            @foreach ($services as $service)
+                                <option data-id="{{ $service->id }}" data-price="{{ $service->service_fee }}"
+                                    value="{{ $service->service_name }}"></option>
+                            @endforeach
+                        </datalist>
                     </div>
                     <div class="add-form-group">
                         <label>Appointment Date</label>
-                        <input type="date" id="add_date">
-                    </div>
-                    <div class="add-form-group">
-                        <label>Phone</label>
-                        <input type="tel" id="add_phone" placeholder="09xxxxxxxx">
+                        <input type="date" name="appointment_date" id="appointmentDateInput" required>
                     </div>
                 </div>
                 <div class="add-form-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeAddModal()">Cancel</button>
-                    <button type="submit" class="btn btn-save">Save Appointment</button>
+                    <button type="submit" class="btn btn-save" id="saveBtn">Save Appointment</button>
                 </div>
             </form>
         </div>
     </div>
 
-    {{-- Discharge Modal (unchanged) --}}
+    {{-- Discharge Modal --}}
     <div id="dischargeModal">
         <div class="modal-container">
-            <div class="panel left-panel">
-                <h2>Patient & Services</h2>
-                <div class="mb-2"><label>Appointment ID</label><input id="discharge_appointment_code" readonly
-                        class="w-full border rounded px-2 py-1 bg-gray-100 text-sm"></div>
-                <div class="mb-2"><label>Patient Name</label><input id="discharge_patient" readonly
-                        class="w-full border rounded px-2 py-1 bg-gray-100 text-sm"></div>
-                <label>Services</label>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Service</th>
-                            <th>Price</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="serviceList"></tbody>
-                </table>
-                <button type="button" onclick="addServiceRow()" class="add-service">+ Add Service</button>
+            <div class="left-panel">
+                <h3>Patient Info</h3>
+                <p><strong>Appointment ID:</strong> <span id="dischargeAppointmentIdText"></span></p>
+                <p><strong>Patient Name:</strong> <span id="dischargePatientName"></span></p>
+                <p><strong>Doctor Name:</strong> <span id="dischargeDoctorName"></span></p>
+                <p><strong>Service:</strong> <span id="dischargeServiceName"></span></p>
+                <p><strong>Date:</strong> <span id="dischargeDate"></span></p>
             </div>
-            <div class="panel right-panel">
-                <h2>Payment & Receipt</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-                    <div><label>Payment Method</label><select id="payment_method"
-                            class="w-full border rounded px-2 py-1 text-sm">
-                            <option>Cash</option>
-                            <option>Card</option>
-                            <option>Mobile Payment</option>
-                        </select></div>
-                    <div><label>Discount</label><input type="number" id="discount_amount" value="0"
-                            class="w-full border rounded px-2 py-1 text-sm"></div>
-                    <div><label>Paid</label><input type="number" id="paid_amount"
-                            class="w-full border rounded px-2 py-1 text-sm"></div>
-                    <div><label>Change / Due</label><input id="balance_amount" readonly
-                            class="w-full border rounded px-2 py-1 bg-gray-100 text-sm"></div>
-                </div>
-                <div id="billPreview"></div>
-                <div class="modal-actions">
-                    <button type="button" onclick="closeDischargeModal()" class="cancel">Cancel</button>
-                    <button type="button" onclick="completeDischarge()" class="complete">Complete</button>
-                    <button type="button" onclick="window.print()" class="print">Print</button>
-                </div>
+
+            <div class="right-panel">
+                <h3>Mini POS / Services</h3>
+                <form id="dischargeForm">
+                    <input type="hidden" id="dischargeAppointmentId">
+                    <table id="serviceTable">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <button type="button" class="add-service" onclick="addServiceRow()">+ Add Service</button>
+                    <div class="add-form-grid">
+                        <div class="add-form-group">
+                            <label>Discount</label>
+                            <input type="number" id="dischargeDiscount" value="0" min="0">
+                        </div>
+                        <div class="add-form-group">
+                            <label>Paid</label>
+                            <input type="number" id="dischargePaid" value="0" min="0">
+                        </div>
+                        <div class="add-form-group">
+                            <label>Balance / Change</label>
+                            <input type="number" id="dischargeBalance" readonly>
+                        </div>
+                        <div class="add-form-group">
+                            <label>Comment</label>
+                            <textarea id="dischargeComment" placeholder="Optional comment"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="slip">
+                        <h4>Receipt / Slip</h4>
+                        <div id="slipItems"></div>
+                        <div class="row total"><span>Total:</span> <span id="slipTotal">0.00</span></div>
+                        <div class="row"><span>Discount:</span> <span id="slipDiscount">0.00</span></div>
+                        <div class="row total"><span>Payable:</span> <span id="slipPayable">0.00</span></div>
+                        <div class="row"><span>Paid:</span> <span id="slipPaid">0.00</span></div>
+                        <div class="row total"><span>Balance / Change:</span> <span id="slipBalance">0.00</span></div>
+                    </div>
+
+                    <div style="margin-top:10px; display:flex; justify-content:flex-end; gap:14px;">
+                        <button type="button" class="btn btn-cancel" onclick="closeDischargeModal()">Cancel</button>
+                        <button type="button" class="btn btn-save" onclick="completeDischarge()">Complete
+                            Discharge</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <script>
-        const addModal = document.getElementById('addModal');
-        const dischargeModal = document.getElementById('dischargeModal');
-        let services = [],
-            currentId = null;
+    {{-- POS datalist --}}
+    <datalist id="posServiceList">
+        @foreach ($services as $service)
+            <option value="{{ $service->service_name }}" data-price="{{ $service->service_fee }}"></option>
+        @endforeach
+    </datalist>
 
+    <script>
+        // Global variables
+        const dischargeModal = document.getElementById('dischargeModal');
+        const dischargeAppointmentId = document.getElementById('dischargeAppointmentId');
+        const dischargeAppointmentIdText = document.getElementById('dischargeAppointmentIdText');
+        const dischargePatientName = document.getElementById('dischargePatientName');
+        const dischargeDoctorName = document.getElementById('dischargeDoctorName');
+        const dischargeServiceName = document.getElementById('dischargeServiceName');
+        const dischargeDate = document.getElementById('dischargeDate');
+        const serviceTableBody = document.querySelector('#serviceTable tbody');
+        const dischargeDiscount = document.getElementById('dischargeDiscount');
+        const dischargePaid = document.getElementById('dischargePaid');
+        const dischargeBalance = document.getElementById('dischargeBalance');
+        const dischargeComment = document.getElementById('dischargeComment');
+        const slipTotal = document.getElementById('slipTotal');
+        const slipDiscount = document.getElementById('slipDiscount');
+        const slipPayable = document.getElementById('slipPayable');
+        const slipPaid = document.getElementById('slipPaid');
+        const slipBalance = document.getElementById('slipBalance');
+        const searchInput = document.getElementById('searchInput');
+        const notificationMessage = document.getElementById('notificationMessage');
+        const notification = document.getElementById('notification');
+        const addModal = document.getElementById('addModal');
+        const addForm = document.getElementById('addAppointmentForm');
+        const saveBtn = document.getElementById('saveBtn');
+
+        // Set today's date as default for appointment date
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('appointmentDateInput').value = today;
+        });
+
+        // --- Add Appointment Modal ---
         function openAddModal() {
             addModal.classList.add('modal-open');
         }
 
         function closeAddModal() {
             addModal.classList.remove('modal-open');
+            // Reset form
+            addForm.reset();
+            document.getElementById('patientIdInput').value = '';
+            document.getElementById('doctorIdInput').value = '';
+            document.getElementById('serviceIdInput').value = '';
+            // Reset date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('appointmentDateInput').value = today;
         }
 
-        function saveAppointment() {
-            const id = 'A' + Math.floor(Math.random() * 900 + 100);
-            const patient = document.getElementById('add_patient').value;
-            const doctor = document.getElementById('add_doctor').value;
-            const service = document.getElementById('add_service').value;
-            const date = document.getElementById('add_date').value;
-            const phone = document.getElementById('add_phone').value;
+        // --- Datalist event listeners to set hidden IDs ---
+        document.getElementById('patientNameInput').addEventListener('input', function() {
+            const option = Array.from(document.getElementById('patientList').options).find(o => o.value === this.value);
+            if (option) {
+                document.getElementById('patientIdInput').value = option.dataset.id;
+            } else {
+                document.getElementById('patientIdInput').value = '';
+            }
+        });
 
-            if (!patient || !doctor || !service || !date) {
-                alert('Please fill all required fields!');
+        document.getElementById('doctorNameInput').addEventListener('input', function() {
+            const option = Array.from(document.getElementById('doctorList').options).find(o => o.value === this.value);
+            if (option) {
+                document.getElementById('doctorIdInput').value = option.dataset.id;
+            } else {
+                document.getElementById('doctorIdInput').value = '';
+            }
+        });
+
+        document.getElementById('serviceNameInput').addEventListener('input', function() {
+            const option = Array.from(document.getElementById('serviceList').options).find(o => o.value === this.value);
+            if (option) {
+                document.getElementById('serviceIdInput').value = option.dataset.id;
+            } else {
+                document.getElementById('serviceIdInput').value = '';
+            }
+        });
+
+        // --- SIMPLE AJAX Form Submission ---
+        addForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Basic validation
+            const patientId = document.getElementById('patientIdInput').value;
+            const doctorId = document.getElementById('doctorIdInput').value;
+            const serviceId = document.getElementById('serviceIdInput').value;
+            const appointmentDate = document.getElementById('appointmentDateInput').value;
+
+            if (!patientId) {
+                alert('❌ Please select a valid patient from the list');
+                return;
+            }
+            if (!doctorId) {
+                alert('❌ Please select a valid doctor from the list');
+                return;
+            }
+            if (!serviceId) {
+                alert('❌ Please select a valid service from the list');
+                return;
+            }
+            if (!appointmentDate) {
+                alert('❌ Please select an appointment date');
                 return;
             }
 
-            const tbody = document.getElementById('appointmentsBody');
-            const tr = document.createElement('tr');
-            tr.id = 'row-' + id;
-            tr.innerHTML = `
-        <td>${id}</td>
-        <td>${patient}</td>
-        <td>${doctor}</td>
-        <td>${service}</td>
-        <td>${date}</td>
-        <td class="text-center" id="pay-${id}"><span class="badge badge-unpaid">Unpaid</span></td>
-        <td class="text-center">
-            <span class="action-btn edit">Edit</span>
-            <span class="action-btn discharge" onclick="openDischargeModal('${id}','${patient}','${service}',0)">Discharge</span>
-        </td>`;
-            tbody.appendChild(tr);
-            closeAddModal();
-            document.getElementById('add_patient').value = '';
-            document.getElementById('add_doctor').value = '';
-            document.getElementById('add_service').value = '';
-            document.getElementById('add_date').value = '';
-            document.getElementById('add_phone').value = '';
-        }
+            // Show loading
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
 
-        // ===== Discharge Modal Functions =====
-        function openDischargeModal(id, patient = '', service = '', price = 0) {
-            currentId = id;
-            services = [{
-                name: service,
-                price: price
-            }];
-            discharge_appointment_code.value = id;
-            discharge_patient.value = patient;
-            paid_amount.value = price;
-            discount_amount.value = 0;
-            renderServiceList();
-            updateBillPreview();
-            dischargeModal.classList.add('modal-open');
+            // Create form data
+            const formData = new FormData();
+            formData.append('patient_id', patientId);
+            formData.append('doctor_id', doctorId);
+            formData.append('service_id', serviceId);
+            formData.append('appointment_date', appointmentDate);
+            formData.append('_token', document.querySelector('input[name="_token"]').value);
+
+            // Send AJAX request using fetch (simplest way)
+            fetch(addForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showNotification('✅ Appointment added successfully!');
+                    closeAddModal();
+
+                    // Add new row to table
+                    const tbody = document.getElementById('appointmentsBody');
+                    const a = data.appointment;
+                    const tr = document.createElement('tr');
+                    tr.id = 'row-' + a.id;
+                    tr.innerHTML = `
+                        <td>${a.id}</td>
+                        <td>${a.patient_name}</td>
+                        <td>${a.doctor_name}</td>
+                        <td>${a.service_name}</td>
+                        <td>${a.appointment_date}</td>
+                        <td class="text-center">
+                            <span class="action-btn edit">Edit</span>
+                            <span class="action-btn discharge" onclick="openDischargeModal(
+                                '${a.id}',
+                                '${a.patient_name}',
+                                '${a.doctor_name}',
+                                '${a.service_name}',
+                                '${a.appointment_date}',
+                                0,
+                                0
+                            )">Discharge</span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                } else {
+                    alert('❌ ' + (data.message || 'Failed to save appointment'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('❌ Failed to save appointment. Please check console for details.');
+            })
+            .finally(() => {
+                // Restore button
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            });
+        });
+
+        // --- Discharge Modal Functions ---
+        function openDischargeModal(id, patient, doctor, service, date, servicePrice, consultationFee) {
+            dischargeModal.style.display = 'flex';
+            dischargeAppointmentId.value = id;
+            dischargeAppointmentIdText.textContent = id;
+            dischargePatientName.textContent = patient;
+            dischargeDoctorName.textContent = doctor;
+            dischargeServiceName.textContent = service;
+            dischargeDate.textContent = date;
+
+            // Clear and add default services
+            serviceTableBody.innerHTML = '';
+            addServiceRow('Booking Fee', 3000);
+            addServiceRow('Consultation Fee', parseFloat(consultationFee) || 0);
+            addServiceRow(service, parseFloat(servicePrice) || 0);
+
+            // Reset form fields
+            dischargeDiscount.value = 0;
+            dischargePaid.value = 0;
+            dischargeComment.value = '';
+
+            // Update totals
+            updateTotals();
         }
 
         function closeDischargeModal() {
-            dischargeModal.classList.remove('modal-open');
+            dischargeModal.style.display = 'none';
         }
 
-        function addServiceRow() {
-            services.push({
-                name: '',
-                price: 0
-            });
-            renderServiceList();
-        }
+        // --- Service Row Management ---
+        function addServiceRow(name = '', price = 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" name="services[]" list="posServiceList" value="${name}" placeholder="Service Name"></td>
+                <td><input type="number" name="price[]" value="${price}" min="0" step="0.01"></td>
+                <td><button type="button" onclick="this.closest('tr').remove();updateTotals();" style="background:red;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">Remove</button></td>
+            `;
+            serviceTableBody.appendChild(row);
 
-        function removeServiceRow(i) {
-            services.splice(i, 1);
-            renderServiceList();
-        }
-
-        function renderServiceList() {
-            serviceList.innerHTML = '';
-            services.forEach((s, i) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td><input value="${s.name}" oninput="services[${i}].name=this.value;updateBillPreview()"></td>
-        <td><input type="number" value="${s.price}" oninput="services[${i}].price=parseFloat(this.value)||0;updateBillPreview()"></td>
-        <td class="text-center"><button onclick="removeServiceRow(${i})" class="text-red-600">X</button></td>`;
-                serviceList.appendChild(tr);
-            });
-            updateBillPreview();
-        }
-
-        function updateBillPreview() {
-            let total = 0;
-            billPreview.innerHTML = '';
-            services.forEach(s => {
-                if (s.name) {
-                    total += s.price;
-                    billPreview.innerHTML +=
-                        `<div class="flex justify-between"><span>${s.name}</span><span>${s.price}</span></div>`;
+            // Add auto-price functionality for new row
+            const serviceInput = row.querySelector('input[name="services[]"]');
+            serviceInput.addEventListener('change', function() {
+                if (this.value === 'Booking Fee' || this.value === 'Consultation Fee') return;
+                const option = Array.from(document.getElementById('posServiceList').options).find(o => o.value === this.value);
+                if (option) {
+                    const priceInput = this.closest('tr').querySelector('input[name="price[]"]');
+                    priceInput.value = parseFloat(option.dataset.price || 0);
+                    updateTotals();
                 }
             });
-            const d = parseFloat(discount_amount.value) || 0;
-            const p = parseFloat(paid_amount.value) || 0;
-            const bal = p - (total - d);
-            balance_amount.value = bal;
-            billPreview.innerHTML += `<hr class="my-1"><div class="flex justify-between"><b>Total</b><b>${total}</b></div>
-    <div class="flex justify-between"><span>Discount</span><span>${d}</span></div>
-    <div class="flex justify-between"><span>Paid</span><span>${p}</span></div>
-    <div class="flex justify-between"><span>Change / Due</span><span>${bal}</span></div>`;
+
+            // Add input event listener for price field
+            const priceInput = row.querySelector('input[name="price[]"]');
+            priceInput.addEventListener('input', updateTotals);
         }
 
-        discount_amount.addEventListener('input', updateBillPreview);
-        paid_amount.addEventListener('input', updateBillPreview);
+        // --- Update Totals and Slip ---
+        function updateTotals() {
+            // Calculate total from services
+            const priceInputs = Array.from(serviceTableBody.querySelectorAll('input[name="price[]"]'));
+            const total = priceInputs.reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
 
-        function completeDischarge() {
-            const dischargeData = {
-                appointment_id: currentId,
-                patient_name: discharge_patient.value,
-                doctor_name: "Doctor Name Placeholder", // adjust if needed
+            // Get discount and paid amounts
+            const discount = parseFloat(dischargeDiscount.value) || 0;
+            const paid = parseFloat(dischargePaid.value) || 0;
+
+            // Calculate payable and balance
+            const payable = Math.max(0, total - discount);
+            const balance = paid - payable;
+
+            // Update slip display
+            slipTotal.textContent = total.toFixed(2);
+            slipDiscount.textContent = discount.toFixed(2);
+            slipPayable.textContent = payable.toFixed(2);
+            slipPaid.textContent = paid.toFixed(2);
+            slipBalance.textContent = balance.toFixed(2);
+
+            // Update balance field
+            dischargeBalance.value = balance;
+
+            // Update slip items list
+            const slipItemsDiv = document.getElementById('slipItems');
+            slipItemsDiv.innerHTML = '';
+
+            // Add each service to slip
+            const serviceInputs = Array.from(serviceTableBody.querySelectorAll('input[name="services[]"]'));
+            serviceInputs.forEach((serviceInput, index) => {
+                const serviceName = serviceInput.value || 'Service';
+                const servicePrice = parseFloat(priceInputs[index].value) || 0;
+                if (serviceName && servicePrice > 0) {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'row';
+                    rowDiv.innerHTML = `<span>${serviceName}</span> <span>${servicePrice.toFixed(2)}</span>`;
+                    slipItemsDiv.appendChild(rowDiv);
+                }
+            });
+        }
+
+        // Add event listeners for discount and paid inputs
+        dischargeDiscount.addEventListener('input', updateTotals);
+        dischargePaid.addEventListener('input', updateTotals);
+
+        // --- Complete Discharge ---
+        async function completeDischarge() {
+            // Validate data
+            const appointmentId = dischargeAppointmentId.value;
+            if (!appointmentId) {
+                alert('❌ Invalid appointment ID');
+                return;
+            }
+
+            // Collect service data
+            const serviceInputs = Array.from(serviceTableBody.querySelectorAll('input[name="services[]"]'));
+            const priceInputs = Array.from(serviceTableBody.querySelectorAll('input[name="price[]"]'));
+
+            const services = [];
+            serviceInputs.forEach((serviceInput, index) => {
+                if (serviceInput.value.trim()) {
+                    services.push({
+                        name: serviceInput.value.trim(),
+                        price: parseFloat(priceInputs[index].value) || 0
+                    });
+                }
+            });
+
+            if (services.length === 0) {
+                alert('❌ Please add at least one service');
+                return;
+            }
+
+            // Prepare data for API
+            const data = {
+                appointment_id: appointmentId,
                 services: services,
-                total: services.reduce((sum, s) => sum + (s.price || 0), 0),
-                paid: parseFloat(paid_amount.value) || 0,
-                balance: parseFloat(balance_amount.value) || 0,
-                payment_method: payment_method.value,
-                _token: '{{ csrf_token() }}'
+                discount: parseFloat(dischargeDiscount.value) || 0,
+                paid: parseFloat(dischargePaid.value) || 0,
+                balance: parseFloat(dischargeBalance.value) || 0,
+                comment: dischargeComment.value.trim(),
+                _token: document.querySelector('input[name="_token"]').value
             };
 
-            fetch('{{ route('discharge.store') }}', {
+            // Show loading state
+            const completeBtn = document.querySelector('#dischargeForm .btn-save');
+            const originalText = completeBtn.textContent;
+            completeBtn.textContent = 'Processing...';
+            completeBtn.disabled = true;
+
+            try {
+                const response = await fetch('{{ route('discharge.store') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
                     },
-                    body: JSON.stringify(dischargeData)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('pay-' + currentId).innerHTML =
-                            '<span class="badge badge-paid">Paid</span>';
-                        const row = document.getElementById('row-' + currentId);
-                        row.querySelector('.action-btn.discharge').outerHTML =
-                            '<span class="text-gray-400">Completed</span>';
-                        closeDischargeModal();
-                    }
+                    body: JSON.stringify(data)
                 });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('✅ Discharge completed successfully!');
+
+                    // Remove appointment from table
+                    const row = document.getElementById('row-' + appointmentId);
+                    if (row) {
+                        row.remove();
+                    }
+
+                    closeDischargeModal();
+                } else {
+                    alert('❌ ' + (result.message || 'Failed to complete discharge'));
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('❌ Failed to process discharge. Please try again.');
+            } finally {
+                // Restore button state
+                completeBtn.textContent = originalText;
+                completeBtn.disabled = false;
+            }
         }
+
+        // --- Search Functionality ---
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#appointmentsBody tr');
+
+            rows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                row.style.display = rowText.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // --- Show Notification ---
+        function showNotification(msg) {
+            notificationMessage.textContent = msg;
+            notificationMessage.style.opacity = 1;
+            setTimeout(() => {
+                notificationMessage.style.opacity = 0;
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === addModal) {
+                closeAddModal();
+            }
+            if (event.target === dischargeModal) {
+                closeDischargeModal();
+            }
+        });
+
+        // Escape key to close modals
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAddModal();
+                closeDischargeModal();
+            }
+        });
     </script>
 @endsection

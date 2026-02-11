@@ -162,8 +162,8 @@
     </div> <!-- End of app container -->
 
     <!-- ADD SERVICE MODAL - MOVED HERE (OUTSIDE ALL CONTAINERS) -->
-    <div id="addServiceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 ml-60">
-        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+    <div id="addServiceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 ">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden ml-60">
             <div class="flex justify-between items-center p-6 border-b">
                 <h2 class="text-xl font-bold text-gray-800">Add Service</h2>
                 <button onclick="closeAddServiceModal()"

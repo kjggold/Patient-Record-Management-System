@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Discharge extends Model
 {
-    use HasFactory;
+    protected $table = 'discharges';
 
     protected $fillable = [
         'appointment_id',
@@ -15,12 +14,13 @@ class Discharge extends Model
         'doctor_name',
         'services',
         'total',
+        'discount',
         'paid',
         'balance',
-        'payment_method',
     ];
 
     protected $casts = [
-        'services' => 'array', // JSON -> Array
-    ];
+    'services' => 'array', // automatically cast JSON to array
+];
+
 }

@@ -5,24 +5,7 @@
 @section('content')
     <div class="flex min-h-screen bg-gray-50 ml-60">
         <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <h2 class="logo">MediCore</h2>
-            <nav>
-                <a href="{{ route('dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-                <a><i class="fa-solid fa-user"></i> Patients</a>
-                <a href="{{ route('doctors.index') }}"><i class="fa-solid fa-user-doctor"></i> Doctors</a>
-                <a><i class="fa-solid fa-calendar-check"></i> Appointments</a>
-                <a><i class="fa-solid fa-stethoscope"></i> Services</a>
-                <a><i class="fa-solid fa-credit-card"></i> Payments</a>
-                <form method="POST" action="{{ route('logout') }}" class="logout-form">
-                    @csrf
-                    <a href="{{ route('logout') }}" class="logout"
-                        onclick="event.preventDefault(); this.closest('form').submit();">
-                        <i class="fa-solid fa-right-from-bracket"></i> Logout
-                    </a>
-                </form>
-            </nav>
-        </aside>
+        @include('layouts.sidebar')
 
         <!-- MAIN CONTENT -->
         <main class="flex-1 p-8">
