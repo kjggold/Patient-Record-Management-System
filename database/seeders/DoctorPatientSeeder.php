@@ -68,9 +68,7 @@ class DoctorPatientSeeder extends Seeder
                         ['min' => 0, 'max' => 17, 'label' => 'child'],    // 0-17 years old
                         ['min' => 18, 'max' => 64, 'label' => 'adult'],   // 18-64 years old
                         ['min' => 65, 'max' => 90, 'label' => 'senior'],  // 65+ years old
-                    ];
-
-                    foreach ($ageGroups as $ageGroup) {
+                    ];foreach ($ageGroups as $ageGroup) {
                     $randomAdmin = $admins->random();
                     $patientPhone = $this->generateUniquePatientPhone();
 
@@ -78,7 +76,7 @@ class DoctorPatientSeeder extends Seeder
                     $age = rand($ageGroup['min'], $ageGroup['max']);
                     $dateOfBirth = Carbon::now()->subYears($age)->subMonths(rand(0, 11))->subDays(rand(0, 30));
 
-                    // **BOTH registration_date AND created_at should be recent (last 10 days)**
+                    // BOTH registration_date AND created_at should be recent (last 10 days)
                     $recentDate = $this->generateRecentDate();
 
                     Patient::create([
@@ -134,17 +132,26 @@ class DoctorPatientSeeder extends Seeder
         } while (in_array($phone, $this->usedPatientPhoneNumbers));
 
         return $phone;
-    }
-
-    private function generateRandomName(): string
+    }private function generateRandomName(): string
     {
-        $firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Lisa', 'Robert', 'Emily',
-                      'William', 'Jennifer', 'James', 'Maria', 'Thomas', 'Susan', 'Charles',
-                      'Karen', 'Christopher', 'Nancy', 'Daniel', 'Betty'];
+        $firstNames = [
+            // Male
+            'Aung', 'Kyaw', 'Zaw', 'Myint', 'Soe', 'Htun', 'Min', 'Lin', 'Win', 'Thant',
+            'Tun', 'Naing', 'Moe', 'Thet', 'Kaung', 'Myo', 'Ye', 'Hla', 'Than', 'Ko',
 
-        $lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller',
-                     'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez',
-                     'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin'];
+            // Female
+            'Hla', 'Khin', 'Thandar', 'Su', 'Nwe', 'Aye', 'Mya', 'Hnin', 'Yu', 'Pan',
+            'Thazin', 'May', 'Myat', 'Phyu', 'Ei', 'Sandar', 'Wai', 'Thu', 'Zin', 'Cho'
+        ];
+
+        $lastNames = [
+            // Common Burmese names (no family names traditionally, but these are used as surnames)
+            'Aung', 'Kyaw', 'Win', 'Hlaing', 'Soe', 'Myint', 'Zaw', 'Moe', 'Thant', 'Naing',
+            'Tun', 'Min', 'Htun', 'Lin', 'Thein', 'Than', 'Ye', 'Htet', 'Phyo', 'Sithu',
+
+            // Some family names (less common but exist)
+            'Maung', 'Bo', 'U', 'Daw', 'Saw', 'Mya', 'Khin', 'Nwe', 'Hnin', 'Mar'
+        ];
 
         return $firstNames[array_rand($firstNames)] . ' ' . $lastNames[array_rand($lastNames)];
     }

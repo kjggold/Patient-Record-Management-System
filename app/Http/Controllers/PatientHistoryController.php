@@ -5,197 +5,103 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\Appointment;
-use App\Models\Doctor;
-use App\Models\Service;
-use App\Models\Payment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class PatientHistoryController extends Controller
 {
+    // List patients with search & date filters
     public function index(Request $request)
     {
-        $dateType = $request->get('date_type', 'all');
-        $selectedDate = $request->get('selected_date', today()->format('Y-m-d'));
+        $search = $request->input('search');
+        $dateType = $request->input('date_type', 'all');
+        $selectedDate = $request->input('selected_date', date('Y-m-d'));
 
-        $query = Patient::query();
+        $query = Patient::query()->orderBy('id', 'desc');
 
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->get('search');
-            $query->where(function($q) use ($search) {
-                $q->where('full_name', 'like', "%{$search}%")
-                  ->orWhere('phone_number', 'like', "%{$search}%")
-                  ->orWhere('national_id_passport', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by doctor
-        if ($request->filled('doctor_id')) {
-            $query->where('assigned_doctor', $request->doctor_id);
-        }
-
-        // Date filtering (appointments table)
+        // Apply date filter - Only show patients who have appointments on selected date
         if ($dateType != 'all') {
-            $query->whereExists(function($q) use ($dateType, $selectedDate) {
-                $q->select(DB::raw(1))
-                  ->from('appointments')
-                  ->whereColumn('appointments.patient_id', 'patients.id');
+            $query->whereExists(function ($subQuery) use ($dateType, $selectedDate) {
+                $subQuery->select(DB::raw(1))
+                    ->from('appointments')
+                    ->whereColumn('appointments.patient_id', 'patients.id');
 
                 if ($dateType == 'today') {
-                    $q->whereDate('appointments.created_at', today());
+                    $subQuery->whereDate('appointments.appointment_date', today());
                 } elseif ($dateType == 'yesterday') {
-                    $q->whereDate('appointments.created_at', today()->subDay());
+                    $subQuery->whereDate('appointments.appointment_date', today()->subDay());
                 } elseif ($dateType == 'week') {
-                    $q->whereBetween('appointments.created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+                    $subQuery->whereBetween('appointments.appointment_date', [now()->startOfWeek(), now()->endOfWeek()]);
                 } elseif ($dateType == 'month') {
-                    $q->whereMonth('appointments.created_at', now()->month);
+                    $subQuery->whereMonth('appointments.appointment_date', now()->month);
                 } elseif ($dateType == 'custom') {
-                    $q->whereDate('appointments.created_at', $selectedDate);
+                    $subQuery->whereDate('appointments.appointment_date', $selectedDate);
                 }
             });
         }
 
-        $patients = $query->orderBy('full_name')->paginate(12);
-        $doctors = Doctor::where('status', 'active')->orderBy('full_name')->get();
-        $services = Service::orderBy('service_name')->get();
-
-        foreach ($patients as $patient) {
-            $appointments = $this->getPatientAppointments($patient);
-
-            $patient->total_visits = $appointments->count();
-            $patient->total_amount = 0;
-            $patient->total_paid = 0;
-            $patient->outstanding_balance = 0;
-
-            $patient->last_visit = $appointments->count()
-                ? Carbon::parse($appointments->sortByDesc('created_at')->first()->created_at)->format('M d, Y')
-                : 'No visits yet';
-
-            $patient->filteredAppointments = $this->getFilteredAppointments($patient, $dateType, $selectedDate);
+        // Apply search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', '%' . $search . '%')
+                  ->orWhere('phone_number', 'like', '%' . $search . '%')
+                  ->orWhere('id', 'like', '%' . $search . '%');
+            });
         }
 
-        return view('patient-history.index', compact(
-            'patients', 'doctors', 'services', 'selectedDate', 'dateType'
-        ));
+        $patients = $query->paginate(12);
+
+        return view('patient-history.index', compact('patients', 'search', 'dateType', 'selectedDate'));
     }
 
-    public function show(Patient $patient)
+    // Show patient details with full history (appointments + discharges)
+    public function show($id)
     {
-        $patient->load('doctor');
+        $patient = Patient::findOrFail($id);
 
-        $appointments = Appointment::where('patient_id', $patient->id)
-            ->with(['doctor', 'service'])
+        // -------------------------------
+        // Get appointments
+        // -------------------------------
+        $appointments = Appointment::with(['doctor', 'service'])
+            ->where('patient_id', $id)
             ->orderBy('appointment_date', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($appointment) {
+                return [
+                    'date' => $appointment->appointment_date,
+                    'doctor_name' => $appointment->doctor->full_name ?? 'N/A',
+                    'service_name' => $appointment->service->service_name ?? 'N/A',
+                    'status' => 'Pending', // default pending for normal appointments
+                    'type' => 'appointment',
+                ];
+            });
 
-        $patient->total_visits = $appointments->count();
-        $patient->last_visit = $appointments->count()
-            ? Carbon::parse($appointments->sortByDesc('appointment_date')->first()->appointment_date)->format('M j, Y')
-            : 'No visits yet';
-
-        return view('patient-history.show', compact('patient', 'appointments'));
-    }
-
-    public function createAppointment(Request $request, Patient $patient)
-    {
-        $request->validate([
-            'doctor_id' => 'required|exists:doctors,id',
-            'service' => 'required|string|max:255',
-            'status' => 'required|in:scheduled,completed,cancelled',
-        ]);
-
-        $appointmentData = [
-            'patient_id' => $patient->id,
-            'doctor_id' => $request->doctor_id,
-            'service' => $request->service,
-            'status' => $request->status,
-            'remarks' => $request->remarks,
-        ];
-
-        if ($request->filled('date')) $appointmentData['date'] = $request->date;
-        if ($request->filled('time')) $appointmentData['time'] = $request->time;
-
-        Appointment::create($appointmentData);
-
-        return redirect()->route('patient-history.show', $patient)
-            ->with('success', 'Appointment created successfully.');
-    }
-
-    public function updateAppointmentStatus(Request $request, Appointment $appointment)
-    {
-        $request->validate([
-            'status' => 'required|in:scheduled,completed,cancelled,no-show,rescheduled',
-        ]);
-
-        $appointment->update(['status' => $request->status]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Appointment status updated.',
-            'status' => $appointment->status,
-        ]);
-    }
-
-    public function updatePatientInfo(Request $request, Patient $patient)
-    {
-        $request->validate([
-            'full_name' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
-            'address' => 'nullable|string',
-            'known_medical_conditions' => 'nullable|string',
-            'allergies' => 'nullable|string',
-            'blood_type' => 'nullable|string',
-            'assigned_doctor' => 'nullable|exists:doctors,id',
-        ]);
-
-        $patient->update($request->only([
-            'full_name','phone_number','address','known_medical_conditions','allergies','blood_type','assigned_doctor'
-        ]));
-
-        return redirect()->back()->with('success', 'Patient information updated successfully.');
-    }
-
-    public function downloadPatientReport(Patient $patient)
-    {
-        $appointments = Appointment::where('patient_id', $patient->id)
-            ->with(['doctor'])
+        // -------------------------------
+        // Get discharge records
+        // -------------------------------
+        $discharges = DB::table('discharges')
+            ->where('patient_name', $patient->full_name)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($discharge) {
+                return [
+                    'date' => $discharge->created_at,
+                    'doctor_name' => $discharge->doctor_name ?? 'N/A',
+                    'service_name' => $discharge->services ?? 'Discharge Services',
+                    'status' => 'Discharged', // mark as discharged
+                    'type' => 'discharge',
+                ];
+            });
 
-        $data = [
-            'patient' => $patient,
-            'appointments' => $appointments,
-            'generated_at' => now()->format('F j, Y H:i:s'),
-        ];
+        // -------------------------------
+        // Merge and sort history by date descending
+        // -------------------------------
+        $allHistory = $appointments->concat($discharges)
+            ->sortByDesc('date')
+            ->values();
 
-        return view('patient-history.report', $data);
-    }
+        $totalVisits = $allHistory->count();
 
-    // Private helpers
-    private function getPatientAppointments($patient)
-    {
-        return Appointment::with(['doctor', 'service'])
-            ->where('patient_id', $patient->id)
-            ->get();
-    }
-
-    private function getFilteredAppointments($patient, $dateType, $selectedDate)
-    {
-        $query = Appointment::with('doctor')->where('patient_id', $patient->id);
-
-        if ($dateType == 'today') {
-            $query->whereDate('created_at', Carbon::today());
-        } elseif ($dateType == 'yesterday') {
-            $query->whereDate('created_at', Carbon::yesterday());
-        } elseif ($dateType == 'specific' || $dateType == 'custom') {
-            $query->whereDate('created_at', $selectedDate);
-        } elseif ($dateType == 'week') {
-            $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
-        } elseif ($dateType == 'month') {
-            $query->whereMonth('created_at', Carbon::now()->month);
-        }
-
-        return $query->orderBy('created_at', 'desc')->get();
+        return view('patient-history.show', compact('patient', 'allHistory', 'totalVisits'));
     }
 }

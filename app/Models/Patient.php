@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Patient extends Model
 {
@@ -11,46 +12,60 @@ class Patient extends Model
 
     protected $fillable = [
         'full_name',
-        'age',
-        'sex_gender',
         'date_of_birth',
+        'sex_gender',
         'phone_number',
+        'email',
         'address',
-        'known_medical_conditions',
-        'allergies',
         'blood_type',
         'alcohol_consumption',
+        'known_medical_conditions',
+        'allergies',
         'registration_date',
-        'created_by',
-        'updated_by'
     ];
 
-    protected static function boot()
+    protected $dates = [
+        'date_of_birth',
+        'registration_date',
+    ];
+
+    // Relationships
+    public function appointments()
     {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (auth()->check()) {
-                $model->created_by = auth()->id();
-            }
-        });
-
-        static::updating(function ($model) {
-            if (auth()->check()) {
-                $model->updated_by = auth()->id();
-            }
-        });
+        return $this->hasMany(\App\Models\Appointment::class);
     }
 
-    // Relationship with creator
-    public function creator()
+    // Accessors
+    public function getLatestDoctorAttribute()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->appointments()->latest('appointment_date')->first()?->doctor;
     }
 
-    // Relationship with updater
-    public function updater()
+    public function getAgeAttribute()
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        if ($this->date_of_birth) {
+            return Carbon::parse($this->date_of_birth)->age;
+        }
+        return null;
+    }
+
+    public function getDateOfBirthFormattedAttribute()
+    {
+        return $this->date_of_birth
+            ? Carbon::parse($this->date_of_birth)->format('F j, Y')
+            : null;
+    }
+
+    public function getLastVisitAttribute()
+    {
+        $latestAppointment = $this->appointments()->latest('appointment_date')->first();
+        return $latestAppointment
+            ? Carbon::parse($latestAppointment->appointment_date)->format('F j, Y')
+            : null;
+    }
+
+    public function getTotalVisitsAttribute()
+    {
+        return $this->appointments()->count();
     }
 }

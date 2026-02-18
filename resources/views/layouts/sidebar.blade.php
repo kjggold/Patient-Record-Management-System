@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Route;
+@endphp
+
 <aside class="sidebar">
     <h2 class="logo">MediCore</h2>
     <nav>
@@ -46,9 +50,9 @@
             <a href="#"><i class="fa-solid fa-stethoscope"></i> Services</a>
         @endif
 
-        @if (Route::has('patientHistory.index'))
-            <a href="{{ route('patientHistory.index') }}"
-                class="{{ request()->routeIs('patientHistory.*') ? 'active' : '' }}">
+        @if (Route::has('patient-history.index'))
+            <a href="{{ route('patient-history.index') }}"
+                class="{{ request()->routeIs('patient-history.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-history"></i> Patient History
             </a>
         @else
@@ -74,7 +78,7 @@
         left: 0;
         width: 220px;
         height: 100vh;
-        background-color: #1e293b;
+        background-color: #e0eeff;
         color: #f8fafc;
         padding: 20px 15px;
         z-index: 1000;
@@ -88,7 +92,6 @@
         margin-bottom: 30px;
         color: #080808;
         text-align: left;
-        /* aligned left */
         padding-left: 5px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
@@ -112,12 +115,10 @@
         background: none;
         border: none;
         cursor: pointer;
-
     }
 
     .sidebar nav a:hover {
         background: rgba(59, 130, 246, 0.2);
-        /* only one hover color */
         transform: translateX(5px);
     }
 
@@ -136,7 +137,6 @@
     nav .logout {
         color: #e93e3e;
         margin-top: 8px;
-        /* same distance as other links */
         padding: 12px 16px;
         border-radius: 10px;
         display: flex;
@@ -153,7 +153,6 @@
 
     .logout-form {
         margin-top: 0;
-        /* removed extra spacing */
     }
 
     /* Scrollbar styling for sidebar */
@@ -174,7 +173,6 @@
         background: rgba(255, 255, 255, 0.3);
     }
 
-    /* -------------------- MAIN CONTENT ADJUSTMENT -------------------- */
     main {
         margin-left: 220px;
         padding: 20px;

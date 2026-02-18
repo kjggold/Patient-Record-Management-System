@@ -12,7 +12,7 @@ class Discharge extends Model
         'appointment_id',
         'patient_name',
         'doctor_name',
-        'services',
+        'services',   // stored as JSON
         'total',
         'discount',
         'paid',
@@ -20,7 +20,10 @@ class Discharge extends Model
     ];
 
     protected $casts = [
-    'services' => 'array', // automatically cast JSON to array
-];
-
+        'services' => 'array', // Automatically cast JSON to array
+        'total' => 'integer',
+        'discount' => 'integer',
+        'paid' => 'integer',
+        'balance' => 'integer',
+    ];
 }
