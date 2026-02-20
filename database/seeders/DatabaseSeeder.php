@@ -45,5 +45,8 @@ class DatabaseSeeder extends Seeder
                 'status'   => 'active',
             ]
         );
+        $this->call([
+            DoctorPatientSeeder::class,
+        ]);
     }
 }

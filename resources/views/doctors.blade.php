@@ -6,7 +6,7 @@
     <div class="app flex min-h-screen">
         {{-- Side bar --}}
         @include('layouts.sidebar')
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-6 ml-60">
             <div class="flex w-full sm:w-auto gap-2">
                 <h1 class="text-2xl font-semibold text-slate-700 mb-4">Doctor Lists</h1>
             </div>

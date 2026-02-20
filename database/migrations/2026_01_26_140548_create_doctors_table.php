@@ -14,13 +14,14 @@ return new class extends Migration
             $table->id();
             $table->string('full_name');
             $table->string('speciality');
-            $table->integer('experience');
             $table->string('phone_number')->unique();
             $table->string('email')->unique();
-            $table->string('consultation_fee');
             $table->string('status')->default('Active');
+            $table->integer('max_patients');
             $table->timestamps();
         });
+
+        DB::statement('ALTER TABLE doctors AUTO_INCREMENT = 1001;');
     }
 
     /* Reverse the migrations.

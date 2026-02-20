@@ -34,33 +34,40 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // Protected dashboard + resources
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::post('/appointments/discharge', [AppointmentController::class, 'discharge'])->name('appointments.discharge');
-Route::post('/appointments/complete-discharge',
-    [AppointmentController::class,'completeDischarge']
-)->name('appointments.completeDischarge');
+    Route::post('/appointments/discharge', [AppointmentController::class, 'discharge'])->name('appointments.discharge');
+    Route::post('/appointments/complete-discharge',
+        [AppointmentController::class,'completeDischarge']
+    )->name('appointments.completeDischarge');
 
-Route::get('/discharges', [DischargeController::class, 'index'])->name('discharge.index');
-Route::post('/discharges', [DischargeController::class, 'store'])->name('discharges.store');
+    Route::get('/discharges', [DischargeController::class, 'index'])->name('discharge.index');
+    Route::post('/discharges', [DischargeController::class, 'store'])->name('discharges.store');
 
-Route::get('/patientHistory', [PatientHistoryController::class, 'index'])->name('patientHistory.index');
+    Route::get('/patientHistory', [PatientHistoryController::class, 'index'])->name('patientHistory.index');
 
     Route::resources([
-        'patients' => PatientController::class,
+        'patients' => PatientHistoryController::class,
         'doctors' => DoctorController::class,
         'appointments' => AppointmentController::class,
         'services' => ServiceController::class,
         'discharge' => DischargeController::class,
-        'patientHistory'=> PatientHistoryController::class,
-
     ]);
-
-
 });
+
+Route::post('/appointments', [AppointmentController::class, 'store'])
+    ->name('appointments.store');
+
 Route::middleware(['auth'])->group(function () {
     // Patient History Routes
     Route::prefix('patient-history')->name('patient-history.')->group(function () {
         Route::get('/', [PatientHistoryController::class, 'index'])->name('index');
         Route::get('/{patient}', [PatientHistoryController::class, 'show'])->name('show');
+
+        // Edit and Update routes for patient history
+        Route::get('/{patient}/edit', [PatientHistoryController::class, 'edit'])->name('edit');
+        Route::put('/{patient}', [PatientHistoryController::class, 'update'])->name('update');
+
+        //add new patient datas
+        Route::post('/patients', [PatientHistoryController::class, 'store'])->name('patients.store');
 
         // Appointment Actions
         Route::post('/{patient}/appointments', [PatientHistoryController::class, 'createAppointment'])->name('create-appointment');
@@ -78,11 +85,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-// Or specifically for the show method
-Route::get('/patients/{patient}', [PatientController::class, 'show'])
-    ->name('patients.show');
 
-Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
 // Admin approval links (from email, signed URLs)
 Route::get('/admin/registrations/{registrationRequest}/approve', [AdminUserApprovalController::class, 'approve'])
@@ -110,6 +113,3 @@ Route::get('/medical-services', function () {
 
     return view('medical-services', compact('clinicServices'));
 })->name('medical-services.index');
-
-//
-

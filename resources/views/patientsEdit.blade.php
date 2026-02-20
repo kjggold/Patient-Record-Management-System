@@ -10,7 +10,6 @@
         <!-- MAIN CONTENT -->
         <main class="flex-1 p-6 ml-60">
 
-
             <!-- Info Message Display -->
             @if(session('info'))
                 <div class="mb-6 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md" id="infoMessage">
@@ -44,9 +43,9 @@
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <a href="{{ route('patients.index') }}"
+                            <a href="{{ route('patient-history.index') }}"
                                class="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition">
-                                View All Patients
+                                Back to Patient History
                             </a>
                             <button onclick="this.parentElement.parentElement.parentElement.remove()"
                                     class="text-green-600 hover:text-green-800">
@@ -113,17 +112,20 @@
                             <!-- Display current date from DB -->
                             <div class="mb-1 text-sm text-gray-600">
                                 Current:
-                                @if($patient->date_of_birth_year && $patient->date_of_birth_month && $patient->date_of_birth_day)
-                                    {{ $patient->date_of_birth_day }}/{{ $patient->date_of_birth_month }}/{{ $patient->date_of_birth_year }}
+                                @if($patient->date_of_birth)
+                                    {{ \Carbon\Carbon::parse($patient->date_of_birth)->format('m/d/Y') }}
+                                @elseif($patient->date_of_birth_year && $patient->date_of_birth_month && $patient->date_of_birth_day)
+                                    {{ $patient->date_of_birth_month }}/{{ $patient->date_of_birth_day }}/{{ $patient->date_of_birth_year }}
                                 @else
                                     Not set
                                 @endif
                             </div>
                             <input type="date" name="date_of_birth" id="date_of_birth"
-                                   value="{{ old('date_of_birth',
-                                        $patient->date_of_birth_year && $patient->date_of_birth_month && $patient->date_of_birth_day
+                                   value="{{ old('date_of_birth', $patient->date_of_birth ?
+                                        \Carbon\Carbon::parse($patient->date_of_birth)->format('Y-m-d') :
+                                        ($patient->date_of_birth_year && $patient->date_of_birth_month && $patient->date_of_birth_day
                                         ? sprintf('%04d-%02d-%02d', $patient->date_of_birth_year, $patient->date_of_birth_month, $patient->date_of_birth_day)
-                                        : '') }}"
+                                        : '')) }}"
                                    required>
                             @error('date_of_birth')
                                 <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -134,12 +136,12 @@
                             <div class="radio-group">
                                 <label>
                                     <input type="radio" name="sex_gender" value="male"
-                                           {{ old('sex_gender', $patient->sex_gender) == 'male' ? 'checked' : '' }}>
+                                           {{ old('sex_gender', strtolower($patient->sex_gender)) == 'male' ? 'checked' : '' }}>
                                     Male
                                 </label>
                                 <label>
                                     <input type="radio" name="sex_gender" value="female"
-                                           {{ old('sex_gender', $patient->sex_gender) == 'female' ? 'checked' : '' }}>
+                                           {{ old('sex_gender', strtolower($patient->sex_gender)) == 'female' ? 'checked' : '' }}>
                                     Female
                                 </label>
                             </div>
@@ -175,8 +177,14 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Known Medical Conditions</label>
+                            @php
+                                $conditions = $patient->known_medical_conditions;
+                                if (is_array($conditions)) {
+                                    $conditions = implode(', ', $conditions);
+                                }
+                            @endphp
                             <input type="text" name="known_medical_conditions" id="known_medical_conditions"
-                                   value="{{ old('known_medical_conditions', $patient->known_medical_conditions) }}"
+                                   value="{{ old('known_medical_conditions', $conditions) }}"
                                    placeholder="Type to search medical conditions.">
                             <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple conditions</small>
                             @error('known_medical_conditions')
@@ -185,8 +193,14 @@
                         </div>
                         <div class="form-group">
                             <label>Allergies</label>
+                            @php
+                                $allergies = $patient->allergies;
+                                if (is_array($allergies)) {
+                                    $allergies = implode(', ', $allergies);
+                                }
+                            @endphp
                             <input type="text" name="allergies" id="allergies"
-                                   value="{{ old('allergies', $patient->allergies) }}"
+                                   value="{{ old('allergies', $allergies) }}"
                                    placeholder="Type to search allergies.">
                             <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple allergies</small>
                             @error('allergies')
@@ -219,17 +233,17 @@
                             <div class="radio-group">
                                 <label>
                                     <input type="radio" name="alcohol_consumption" value="none"
-                                           {{ old('alcohol_consumption', $patient->alcohol_consumption) == 'none' ? 'checked' : '' }}>
+                                           {{ old('alcohol_consumption', strtolower($patient->alcohol_consumption)) == 'none' ? 'checked' : '' }}>
                                     None
                                 </label>
                                 <label>
                                     <input type="radio" name="alcohol_consumption" value="occasional"
-                                           {{ old('alcohol_consumption', $patient->alcohol_consumption) == 'occasional' ? 'checked' : '' }}>
+                                           {{ old('alcohol_consumption', strtolower($patient->alcohol_consumption)) == 'occasional' ? 'checked' : '' }}>
                                     Occasional
                                 </label>
                                 <label>
                                     <input type="radio" name="alcohol_consumption" value="regular"
-                                           {{ old('alcohol_consumption', $patient->alcohol_consumption) == 'regular' ? 'checked' : '' }}>
+                                           {{ old('alcohol_consumption', strtolower($patient->alcohol_consumption)) == 'regular' ? 'checked' : '' }}>
                                     Regular
                                 </label>
                             </div>
@@ -241,24 +255,9 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="required">Assigned Doctor</label>
-                            <select name="assigned_doctor" id="assigned_doctor" required>
-                                <option value="" disabled {{ !$patient->assigned_doctor ? 'selected' : '' }}>Select Doctor</option>
-                                @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}"
-                                            {{ old('assigned_doctor', $patient->assigned_doctor) == $doctor->id ? 'selected' : '' }}>
-                                        {{ $doctor->full_name }} ({{ $doctor->speciality }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('assigned_doctor')
-                                <span class="text-red-500 text-xs">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="form-group">
                             <label class="required">Registration Date</label>
                             <input type="date" name="registration_date" id="registration_date"
-                                   value="{{ old('registration_date', $patient->registration_date) }}" required>
+                                   value="{{ old('registration_date', $patient->registration_date ? \Carbon\Carbon::parse($patient->registration_date)->format('Y-m-d') : '') }}" required>
                             @error('registration_date')
                                 <span class="text-red-500 text-xs">{{ $message }}</span>
                             @enderror
@@ -266,7 +265,7 @@
                     </div>
 
                     <div class="button-container">
-                        <a href="{{ route('patients.index') }}" class="cancel-btn">Cancel</a>
+                        <a href="{{ route('patient-history.index') }}" class="cancel-btn">Cancel</a>
                         <button type="submit" class="register-btn" id="submitBtn">Update Patient</button>
                     </div>
                 </form>
@@ -440,7 +439,6 @@
             const dob = document.getElementById('date_of_birth').value;
             const phone = document.getElementById('phone_number').value.trim();
             const address = document.getElementById('address').value.trim();
-            const doctor = document.getElementById('assigned_doctor').value;
             const regDate = document.getElementById('registration_date').value;
 
             // Basic validation
@@ -473,11 +471,6 @@
 
             if (!address) {
                 alert('Please enter address');
-                return false;
-            }
-
-            if (!doctor) {
-                alert('Please select an assigned doctor');
                 return false;
             }
 
@@ -607,6 +600,26 @@
 
             // Initial button state
             updateSubmitButtonState();
+
+            // Format phone number on load
+            const phoneInput = document.getElementById('phone_number');
+            if (phoneInput.value) {
+                let phone = phoneInput.value.replace(/\D/g, '');
+                if (phone.length > 0) {
+                    if (phone.length <= 3) {
+                        phone = '(' + phone;
+                    } else if (phone.length <= 6) {
+                        phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3);
+                    } else {
+                        phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3, 6) + '-' + phone.substring(6, 10);
+                    }
+                }
+                phoneInput.value = phone;
+            }
+
+            // Log for debugging
+            console.log('Sex/Gender from DB:', "{{ $patient->sex_gender }}");
+            console.log('Alcohol Consumption from DB:', "{{ $patient->alcohol_consumption }}");
 
             // Form submission handling
             const submitBtn = document.getElementById('submitBtn');

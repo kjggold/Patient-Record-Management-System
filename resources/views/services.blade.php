@@ -8,28 +8,32 @@
         @include('layouts.sidebar')
 
         <!-- MAIN CONTENT -->
-        <div class="flex-1 p-6 bg-gray-50 ml-60"> <!-- Changed from main to div and added proper margin -->
+        <div class="flex-1 p-6 bg-gray-50 ml-60">
             <h1 class="text-2xl font-bold text-gray-800 mb-4">Services</h1>
 
             <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
-                <!-- Search Input -->
+                <!-- Search Input - FIXED VERSION -->
                 <div class="relative w-full md:w-auto">
                     <input type="text"
                            id="searchInput"
                            placeholder="Search by name..."
-                           class="w-full md:w-64 border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           class="w-full md:w-64 border border-blue-300 rounded-lg px-4 py-2 pl-10 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                            value="{{ request('search') ?? '' }}"
                            autocomplete="off">
+
+                    <!-- Search Icon - Left side -->
                     <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1114 0 7 7 0 01-14 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
-                    <!-- Clear button -->
-                    @if(request('search'))
-                        <button onclick="clearSearch()"
-                                class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
-                            <i class="fa-solid fa-times"></i>
-                        </button>
-                    @endif
+
+                    <!-- Clear button - Right side (always present but hidden when no search) -->
+                    <button onclick="clearSearch()"
+                            id="clearSearchBtn"
+                            class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 {{ request('search') ? '' : 'hidden' }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
 
                 <!-- Buttons Group -->
@@ -68,10 +72,11 @@
                                     @foreach ($services as $service)
                                         <tr class="hover:bg-slate-50">
                                             <td class="px-6 py-4 font-medium text-gray-900">{{ $service->service_name }}</td>
-                                            <td class="px-6 py-4 text-gray-700">{{ $service->service_fee }}</td>
-                                            <td class="px-6 py-4 text-gray-600">{{ $service->description }}</td>
+                                            <td class="px-6 py-4 text-gray-700">{{ number_format($service->service_fee) }} Ks</td>
+                                            <td class="px-6 py-4 text-gray-600">{{ $service->description ?? 'No description' }}</td>
                                             <td class="px-6 py-4 text-gray-500 text-sm">
-                                                {{ $service->created_at?->format('Y-m-d H:i') }}</td>
+                                                {{ $service->created_at ? $service->created_at->format('Y-m-d H:i') : 'N/A' }}
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -156,13 +161,11 @@
                 @endif
             </div>
 
-            <!-- REMOVED MODAL FROM HERE -->
-
         </div> <!-- End of main content -->
     </div> <!-- End of app container -->
 
-    <!-- ADD SERVICE MODAL - MOVED HERE (OUTSIDE ALL CONTAINERS) -->
-    <div id="addServiceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 ">
+    <!-- ADD SERVICE MODAL -->
+    <div id="addServiceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden ml-60">
             <div class="flex justify-between items-center p-6 border-b">
                 <h2 class="text-xl font-bold text-gray-800">Add Service</h2>
@@ -205,207 +208,209 @@
             </div>
         </div>
     </div>
+@endsection
 
-    @push('scripts')
-        <script>
-            // Variables
-            let searchTimeout;
-            let currentSearchTerm = "{{ request('search', '') }}";
-            let abortController = null;
+@push('scripts')
+    <script>
+        // Variables
+        let searchTimeout;
+        let currentSearchTerm = "{{ request('search', '') }}";
+        let abortController = null;
 
-            // Update clear button visibility
-            function updateClearButtonVisibility(searchTerm) {
-                const searchInput = document.getElementById('searchInput');
-                const clearBtn = searchInput?.parentElement.querySelector('.fa-times');
-
-                if (clearBtn) {
-                    clearBtn.parentElement.style.display = searchTerm ? 'block' : 'none';
-                }
-            }
-
-            // Debounce function
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
-            }
-
-            // Optimized AJAX search function
-            function performAjaxSearch(searchTerm) {
-                // Cancel previous request if still pending
-                if (abortController) {
-                    abortController.abort();
-                }
-
-                // Create new AbortController for this request
-                abortController = new AbortController();
-
-                // Build URL - IMPORTANT: When search is empty, go to page 1
-                const url = new URL("{{ route('services.index') }}", window.location.origin);
-
-                // Only add search parameter if there's a search term
-                if (searchTerm) {
-                    url.searchParams.set('search', searchTerm);
+        // Update clear button visibility
+        function updateClearButtonVisibility(searchTerm) {
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (clearBtn) {
+                if (searchTerm && searchTerm.length > 0) {
+                    clearBtn.classList.remove('hidden');
                 } else {
-                    // When search is cleared, explicitly remove search param and go to page 1
-                    url.searchParams.delete('search');
-                    url.searchParams.delete('page'); // Go to page 1
+                    clearBtn.classList.add('hidden');
                 }
+            }
+        }
 
-                // Add AJAX flag
-                url.searchParams.set('ajax', '1');
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
-                // Make AJAX request
-                fetch(url.toString(), {
-                    signal: abortController.signal,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.text())
-                .then(html => {
-                    // Parse the response
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-
-                    // Find the table container in the response
-                    const newTableContainer = doc.querySelector('#servicesTableContainer');
-
-                    if (newTableContainer) {
-                        // Update the table container
-                        document.getElementById('servicesTableContainer').innerHTML = newTableContainer.innerHTML;
-                    }
-
-                    // Update URL without reloading page (remove ajax parameter)
-                    const cleanUrl = url.toString().replace('&ajax=1', '').replace('?ajax=1', '');
-                    window.history.replaceState({}, '', cleanUrl);
-
-                    // Update current search term
-                    currentSearchTerm = searchTerm;
-
-                    // Update clear button visibility
-                    updateClearButtonVisibility(searchTerm);
-                })
-                .catch(error => {
-                    if (error.name === 'AbortError') {
-                        console.log('Search request was aborted');
-                        return;
-                    }
-                    console.error('Search error:', error);
-                    // Fallback to traditional page reload
-                    window.location.href = url.toString().replace('&ajax=1', '').replace('?ajax=1', '');
-                })
-                .finally(() => {
-                    abortController = null;
-                });
+        // Optimized AJAX search function
+        function performAjaxSearch(searchTerm) {
+            // Cancel previous request if still pending
+            if (abortController) {
+                abortController.abort();
             }
 
-            // Search as you type
-            document.getElementById('searchInput')?.addEventListener('input', debounce(function(e) {
-                const searchTerm = e.target.value.trim();
+            // Create new AbortController for this request
+            abortController = new AbortController();
 
-                // If search term hasn't changed, do nothing
-                if (searchTerm === currentSearchTerm) {
-                    return;
-                }
+            // Build URL - IMPORTANT: When search is empty, go to page 1
+            const url = new URL("{{ route('services.index') }}", window.location.origin);
 
-                // Update clear button visibility
-                updateClearButtonVisibility(searchTerm);
-
-                // Perform search
-                performAjaxSearch(searchTerm);
-            }, 500));
-
-            // Clear search function - go back to original page 1
-            function clearSearch() {
-                const searchInput = document.getElementById('searchInput');
-                searchInput.value = '';
-                searchInput.focus();
-
-                // Update clear button
-                updateClearButtonVisibility('');
-
-                // Immediately trigger search with empty term to go to page 1
-                performAjaxSearch('');
+            // Only add search parameter if there's a search term
+            if (searchTerm) {
+                url.searchParams.set('search', searchTerm);
+            } else {
+                // When search is cleared, explicitly remove search param and go to page 1
+                url.searchParams.delete('search');
+                url.searchParams.delete('page'); // Go to page 1
             }
 
-            // Handle Enter key in search
-            document.getElementById('searchInput')?.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const searchTerm = this.value.trim();
-                    if (searchTerm !== currentSearchTerm) {
-                        performAjaxSearch(searchTerm);
-                    }
-                }
-            });
+            // Add AJAX flag
+            url.searchParams.set('ajax', '1');
 
-            // Handle browser back/forward buttons
-            window.addEventListener('popstate', function() {
-                // Get search term from URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const searchTerm = urlParams.get('search') || '';
-
-                // Update input field
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput) {
-                    searchInput.value = searchTerm;
+            // Make AJAX request
+            fetch(url.toString(), {
+                signal: abortController.signal,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Parse the response
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Find the table container in the response
+                const newTableContainer = doc.querySelector('#servicesTableContainer');
+
+                if (newTableContainer) {
+                    // Update the table container
+                    document.getElementById('servicesTableContainer').innerHTML = newTableContainer.innerHTML;
+                }
+
+                // Update URL without reloading page (remove ajax parameter)
+                const cleanUrl = url.toString().replace('&ajax=1', '').replace('?ajax=1', '');
+                window.history.replaceState({}, '', cleanUrl);
 
                 // Update current search term
                 currentSearchTerm = searchTerm;
 
-                // Update clear button
+                // Update clear button visibility
                 updateClearButtonVisibility(searchTerm);
-
-                // Perform search with current term
-                performAjaxSearch(searchTerm);
+            })
+            .catch(error => {
+                if (error.name === 'AbortError') {
+                    console.log('Search request was aborted');
+                    return;
+                }
+                console.error('Search error:', error);
+                // Fallback to traditional page reload
+                window.location.href = url.toString().replace('&ajax=1', '').replace('?ajax=1', '');
+            })
+            .finally(() => {
+                abortController = null;
             });
+        }
 
-            // Modal functions
-            function openAddServiceModal() {
-                const form = document.getElementById('addServiceForm');
-                if (form) form.reset();
-                document.getElementById('addServiceModal').classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
+        // Search as you type
+        document.getElementById('searchInput')?.addEventListener('input', debounce(function(e) {
+            const searchTerm = e.target.value.trim();
+
+            // If search term hasn't changed, do nothing
+            if (searchTerm === currentSearchTerm) {
+                return;
             }
 
-            function closeAddServiceModal() {
-                document.getElementById('addServiceModal').classList.add('hidden');
-                document.body.style.overflow = ''; // Restore scrolling
+            // Update clear button visibility
+            updateClearButtonVisibility(searchTerm);
+
+            // Perform search
+            performAjaxSearch(searchTerm);
+        }, 500));
+
+        // Clear search function - go back to original page 1
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            searchInput.focus();
+
+            // Update clear button
+            updateClearButtonVisibility('');
+
+            // Immediately trigger search with empty term to go to page 1
+            performAjaxSearch('');
+        }
+
+        // Handle Enter key in search
+        document.getElementById('searchInput')?.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const searchTerm = this.value.trim();
+                if (searchTerm !== currentSearchTerm) {
+                    performAjaxSearch(searchTerm);
+                }
+            }
+        });
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function() {
+            // Get search term from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchTerm = urlParams.get('search') || '';
+
+            // Update input field
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = searchTerm;
             }
 
-            // Close modal when clicking on backdrop
-            document.getElementById('addServiceModal')?.addEventListener('click', function(e) {
-                if (e.target === this) {
+            // Update current search term
+            currentSearchTerm = searchTerm;
+
+            // Update clear button
+            updateClearButtonVisibility(searchTerm);
+
+            // Perform search with current term
+            performAjaxSearch(searchTerm);
+        });
+
+        // Modal functions
+        function openAddServiceModal() {
+            const form = document.getElementById('addServiceForm');
+            if (form) form.reset();
+            document.getElementById('addServiceModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
+        }
+
+        function closeAddServiceModal() {
+            document.getElementById('addServiceModal').classList.add('hidden');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // Close modal when clicking on backdrop
+        document.getElementById('addServiceModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddServiceModal();
+            }
+        });
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClearButtonVisibility(currentSearchTerm);
+
+            // Focus search input if it has value
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && searchInput.value) {
+                searchInput.focus();
+                searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+            }
+
+            // Add escape key listener to close modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
                     closeAddServiceModal();
                 }
             });
-
-            // Initial clear button setup
-            document.addEventListener('DOMContentLoaded', function() {
-                updateClearButtonVisibility(currentSearchTerm);
-
-                // Focus search input if it has value
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput && searchInput.value) {
-                    searchInput.focus();
-                    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-                }
-
-                // Add escape key listener to close modal
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') {
-                        closeAddServiceModal();
-                    }
-                });
-            });
-        </script>
-    @endpush
-@endsection
+        });
+    </script>
+@endpush

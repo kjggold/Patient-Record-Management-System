@@ -5,13 +5,21 @@
             <i class="fa-solid fa-chart-line"></i> Dashboard
         </a>
 
-        @if (Route::has('patients.index'))
+        {{-- @if (Route::has('patients.index'))
             <a href="{{ route('patients.index') }}" class="{{ request()->routeIs('patients.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-user"></i> Patients
+                <i class="fa-solid fa-user"></i> Patients re
             </a>
         @else
             <a href="#"><i class="fa-solid fa-user"></i> Patients</a>
-        @endif
+        @endif --}}
+
+        @if (Route::has('patientHistory.index'))
+        <a href="{{ route('patientHistory.index') }}" class="{{ request()->routeIs('patientHistory.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-user"></i> Patients
+        </a>
+    @else
+        <a href="#"><i class="fa-solid fa-user"></i> Patients</a>
+    @endif
 
         @if (Route::has('doctors.index'))
             <a href="{{ route('doctors.index') }}" class="{{ request()->routeIs('doctors.*') ? 'active' : '' }}">
@@ -46,13 +54,7 @@
             <a href="#"><i class="fa-solid fa-stethoscope"></i> Services</a>
         @endif
 
-        @if (Route::has('patientHistory.index'))
-        <a href="{{ route('patientHistory.index') }}" class="{{ request()->routeIs('patientHistory.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-history"></i> Patient History
-        </a>
-    @else
-        <a href="#"><i class="fa-solid fa-history"></i> Patient History</a>
-    @endif
+
 
         <!-- Logout -->
         <form method="POST" action="{{ route('logout') }}" class="logout-form">
