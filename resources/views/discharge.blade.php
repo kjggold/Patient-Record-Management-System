@@ -7,7 +7,7 @@
     <style>
         /* Stat Cards */
         .stat-card {
-            background: #ffffff;
+            background: #c0eaff;
             border-radius: 14px;
             padding: 18px 20px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, .05);
@@ -43,7 +43,7 @@
             letter-spacing: .03em;
             padding: 12px 8px;
             text-align: left;
-            background: #f0f5ff;
+            background: #91e2ff;
             color: #1e293b;
             font-weight: 600;
             white-space: nowrap;
@@ -109,89 +109,163 @@
             color: white;
         }
 
-        /* Service detail dropdown - hidden by default */
+        /* Service detail dropdown - Clean Glass Effect - Minimized */
+    .service-detail {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-left: 3px solid rgba(13, 110, 253, 0.3);
+        padding: 10px;
+        margin-top: 0;
+        margin-left: 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        display: none;
+        box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.15);
+        position: absolute;
+        z-index: 100;
+        min-width: 200px;
+        max-width: 250px;
+        left: 100%;
+        top: 0;
+        right: auto;
+        transition: all 0.2s ease;
+    }
+
+    .service-detail.show {
+        display: block;
+        animation: slideInRight 0.2s ease;
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Service container for positioning */
+    .service-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .view-services-link {
+        font-size: 10px;
+        color: #0d6efd;
+        margin-left: 4px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.5);
+        padding: 2px 6px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-weight: 500;
+        display: inline-block;
+        line-height: 1.2;
+    }
+
+    .view-services-link:hover {
+        background: rgba(13, 110, 253, 0.15);
+        color: #0a58ca;
+    }
+
+    /* Glass header - minimized */
+    .service-detail div:first-child {
+        background: rgba(255, 255, 255, 0.3);
+        padding: 5px 8px;
+        margin: -8px -8px 8px -8px;
+        border-radius: 10px 10px 6px 6px;
+        font-weight: 600;
+        color: #0d6efd;
+        font-size: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Glass service rows - minimized */
+    .service-detail div:not(:first-child):not(:last-child) {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 6px 8px;
+        margin: 4px -4px;
+        border-radius: 8px;
+        font-size: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Total row - minimized */
+    .service-detail div:last-child {
+        background: rgba(13, 110, 253, 0.1);
+        padding: 8px 8px;
+        margin: 8px -8px -8px -8px;
+        border-radius: 6px 6px 10px 10px;
+        font-weight: 600;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        color: #0d6efd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+    }
+
+    /* Money values inside glass card - minimized */
+    .service-detail .money-value {
+        font-weight: 600;
+        color: #0f172a;
+        background: rgba(255, 255, 255, 0.3);
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        white-space: nowrap;
+    }
+
+    /* Service name in rows - truncate long names */
+    .service-detail div:not(:first-child):not(:last-child) span:first-child {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Service badge - keep original but smaller */
+    .service-badge {
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .service-badge:hover {
+        background: #0d6efd;
+        color: white;
+    }
+
+    /* Adjust for mobile/small screens */
+    @media (max-width: 768px) {
         .service-detail {
-            background: #f8fafc;
-            border-left: 3px solid #0d6efd;
-            padding: 12px;
-            margin-top: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            display: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            position: absolute;
-            z-index: 100;
-            min-width: 250px;
+            min-width: 180px;
+            left: auto;
             right: 0;
+            top: 100%;
+            margin-left: 0;
+            margin-top: 5px;
         }
+    }
+</style>
 
-        .service-detail.show {
-            display: block;
-        }
-
-        /* Service container for positioning */
-        .service-container {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .view-services-link {
-            font-size: 10px;
-            color: #64748b;
-            margin-left: 5px;
-            cursor: pointer;
-            text-decoration: underline;
-            text-decoration-style: dotted;
-            white-space: nowrap;
-        }
-
-        .view-services-link:hover {
-            color: #0d6efd;
-        }
-
-        .action-btn {
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            background: #0d6efd;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
-        }
-
-        .action-btn:hover {
-            background: #0b5ed7;
-        }
-
-        .empty-box {
-            padding: 60px 20px;
-            text-align: center;
-            color: #64748b;
-        }
-
-        /* Responsive table container */
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-radius: 14px;
-        }
-
-        /* Money values */
-        .money-value {
-            font-weight: 600;
-            color: #0f172a;
-        }
-
-        .total-services-price {
-            font-size: 10px;
-            color: #64748b;
-            display: block;
-            margin-top: 2px;
-        }
-    </style>
 
     <div class="app flex min-h-screen">
         @include('layouts.sidebar')
