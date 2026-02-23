@@ -46,14 +46,22 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Known Medical Conditions</label>
-                    <input type="text" id="known_medical_conditions" name="known_medical_conditions" rows="2"
-                        placeholder="Type to search medical conditions.">
+                    <div class="tags-input-container">
+                        <input type="text" id="known_medical_conditions_input" class="tags-input"
+                            placeholder="Type to search medical conditions." autocomplete="off">
+                        <div id="medical_conditions_tags" class="tags-container"></div>
+                        <input type="hidden" name="known_medical_conditions" id="known_medical_conditions">
+                    </div>
                     <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple conditions</small>
                 </div>
                 <div class="form-group">
                     <label>Allergies</label>
-                    <input id="allergies" name="allergies" rows="2"
-                        placeholder="Type to search allergies.">
+                    <div class="tags-input-container">
+                        <input type="text" id="allergies_input" class="tags-input"
+                            placeholder="Type to search allergies." autocomplete="off">
+                        <div id="allergies_tags" class="tags-container"></div>
+                        <input type="hidden" name="allergies" id="allergies">
+                    </div>
                     <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple allergies</small>
                 </div>
             </div>
@@ -163,6 +171,77 @@
         outline: none;
     }
 
+    /* Tags input styling */
+    #patientModal .tags-input-container {
+        border: 1px solid #c8e1f3;
+        border-radius: 8px;
+        background-color: #fff;
+        padding: 4px;
+    }
+
+    #patientModal .tags-input {
+        width: 100%;
+        border: none !important;
+        padding: 6px 8px !important;
+        font-size: 13px;
+        outline: none;
+    }
+
+    #patientModal .tags-input:focus {
+        border: none;
+        box-shadow: none;
+    }
+
+    #patientModal .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 4px 8px 8px 8px;
+    }
+
+    #patientModal .condition-tag {
+        background-color: #91defa;
+        color: #104a58;
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    #patientModal .allergy-tag {
+        background-color: #fef3c7;
+        color: #92400e;
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    #patientModal .tag-remove {
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+        color: currentColor;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    #patientModal .tag-remove:hover {
+        opacity: 1;
+    }
+
+    /* Remove default input styling when tags exist */
+    #patientModal .tags-input-container:focus-within {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
     #patientModal .radio-group {
         display: flex;
         gap: 15px;
@@ -232,28 +311,6 @@
         margin-top: 2px;
     }
 
-    /* Tag styling for conditions and allergies */
-    #patientModal .tag {
-        background-color: #e0f2fe;
-        color: #0369a1;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    #patientModal .tag-remove {
-        cursor: pointer;
-        font-size: 14px;
-        line-height: 1;
-    }
-
-    #patientModal .tag-remove:hover {
-        color: #dc2626;
-    }
-
     /* Modal adjustments */
     #patientModal {
         align-items: flex-start;
@@ -308,8 +365,7 @@
 
 @push('scripts')
     <script>
-        /* ---------------- NOTIFICATION FUNCTION (FROM NEW) ---------------- */
-
+        /* ---------------- NOTIFICATION FUNCTION ---------------- */
         function showNotification(message, type = 'success') {
             // Create notification element
             const notification = document.createElement('div');
@@ -389,8 +445,7 @@
             }
         }
 
-        /* ---------------- SEARCH FUNCTIONALITY (FROM NEW) ---------------- */
-
+        /* ---------------- SEARCH FUNCTIONALITY ---------------- */
         document.getElementById('searchInput').addEventListener('keyup', function() {
             const value = this.value.toLowerCase();
             const rows = document.querySelectorAll('#patientsTable tbody tr');
@@ -418,8 +473,7 @@
             });
         });
 
-        /* ---------------- AGE CALCULATION (FROM OLD) ---------------- */
-
+        /* ---------------- AGE CALCULATION ---------------- */
         function calculateAge() {
             const dobInput = document.getElementById('date_of_birth');
             const ageInput = document.getElementById('age');
@@ -438,8 +492,7 @@
             }
         }
 
-        /* ---------------- PHONE NUMBER FORMATTING (FROM OLD) ---------------- */
-
+        /* ---------------- PHONE NUMBER FORMATTING ---------------- */
         function formatPhoneNumber(input) {
             // Remove all non-digit characters
             let phone = input.value.replace(/\D/g, '');
@@ -458,8 +511,7 @@
             input.value = phone;
         }
 
-        /* ---------------- DELETE PATIENT FUNCTION (FROM NEW) ---------------- */
-
+        /* ---------------- DELETE PATIENT FUNCTION ---------------- */
         function deletePatient(patientId, patientName) {
             if (confirm(`Are you sure you want to delete patient "${patientName}"? This action cannot be undone.`)) {
                 // Send delete request
@@ -521,8 +573,7 @@
             }
         }
 
-        /* ---------------- FORM VALIDATION (FROM NEW) ---------------- */
-
+        /* ---------------- FORM VALIDATION ---------------- */
         function validateForm() {
             const fullName = document.getElementById('full_name').value.trim();
             const age = document.getElementById('age').value;
@@ -572,8 +623,7 @@
             return true;
         }
 
-        /* ---------------- VIEW MODAL FUNCTION (FROM NEW) ---------------- */
-
+        /* ---------------- VIEW MODAL FUNCTION ---------------- */
         function openViewModal(patientId) {
             // Fetch patient details via AJAX
             fetch(`/patients/${patientId}`)
@@ -646,13 +696,13 @@
         }
     </script>
 
-    <!-- KEEP THE OLD WORKING JQUERY AUTOCOMPLETE SCRIPT -->
+    <!-- jQuery and jQuery UI for Autocomplete -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
 
     <script>
-        // OLD WORKING SCRIPT FOR AUTOCOMPLETE (KEEP AS IS)
+        // AutoComplete and Tags Functionality
         $(document).ready(function() {
             let medicalConditions = [];
             let allergies = [];
@@ -718,15 +768,57 @@
                 ];
             }
 
+            // Function to update medical conditions display
+            function updateMedicalConditionsDisplay() {
+                const container = $('#medical_conditions_tags');
+                container.empty();
+
+                if (medicalConditions.length > 0) {
+                    medicalConditions.forEach((condition, index) => {
+                        const tag = $(`
+                            <span class="condition-tag">
+                                ${condition}
+                                <span class="tag-remove" data-index="${index}">×</span>
+                            </span>
+                        `);
+                        container.append(tag);
+                    });
+                }
+
+                // Update hidden input
+                $('#known_medical_conditions').val(medicalConditions.join(', '));
+            }
+
+            // Function to update allergies display
+            function updateAllergiesDisplay() {
+                const container = $('#allergies_tags');
+                container.empty();
+
+                if (allergies.length > 0) {
+                    allergies.forEach((allergy, index) => {
+                        const tag = $(`
+                            <span class="allergy-tag">
+                                ${allergy}
+                                <span class="tag-remove" data-index="${index}">×</span>
+                            </span>
+                        `);
+                        container.append(tag);
+                    });
+                }
+
+                // Update hidden input
+                $('#allergies').val(allergies.join(', '));
+            }
+
             // Initialize Medical Conditions Autocomplete
-            $('#known_medical_conditions').autocomplete({
+            $('#known_medical_conditions_input').autocomplete({
                 source: function(request, response) {
                     loadMedicalConditions().then(function(data) {
                         const term = request.term.toLowerCase();
                         const filtered = data.filter(function(item) {
                             return item.toLowerCase().includes(term);
                         });
-                        response(filtered.slice(0, 20)); // Limit to 20 results
+                        response(filtered.slice(0, 20));
                     });
                 },
                 minLength: 1,
@@ -744,7 +836,6 @@
                     $(this).autocomplete('widget').css('z-index', 999999);
                 }
             }).on('keypress', function(e) {
-                // Add condition on Enter key
                 if (e.which == 13) {
                     const condition = $(this).val().trim();
                     if (condition && !medicalConditions.includes(condition)) {
@@ -758,14 +849,14 @@
             });
 
             // Initialize Allergies Autocomplete
-            $('#allergies').autocomplete({
+            $('#allergies_input').autocomplete({
                 source: function(request, response) {
                     loadAllergies().then(function(data) {
                         const term = request.term.toLowerCase();
                         const filtered = data.filter(function(item) {
                             return item.toLowerCase().includes(term);
                         });
-                        response(filtered.slice(0, 20)); // Limit to 20 results
+                        response(filtered.slice(0, 20));
                     });
                 },
                 minLength: 1,
@@ -783,7 +874,6 @@
                     $(this).autocomplete('widget').css('z-index', 999999);
                 }
             }).on('keypress', function(e) {
-                // Add allergy on Enter key
                 if (e.which == 13) {
                     const allergy = $(this).val().trim();
                     if (allergy && !allergies.includes(allergy)) {
@@ -796,83 +886,32 @@
                 }
             });
 
-            // Function to update medical conditions display
-            function updateMedicalConditionsDisplay() {
-                const container = $('#known_medical_conditions').parent();
-                // Remove existing tags container
-                container.find('.tags-container').remove();
+            // Remove tag handlers (using event delegation)
+            $(document).on('click', '.condition-tag .tag-remove', function() {
+                const index = $(this).data('index');
+                medicalConditions.splice(index, 1);
+                updateMedicalConditionsDisplay();
+            });
 
-                if (medicalConditions.length > 0) {
-                    // Create tags container
-                    const tagsHtml = '<div class="tags-container mt-2">' +
-                        medicalConditions.map((condition, index) =>
-                            `<span class="condition-tag">${condition} <span class="remove" data-index="${index}">×</span></span>`
-                        ).join('') +
-                        '</div>';
-
-                    container.append(tagsHtml);
-
-                    // Update hidden input for form submission
-                    container.find('input[name="known_medical_conditions_hidden"]').remove();
-                    container.append(
-                        `<input type="hidden" name="known_medical_conditions_hidden" value="${medicalConditions.join('|')}">`
-                        );
-                }
-
-                // Add click handlers for remove buttons
-                container.on('click', '.condition-tag .remove', function() {
-                    const index = $(this).data('index');
-                    medicalConditions.splice(index, 1);
-                    updateMedicalConditionsDisplay();
-                });
-            }
-
-            // Function to update allergies display
-            function updateAllergiesDisplay() {
-                const container = $('#allergies').parent();
-                // Remove existing tags container
-                container.find('.tags-container').remove();
-
-                if (allergies.length > 0) {
-                    // Create tags container
-                    const tagsHtml = '<div class="tags-container mt-2">' +
-                        allergies.map((allergy, index) =>
-                            `<span class="allergy-tag">${allergy} <span class="remove" data-index="${index}">×</span></span>`
-                        ).join('') +
-                        '</div>';
-
-                    container.append(tagsHtml);
-
-                    // Update hidden input for form submission
-                    container.find('input[name="allergies_hidden"]').remove();
-                    container.append(
-                    `<input type="hidden" name="allergies_hidden" value="${allergies.join('|')}">`);
-                }
-
-                // Add click handlers for remove buttons
-                container.on('click', '.allergy-tag .remove', function() {
-                    const index = $(this).data('index');
-                    allergies.splice(index, 1);
-                    updateAllergiesDisplay();
-                });
-            }
+            $(document).on('click', '.allergy-tag .tag-remove', function() {
+                const index = $(this).data('index');
+                allergies.splice(index, 1);
+                updateAllergiesDisplay();
+            });
 
             // Form submission handler
             $('#patientForm').on('submit', function(e) {
-                // Set the textarea values to the joined arrays
-                $('#known_medical_conditions').val(medicalConditions.join(', '));
-                $('#allergies').val(allergies.join(', '));
+                // Already set in update functions
                 return true;
             });
 
-            // Load data immediately when modal opens
+            // Load data when modal opens
             $(document).on('click', '[onclick*="openAddModal"]', function() {
-                // Preload data for faster response
                 loadMedicalConditions();
                 loadAllergies();
             });
 
-            // Age and Date of Birth synchronization (FROM OLD)
+            // Age and Date of Birth synchronization
             function setupAgeDateSync() {
                 const ageInput = document.querySelector('input[name="age"]');
                 const dobInput = document.querySelector('input[name="date_of_birth"]');

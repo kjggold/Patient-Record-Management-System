@@ -324,4 +324,59 @@ class PatientHistoryController extends Controller
         $patient->delete();
         return redirect('patients')->with('success', 'Patient deleted successfully.');
     }
+
+    public function downloadPatientReport($id)
+    {
+        $patient = Patient::with('doctor')->findOrFail($id);
+
+        $appointments = Appointment::with(['doctor', 'service'])
+            ->where('patient_id', $id)
+            ->orderBy('appointment_date', 'desc')
+            ->get();
+
+        $discharges = DB::table('discharges')
+            ->where('patient_name', $patient->full_name)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($discharge) {
+                $serviceName = 'Medical Service';
+
+                if (isset($discharge->service_name) && !empty($discharge->service_name) && $discharge->service_name !== 'Unknown') {
+                    $serviceName = $discharge->service_name;
+                } else if (isset($discharge->services)) {
+                    $services = json_decode($discharge->services, true);
+                    if (is_array($services) && !empty($services)) {
+                        $firstService = $services[0];
+                        $serviceName = is_array($firstService) ? ($firstService['name'] ?? 'Service') : $firstService;
+                    }
+                }
+
+                $discharge->service_name = $serviceName;
+                return $discharge;
+            });
+
+        $totalVisits = $appointments->count() + $discharges->count();
+
+        $data = [
+            'patient' => $patient,
+            'appointments' => $appointments,
+            'discharges' => $discharges,
+            'totalVisits' => $totalVisits,
+            'generatedDate' => now()->format('F j, Y, g:i a')
+        ];
+
+        $html = view('pdfs.patient-history', $data)->render();
+
+        require_once base_path('vendor/dompdf/autoload.inc.php');
+
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="patient-' . $patient->id . '-history.pdf"',
+        ]);
+    }
 }

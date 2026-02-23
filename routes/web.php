@@ -53,6 +53,8 @@ Route::middleware('auth')->group(function () {
     ]);
 });
 
+Route::get('/patient-history/{patient}/download-report', [App\Http\Controllers\PatientHistoryController::class, 'downloadReport'])->name('patient-history.download-report');
+
 Route::post('/appointments', [AppointmentController::class, 'store'])
     ->name('appointments.store');
 
