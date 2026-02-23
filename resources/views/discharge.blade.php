@@ -525,92 +525,101 @@
             renderDischarges();
 
             window.printSingle = function(id) {
-                let tr = document.getElementById(`discharge_${id}`);
-                if (!tr) return;
+    let tr = document.getElementById(`discharge_${id}`);
+    if (!tr) return;
 
-                const cells = tr.cells;
+    const cells = tr.cells;
 
-                // Get service info
-                const serviceBadge = cells[3]?.querySelector('.service-badge');
-                const mainService = serviceBadge?.innerText || 'N/A';
+    // Get service info
+    const serviceBadge = cells[3]?.querySelector('.service-badge');
+    const mainService = serviceBadge?.innerText || 'N/A';
 
-                // Get all services if available
-                const serviceDetail = cells[3]?.querySelector('.service-detail');
-                let allServicesHtml = '';
-                if (serviceDetail) {
-                    allServicesHtml = serviceDetail.cloneNode(true);
-                    allServicesHtml.classList.add('show');
-                    allServicesHtml = allServicesHtml.outerHTML;
-                }
+    // Get all services if available
+    const serviceDetail = cells[3]?.querySelector('.service-detail');
+    let allServicesHtml = '';
+    if (serviceDetail) {
+        allServicesHtml = serviceDetail.cloneNode(true);
+        allServicesHtml.classList.add('show');
+        allServicesHtml = allServicesHtml.outerHTML;
+    }
 
-                let html = `
-                    <h2 style="text-align: center; color: #0d6efd;">Discharge Receipt</h2>
-                    <hr>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr><td style="padding: 8px 0;"><strong>Appointment:</strong></td><td style="text-align: right;">${cells[0]?.innerText || '-'}</td></tr>
-                        <tr><td style="padding: 8px 0;"><strong>Patient:</strong></td><td style="text-align: right;">${cells[1]?.innerText || '-'}</td></tr>
-                        <tr><td style="padding: 8px 0;"><strong>Doctor:</strong></td><td style="text-align: right;">${cells[2]?.innerText || '-'}</td></tr>
-                        <tr><td style="padding: 8px 0;"><strong>Main Service:</strong></td><td style="text-align: right;">${mainService}</td></tr>
-                    </table>
-                    <hr>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr><td style="padding: 8px 0;"><strong>Total Price:</strong></td><td style="text-align: right;">${cells[4]?.innerText || '0'} MMK</td></tr>
-                        <tr><td style="padding: 8px 0;"><strong>Discount:</strong></td><td style="text-align: right;">${cells[5]?.innerText || '0'} MMK</td></tr>
-                        <tr><td style="padding: 8px 0;"><strong>Paid:</strong></td><td style="text-align: right;">${cells[6]?.innerText || '0'} MMK</td></tr>
-                        <tr><td style="padding: 8px 0;"><strong>Balance:</strong></td><td style="text-align: right;">${cells[7]?.innerText || '-'}</td></tr>
-                    </table>
-                    ${allServicesHtml ? `<hr><div style="margin-top: 16px;">${allServicesHtml}</div>` : ''}
-                    <hr>
-                    <p style="text-align: right; color: #64748b; font-size: 11px;">${cells[8]?.innerText || '-'}</p>
-                `;
+    let html = `
+        <html>
+            <head>
+                <title>Receipt #${cells[0]?.innerText}</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        padding: 30px;
+                        max-width: 400px;
+                        margin: 0 auto;
+                        background: white;
+                    }
+                    h2 { text-align: center; color: #0d6efd; margin-bottom: 20px; }
+                    hr {
+                        border: none;
+                        border-top: 1px solid #e2e8f0;
+                        margin: 15px 0;
+                    }
+                    table { width: 100%; }
+                    td { padding: 6px 0; }
+                    .service-detail {
+                        background: #f8fafc;
+                        border-left: 3px solid #0d6efd;
+                        padding: 12px;
+                        border-radius: 8px;
+                        font-size: 12px;
+                    }
+                    .service-detail.show { display: block; }
+                    .money-value { font-weight: 600; }
+                </style>
+            </head>
+            <body>
+                <h2>Discharge Receipt</h2>
+                <hr>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr><td style="padding: 8px 0;"><strong>Appointment:</strong></td><td style="text-align: right;">${cells[0]?.innerText || '-'}</td></tr>
+                    <tr><td style="padding: 8px 0;"><strong>Patient:</strong></td><td style="text-align: right;">${cells[1]?.innerText || '-'}</td></tr>
+                    <tr><td style="padding: 8px 0;"><strong>Doctor:</strong></td><td style="text-align: right;">${cells[2]?.innerText || '-'}</td></tr>
+                    <tr><td style="padding: 8px 0;"><strong>Main Service:</strong></td><td style="text-align: right;">${mainService}</td></tr>
+                </table>
+                <hr>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr><td style="padding: 8px 0;"><strong>Total Price:</strong></td><td style="text-align: right;">${cells[4]?.innerText || '0'} MMK</td></tr>
+                    <tr><td style="padding: 8px 0;"><strong>Discount:</strong></td><td style="text-align: right;">${cells[5]?.innerText || '0'} MMK</td></tr>
+                    <tr><td style="padding: 8px 0;"><strong>Paid:</strong></td><td style="text-align: right;">${cells[6]?.innerText || '0'} MMK</td></tr>
+                    <tr><td style="padding: 8px 0;"><strong>Balance:</strong></td><td style="text-align: right;">${cells[7]?.innerText || '-'}</td></tr>
+                </table>
+                ${allServicesHtml ? `<hr><div style="margin-top: 16px;">${allServicesHtml}</div>` : ''}
+                <hr>
+                <p style="text-align: right; color: #64748b; font-size: 11px;">${cells[8]?.innerText || '-'}</p>
+            </body>
+        </html>
+    `;
 
-                const w = window.open('', '_blank');
-                w.document.write(`
-                    <html>
-                        <head>
-                            <title>Receipt #${cells[0]?.innerText}</title>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    padding: 30px;
-                                    max-width: 400px;
-                                    margin: 0 auto;
-                                    background: white;
-                                }
-                                h2 { margin-bottom: 20px; }
-                                hr {
-                                    border: none;
-                                    border-top: 1px solid #e2e8f0;
-                                    margin: 15px 0;
-                                }
-                                table { width: 100%; }
-                                td { padding: 6px 0; }
-                                .service-detail {
-                                    background: #f8fafc;
-                                    border-left: 3px solid #0d6efd;
-                                    padding: 12px;
-                                    border-radius: 8px;
-                                    font-size: 12px;
-                                }
-                                .service-detail.show { display: block; }
-                                .money-value { font-weight: 600; }
-                                @media print {
-                                    body { padding: 15px; }
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            ${html}
-                            <script>
-                                window.onload = function() {
-                                    setTimeout(function() { window.print(); }, 500);
-                                }
-                            <\/script>
-                        </body>
-                    </html>
-                `);
-                w.document.close();
-            }
+    // Create an iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
+    // Write content to iframe
+    const iframeDoc = iframe.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write(html);
+    iframeDoc.close();
+
+    // Print from iframe and remove it
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+
+    // Remove iframe after printing
+    setTimeout(() => {
+        document.body.removeChild(iframe);
+    }, 1000);
+}
         });
     </script>
 @endsection
