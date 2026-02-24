@@ -7,7 +7,7 @@
     <style>
         /* Stat Cards */
         .stat-card {
-            background: #c0eaff;
+            background: hsl(201, 100%, 88%);
             border-radius: 14px;
             padding: 18px 20px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, .05);

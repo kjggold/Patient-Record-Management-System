@@ -32,20 +32,6 @@
                     <label>Email</label>
                     <input type="email" name="email" placeholder="Enter Email Address">
                 </div>
-
-                <div class="form-group">
-                    <label>Status <span class="required">*</span></label>
-                    <select name="status" required>
-                        <option value="">Select Status</option>
-                        <option value="Active">Active</option>
-                        <option value="On Leave">On Leave</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Maximum Patients Per Day <span class="required">*</span></label>
-                    <input type="number" name="max_patients" placeholder="Enter maximum patients" required>
-                </div>
             </div>
 
             <!-- Footer Buttons -->
@@ -66,14 +52,12 @@
         padding: 25px 30px;
         border-radius: 14px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        margin: 20px;
-        /* Add some margin for smaller screens */
+        margin: 20px; /* Add some margin for smaller screens */
     }
 
     /* Add this to ensure backdrop covers everything */
     #addModal {
-        display: none;
-        /* Use 'none' instead of 'hidden' for better control */
+        display: none; /* Use 'none' instead of 'hidden' for better control */
     }
 
     #addModal.flex {

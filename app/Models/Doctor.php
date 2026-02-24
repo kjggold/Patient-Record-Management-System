@@ -10,45 +10,40 @@ class Doctor extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'full_name',
         'speciality',
-        'experience',
         'phone_number',
         'email',
-        'consultation_fee',
-        'status',
+        'created_by',
+        'updated_by'
     ];
 
-    // Add these relationships
-    public function patients()
+    protected static function boot()
     {
-        return $this->hasMany(Patient::class, 'assigned_doctor');
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (auth()->check()) {
+                $model->created_by = auth()->id();
+            }
+        });
+
+        static::updating(function ($model) {
+            if (auth()->check()) {
+                $model->updated_by = auth()->id();
+            }
+        });
     }
 
-    public function appointments()
+    // Relationship with creator
+    public function creator()
     {
-        return $this->hasMany(Appointment::class, 'doctor_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    // Accessor for formatted name with speciality
-    public function getNameWithSpecialityAttribute()
+    // Relationship with updater
+    public function updater()
     {
-        if ($this->speciality) {
-            return 'Dr. ' . $this->full_name . ' (' . $this->speciality . ')';
-        }
-        return 'Dr. ' . $this->full_name;
-    }
-
-    // Accessor for formatted consultation fee
-    public function getFormattedFeeAttribute()
-    {
-        return '$' . number_format($this->consultation_fee, 2);
-    }
-
-    // Check if doctor is active
-    public function getIsActiveAttribute()
-    {
-        return $this->status === 'active' || $this->status === 'available';
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

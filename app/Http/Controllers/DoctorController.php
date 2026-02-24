@@ -7,31 +7,83 @@ use App\Models\Doctor;
 
 class DoctorController extends Controller
 {
-    // NO CONSTRUCTOR HERE - Remove it if you have one
-
     public function index(Request $request)
     {
-        $query = Doctor::query();
+        // Get search query from request
+        $search = $request->input('search');
 
-        // Search functionality
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where('full_name', 'LIKE', "%{$search}%");
+        // Check if it's an AJAX request for live search
+        if ($request->ajax()) {
+            return $this->searchDoctors($request);
         }
 
-        $doctors = $query->paginate(10)->withQueryString();
-        return view('doctors', compact('doctors'));
+        // Start query
+        $query = Doctor::query()->orderBy('id', 'desc');
+
+        // Apply search filter
+        if (!empty($search)) {
+            $searchTerm = '%' . trim($search) . '%';
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('full_name', 'LIKE', $searchTerm)
+                  ->orWhere('speciality', 'LIKE', $searchTerm)
+                  ->orWhere('phone_number', 'LIKE', $searchTerm)
+                  ->orWhere('email', 'LIKE', $searchTerm);
+            });
+        }
+
+        // Get paginated results
+        $doctors = $query->paginate(10);
+
+        // Append search parameter to pagination links if search exists
+        if (!empty($search)) {
+            $doctors->appends(['search' => $search]);
+        }
+
+        return view('doctors', compact('doctors', 'search'));
+    }
+
+    /**
+     * Search doctors via AJAX for live search
+     */
+    public function searchDoctors(Request $request)
+    {
+        $search = $request->input('search');
+
+        $query = Doctor::query()->orderBy('id', 'desc');
+
+        // Apply search filter
+        if (!empty($search)) {
+            $searchTerm = '%' . trim($search) . '%';
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('full_name', 'LIKE', $searchTerm)
+                  ->orWhere('speciality', 'LIKE', $searchTerm)
+                  ->orWhere('phone_number', 'LIKE', $searchTerm)
+                  ->orWhere('email', 'LIKE', $searchTerm);
+            });
+        }
+
+        $doctors = $query->paginate(10);
+
+        // Return JSON response with the table HTML and updated info
+        return response()->json([
+            'html' => view('doctors.partials.doctor-table', [
+                'doctors' => $doctors,
+                'search' => $search
+            ])->render(),
+            'count' => $doctors->total(),
+            'from' => $doctors->firstItem(),
+            'to' => $doctors->lastItem(),
+            'search_term' => $search
+        ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'full_name' => 'required|string|max:100',
-            'speciality' => 'required|string|max:100',
-            'phone_number' => 'required|string|max:100|unique:doctors,phone_number',
-            'email' => 'required|email|unique:doctors,email|max:100',
-            'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
-            'max_patients' => 'required|integer|min:1|max:100',
+            'full_name' => 'required|string|max:255',
+            'speciality' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:255|unique:doctors,phone_number',
+            'email' => 'required|email|unique:doctors,email|max:255',
         ]);
 
         // Get authenticated user ID
@@ -58,12 +110,10 @@ class DoctorController extends Controller
     {
         // Validation rules
         $validated = $request->validate([
-            'full_name' => 'required|string|max:100',
-            'speciality' => 'required|string|max:100',
-            'phone_number' => 'required|string|max:100|unique:doctors,phone_number,' . $doctor->id,
-            'email' => 'required|email|max:100|unique:doctors,email,' . $doctor->id,
-            'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
-            'max_patients' => 'required|integer|min:1|max:100',
+            'full_name' => 'required|string|max:255',
+            'speciality' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:255|unique:doctors,phone_number,' . $doctor->id,
+            'email' => 'required|email|max:255|unique:doctors,email,' . $doctor->id,
         ]);
 
         // Add updated_by

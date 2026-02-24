@@ -9,15 +9,17 @@
 
         <!-- MAIN CONTENT -->
         <div class="flex-1 p-6 bg-gray-50 ml-60">
-            <h1 class="text-2xl font-bold text-gray-800 mb-4">Services</h1>
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-semibold text-slate-700">Services</h1>
+            </div>
 
-            <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
-                <!-- Search Input - FIXED VERSION -->
+            <div class="flex justify-between items-center mb-6 gap-3">
+                <!-- Search Input -->
                 <div class="relative w-full md:w-auto">
                     <input type="text"
                            id="searchInput"
                            placeholder="Search by name..."
-                           class="w-full md:w-64 border border-blue-300 rounded-lg px-4 py-2 pl-10 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           class="w-full md:w-80 border border-blue-300 rounded-lg px-4 py-2 pl-10 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                            value="{{ request('search') ?? '' }}"
                            autocomplete="off">
 
@@ -26,7 +28,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
 
-                    <!-- Clear button - Right side (always present but hidden when no search) -->
+                    <!-- Clear button - Right side -->
                     <button onclick="clearSearch()"
                             id="clearSearchBtn"
                             class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 {{ request('search') ? '' : 'hidden' }}">
@@ -36,129 +38,17 @@
                     </button>
                 </div>
 
-                <!-- Buttons Group -->
-                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                    <!-- Add Medical Services Button -->
-                    <a href="{{ route('medical-services.index') }}"
-                       class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-stethoscope"></i>
-                        Medical Services
-                    </a>
-
-                    <!-- Add Service Button -->
-                    <button onclick="openAddServiceModal()"
-                        class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-plus"></i>
-                        Add Service
-                    </button>
-                </div>
+                <!-- Add Service Button -->
+                <button onclick="openAddServiceModal()"
+                    class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Service
+                </button>
             </div>
 
             <!-- SERVICE TABLE CONTAINER -->
             <div id="servicesTableContainer">
-                @if (isset($services) && $services->count())
-                    <div class="mb-8 bg-white rounded-xl shadow overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-sky-50 text-slate-600">
-                                    <tr>
-                                        <th class="px-6 py-3">Service Name</th>
-                                        <th class="px-6 py-3">Fee</th>
-                                        <th class="px-6 py-3">Description</th>
-                                        <th class="px-6 py-3">Created At</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y">
-                                    @foreach ($services as $service)
-                                        <tr class="hover:bg-slate-50">
-                                            <td class="px-6 py-4 font-medium text-gray-900">{{ $service->service_name }}</td>
-                                            <td class="px-6 py-4 text-gray-700">{{ number_format($service->service_fee) }} Ks</td>
-                                            <td class="px-6 py-4 text-gray-600">{{ $service->description ?? 'No description' }}</td>
-                                            <td class="px-6 py-4 text-gray-500 text-sm">
-                                                {{ $service->created_at ? $service->created_at->format('Y-m-d H:i') : 'N/A' }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- PAGINATION -->
-                        @if ($services->hasPages())
-                            <div class="px-6 py-4 border-t bg-white">
-                                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                    <!-- Showing info -->
-                                    <div class="text-sm text-gray-600">
-                                        Showing {{ $services->firstItem() }} to {{ $services->lastItem() }} of {{ $services->total() }} results
-
-                                        @if(request('search'))
-                                            <span class="text-blue-600 ml-2">
-                                                (Searching all {{ $services->total() }} matches)
-                                            </span>
-                                        @endif
-                                    </div>
-
-                                    <!-- Pagination Links -->
-                                    <div class="flex items-center gap-1">
-                                        <!-- Previous Page Link -->
-                                        @if ($services->onFirstPage())
-                                            <span class="px-3 py-2 rounded border text-gray-400 cursor-not-allowed">
-                                                <i class="fa-solid fa-chevron-left"></i>
-                                            </span>
-                                        @else
-                                            <a href="{{ $services->previousPageUrl() . (request('search') ? '&search=' . urlencode(request('search')) : '') }}"
-                                               class="px-3 py-2 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300">
-                                                <i class="fa-solid fa-chevron-left"></i>
-                                            </a>
-                                        @endif
-
-                                        <!-- Page Numbers -->
-                                        @foreach ($services->getUrlRange(1, $services->lastPage()) as $page => $url)
-                                            @if ($page == $services->currentPage())
-                                                <span class="px-4 py-2 rounded border bg-sky-600 text-white font-medium border-sky-600">
-                                                    {{ $page }}
-                                                </span>
-                                            @else
-                                                <a href="{{ $url . (request('search') ? '&search=' . urlencode(request('search')) : '') }}"
-                                                   class="px-4 py-2 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300">
-                                                    {{ $page }}
-                                                </a>
-                                            @endif
-                                        @endforeach
-
-                                        <!-- Next Page Link -->
-                                        @if ($services->hasMorePages())
-                                            <a href="{{ $services->nextPageUrl() . (request('search') ? '&search=' . urlencode(request('search')) : '') }}"
-                                               class="px-3 py-2 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300">
-                                                <i class="fa-solid fa-chevron-right"></i>
-                                            </a>
-                                        @else
-                                            <span class="px-3 py-2 rounded border text-gray-400 cursor-not-allowed">
-                                                <i class="fa-solid fa-chevron-right"></i>
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                @else
-                    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 text-center">
-                        <i class="fa-solid fa-list-check text-4xl text-gray-300 mb-4"></i>
-                        <h3 class="text-lg font-medium text-gray-700 mb-2">
-                            @if(request('search'))
-                                No services found for "{{ request('search') }}"
-                            @else
-                                No services found
-                            @endif
-                        </h3>
-                        <p class="text-gray-500 mb-4">Try adding your first service</p>
-                        <button onclick="openAddServiceModal()"
-                            class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
-                            + Add Service
-                        </button>
-                    </div>
-                @endif
+                @include('services.partials.service-table', ['services' => $services, 'search' => request('search')])
             </div>
 
         </div> <!-- End of main content -->
@@ -212,10 +102,10 @@
 
 @push('scripts')
     <script>
-        // Variables
-        let searchTimeout;
+        let searchTimeout = null;
         let currentSearchTerm = "{{ request('search', '') }}";
         let abortController = null;
+        const csrfToken = '{{ csrf_token() }}';
 
         // Update clear button visibility
         function updateClearButtonVisibility(searchTerm) {
@@ -229,7 +119,85 @@
             }
         }
 
-        // Debounce function
+        // Perform search via AJAX
+        function performSearch(page = 1) {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+
+            // Cancel previous request if still pending
+            if (abortController) {
+                abortController.abort();
+            }
+
+            // Create new AbortController for this request
+            abortController = new AbortController();
+
+            // Show loading state
+            const container = document.getElementById('servicesTableContainer');
+            container.innerHTML = '<div class="text-center py-12"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
+
+            // Build URL with search term and page
+            let url = '{{ route("services.index") }}?page=' + page;
+            if (searchTerm.trim() !== '') {
+                url += '&search=' + encodeURIComponent(searchTerm);
+            }
+
+            // Add AJAX flag
+            url += '&ajax=1';
+
+            // Fetch search results
+            fetch(url, {
+                signal: abortController.signal,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.html) {
+                    container.innerHTML = data.html;
+
+                    // Update URL without reloading page
+                    const cleanUrl = window.location.pathname + (searchTerm ? '?search=' + encodeURIComponent(searchTerm) : '');
+                    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+
+                    // Update current search term
+                    currentSearchTerm = searchTerm;
+
+                    // Update clear button visibility
+                    updateClearButtonVisibility(searchTerm);
+
+                    // Re-attach event listeners to pagination links
+                    attachPaginationListeners();
+                }
+            })
+            .catch(error => {
+                if (error.name === 'AbortError') {
+                    console.log('Search request was aborted');
+                    return;
+                }
+                console.error('Error:', error);
+                container.innerHTML = '<div class="text-center py-12 text-red-600">An error occurred while searching. Please try again.</div>';
+            })
+            .finally(() => {
+                abortController = null;
+            });
+        }
+
+        // Attach listeners to pagination links
+        function attachPaginationListeners() {
+            document.querySelectorAll('.pagination a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = new URL(this.href);
+                    const page = url.searchParams.get('page') || 1;
+                    performSearch(page);
+                });
+            });
+        }
+
+        // Debounce function for search input
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -242,93 +210,58 @@
             };
         }
 
-        // Optimized AJAX search function
-        function performAjaxSearch(searchTerm) {
-            // Cancel previous request if still pending
-            if (abortController) {
-                abortController.abort();
+        // Setup search input with debounce
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce(function(e) {
+                    const searchTerm = e.target.value.trim();
+
+                    // If search term hasn't changed, do nothing
+                    if (searchTerm === currentSearchTerm) {
+                        return;
+                    }
+
+                    // Update clear button visibility
+                    updateClearButtonVisibility(searchTerm);
+
+                    // Perform search from page 1
+                    performSearch(1);
+                }, 500));
+
+                // Handle Enter key
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const searchTerm = this.value.trim();
+                        if (searchTerm !== currentSearchTerm) {
+                            performSearch(1);
+                        }
+                    }
+                });
+
+                // Focus search input if it has value
+                if (searchInput.value) {
+                    searchInput.focus();
+                    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+                }
             }
 
-            // Create new AbortController for this request
-            abortController = new AbortController();
+            // Initial clear button visibility
+            updateClearButtonVisibility(currentSearchTerm);
 
-            // Build URL - IMPORTANT: When search is empty, go to page 1
-            const url = new URL("{{ route('services.index') }}", window.location.origin);
+            // Initial pagination listeners
+            attachPaginationListeners();
 
-            // Only add search parameter if there's a search term
-            if (searchTerm) {
-                url.searchParams.set('search', searchTerm);
-            } else {
-                // When search is cleared, explicitly remove search param and go to page 1
-                url.searchParams.delete('search');
-                url.searchParams.delete('page'); // Go to page 1
-            }
-
-            // Add AJAX flag
-            url.searchParams.set('ajax', '1');
-
-            // Make AJAX request
-            fetch(url.toString(), {
-                signal: abortController.signal,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+            // Add escape key listener to close modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeAddServiceModal();
                 }
-            })
-            .then(response => response.text())
-            .then(html => {
-                // Parse the response
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-
-                // Find the table container in the response
-                const newTableContainer = doc.querySelector('#servicesTableContainer');
-
-                if (newTableContainer) {
-                    // Update the table container
-                    document.getElementById('servicesTableContainer').innerHTML = newTableContainer.innerHTML;
-                }
-
-                // Update URL without reloading page (remove ajax parameter)
-                const cleanUrl = url.toString().replace('&ajax=1', '').replace('?ajax=1', '');
-                window.history.replaceState({}, '', cleanUrl);
-
-                // Update current search term
-                currentSearchTerm = searchTerm;
-
-                // Update clear button visibility
-                updateClearButtonVisibility(searchTerm);
-            })
-            .catch(error => {
-                if (error.name === 'AbortError') {
-                    console.log('Search request was aborted');
-                    return;
-                }
-                console.error('Search error:', error);
-                // Fallback to traditional page reload
-                window.location.href = url.toString().replace('&ajax=1', '').replace('?ajax=1', '');
-            })
-            .finally(() => {
-                abortController = null;
             });
-        }
+        });
 
-        // Search as you type
-        document.getElementById('searchInput')?.addEventListener('input', debounce(function(e) {
-            const searchTerm = e.target.value.trim();
-
-            // If search term hasn't changed, do nothing
-            if (searchTerm === currentSearchTerm) {
-                return;
-            }
-
-            // Update clear button visibility
-            updateClearButtonVisibility(searchTerm);
-
-            // Perform search
-            performAjaxSearch(searchTerm);
-        }, 500));
-
-        // Clear search function - go back to original page 1
+        // Clear search function
         function clearSearch() {
             const searchInput = document.getElementById('searchInput');
             searchInput.value = '';
@@ -337,20 +270,11 @@
             // Update clear button
             updateClearButtonVisibility('');
 
-            // Immediately trigger search with empty term to go to page 1
-            performAjaxSearch('');
-        }
-
-        // Handle Enter key in search
-        document.getElementById('searchInput')?.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const searchTerm = this.value.trim();
-                if (searchTerm !== currentSearchTerm) {
-                    performAjaxSearch(searchTerm);
-                }
+            // Perform search with empty term
+            if (currentSearchTerm !== '') {
+                performSearch(1);
             }
-        });
+        }
 
         // Handle browser back/forward buttons
         window.addEventListener('popstate', function() {
@@ -371,7 +295,7 @@
             updateClearButtonVisibility(searchTerm);
 
             // Perform search with current term
-            performAjaxSearch(searchTerm);
+            performSearch(1);
         });
 
         // Modal functions
@@ -379,12 +303,12 @@
             const form = document.getElementById('addServiceForm');
             if (form) form.reset();
             document.getElementById('addServiceModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
+            document.body.style.overflow = 'hidden';
         }
 
         function closeAddServiceModal() {
             document.getElementById('addServiceModal').classList.add('hidden');
-            document.body.style.overflow = ''; // Restore scrolling
+            document.body.style.overflow = '';
         }
 
         // Close modal when clicking on backdrop
@@ -392,25 +316,6 @@
             if (e.target === this) {
                 closeAddServiceModal();
             }
-        });
-
-        // Initial setup
-        document.addEventListener('DOMContentLoaded', function() {
-            updateClearButtonVisibility(currentSearchTerm);
-
-            // Focus search input if it has value
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput && searchInput.value) {
-                searchInput.focus();
-                searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-            }
-
-            // Add escape key listener to close modal
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeAddServiceModal();
-                }
-            });
         });
     </script>
 @endpush
