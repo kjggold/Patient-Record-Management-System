@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>{{ $patient->full_name }} - Patient Medical History Report</title>
@@ -18,10 +19,12 @@
             margin-bottom: 15px;
             text-align: center;
         }
+
         .main-header h1 {
             color: #0284c7;
             margin: 0;
-            font-size: 32px; /* Increased from 24px */
+            font-size: 32px;
+            /* Increased from 24px */
             font-weight: 600;
             line-height: 1.2;
         }
@@ -43,6 +46,7 @@
             padding-bottom: 5px;
             border-bottom: 1px solid #e2e8f0;
         }
+
         .sub-header h2 {
             color: #334155;
             margin: 0;
@@ -60,14 +64,17 @@
             align-items: center;
             gap: 6px;
             font-size: 0;
-            margin-left: auto; /* Pushes to the right */
+            margin-left: auto;
+            /* Pushes to the right */
         }
+
         .total-visits-box .number {
             font-size: 16px;
             font-weight: 700;
             color: #0284c7;
             line-height: 1.5;
         }
+
         .total-visits-box .label {
             font-size: 10px;
             font-weight: 600;
@@ -85,15 +92,19 @@
             border: 1px solid #e2e8f0;
             font-size: 11px;
         }
+
         .info-table tr {
             border-bottom: 1px solid #e2e8f0;
         }
+
         .info-table tr:last-child {
             border-bottom: none;
         }
+
         .info-table td {
             padding: 8px 12px;
         }
+
         .info-table td:first-child {
             width: 30%;
             background: #f8fafc;
@@ -101,6 +112,7 @@
             color: #475569;
             border-right: 1px solid #e2e8f0;
         }
+
         .info-table td:last-child {
             width: 70%;
             color: #0f172a;
@@ -123,11 +135,13 @@
             gap: 15px;
             margin-bottom: 20px;
         }
+
         .medical-box {
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 12px;
         }
+
         .medical-box .label {
             font-weight: 600;
             color: #475569;
@@ -136,6 +150,7 @@
             border-bottom: 1px solid #e2e8f0;
             padding-bottom: 5px;
         }
+
         .medical-box .value {
             color: #0f172a;
             font-size: 11px;
@@ -150,6 +165,7 @@
             margin-bottom: 20px;
             border: 1px solid #e2e8f0;
         }
+
         .appointments-table th {
             background: #f1f5f9;
             color: #334155;
@@ -159,6 +175,7 @@
             border: 1px solid #cbd5e1;
             font-size: 10px;
         }
+
         .appointments-table td {
             padding: 8px 6px;
             border: 1px solid #e2e8f0;
@@ -172,6 +189,7 @@
             margin-bottom: 20px;
             border: 1px solid #e2e8f0;
         }
+
         .discharge-table th {
             background: #f1f5f9;
             color: #334155;
@@ -181,6 +199,7 @@
             border: 1px solid #cbd5e1;
             font-size: 10px;
         }
+
         .discharge-table td {
             padding: 8px 6px;
             border: 1px solid #e2e8f0;
@@ -222,6 +241,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Main header - centered with bigger MediCore -->
     <div class="main-header">
@@ -255,7 +275,8 @@
         </tr>
         <tr>
             <td>Date of Birth:</td>
-            <td>{{ $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('F j, Y') : 'N/A' }}</td>
+            <td>{{ $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('F j, Y') : 'N/A' }}
+            </td>
         </tr>
         <tr>
             <td>Age / Gender:</td>
@@ -275,7 +296,8 @@
         </tr>
         <tr>
             <td>Registration Date:</td>
-            <td>{{ $patient->registration_date ? \Carbon\Carbon::parse($patient->registration_date)->format('F j, Y') : 'N/A' }}</td>
+            <td>{{ $patient->registration_date ? \Carbon\Carbon::parse($patient->registration_date)->format('F j, Y') : 'N/A' }}
+            </td>
         </tr>
         <tr>
             <td>Blood Type:</td>
@@ -285,19 +307,6 @@
             <td>Alcohol Consumption:</td>
             <td>{{ $patient->alcohol_consumption ? ucfirst($patient->alcohol_consumption) : 'None' }}</td>
         </tr>
-        <tr>
-            <td>Assigned Doctor:</td>
-            <td>
-                @if($patient->doctor)
-                    Dr. {{ $patient->doctor->full_name }}
-                    @if($patient->doctor->speciality)
-                        ({{ $patient->doctor->speciality }})
-                    @endif
-                @else
-                    Not Assigned
-                @endif
-            </td>
-        </tr>
     </table>
 
     <!-- Medical History - Side by side -->
@@ -305,7 +314,7 @@
         <div class="medical-box">
             <div class="label">Medical Conditions</div>
             <div class="value">
-                @if($patient->known_medical_conditions && trim($patient->known_medical_conditions) !== '')
+                @if ($patient->known_medical_conditions && trim($patient->known_medical_conditions) !== '')
                     {{ $patient->known_medical_conditions }}
                 @else
                     None
@@ -315,7 +324,7 @@
         <div class="medical-box">
             <div class="label">Allergies</div>
             <div class="value">
-                @if($patient->allergies && trim($patient->allergies) !== '')
+                @if ($patient->allergies && trim($patient->allergies) !== '')
                     {{ $patient->allergies }}
                 @else
                     None
@@ -324,7 +333,7 @@
         </div>
     </div>
 
-    @if($appointments->isNotEmpty())
+    @if ($appointments->isNotEmpty())
         <div class="section-title">Appointment History ({{ $appointments->count() }} records)</div>
         <table class="appointments-table">
             <thead>
@@ -337,7 +346,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($appointments as $index => $appointment)
+                @foreach ($appointments as $index => $appointment)
                     @php
                         $displayStatus = $appointment->status == 'scheduled' ? 'pending' : $appointment->status;
 
@@ -345,23 +354,23 @@
                         $serviceName = 'N/A';
 
                         // Check if service relationship exists and get the name
-                        if($appointment->service) {
+                        if ($appointment->service) {
                             // Try different possible field names in the services table
-                            $serviceName = $appointment->service->service_name ??
-                                          $appointment->service->name ??
-                                          'Service #' . $appointment->service_id;
-                        } elseif($appointment->service_id) {
+                            $serviceName =
+                                $appointment->service->service_name ??
+                                ($appointment->service->name ?? 'Service #' . $appointment->service_id);
+                        } elseif ($appointment->service_id) {
                             // If relationship isn't loaded but we have an ID, show the ID
-                            $serviceName = 'Service ID: ' . $appointment->service_id;
-                        }
+    $serviceName = 'Service ID: ' . $appointment->service_id;
+}
 
-                        // Get doctor name without duplicate "Dr."
-                        $doctorDisplay = 'N/A';
-                        if($appointment->doctor) {
-                            $doctorName = $appointment->doctor->full_name ?? $appointment->doctor->name ?? '';
-                            // Remove any existing "Dr." prefix to avoid duplication
-                            $doctorName = preg_replace('/^Dr\.\s*/i', '', $doctorName);
-                            $doctorDisplay = 'Dr. ' . $doctorName;
+// Get doctor name without duplicate "Dr."
+$doctorDisplay = 'N/A';
+if ($appointment->doctor) {
+    $doctorName = $appointment->doctor->full_name ?? ($appointment->doctor->name ?? '');
+    // Remove any existing "Dr." prefix to avoid duplication
+    $doctorName = preg_replace('/^Dr\.\s*/i', '', $doctorName);
+    $doctorDisplay = 'Dr. ' . $doctorName;
                         }
                     @endphp
                     <tr>
@@ -376,7 +385,7 @@
         </table>
     @endif
 
-    @if($discharges->isNotEmpty())
+    @if ($discharges->isNotEmpty())
         <div class="section-title">Discharge History ({{ $discharges->count() }} records)</div>
         <table class="discharge-table">
             <thead>
@@ -388,21 +397,22 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($discharges as $index => $discharge)
+                @foreach ($discharges as $index => $discharge)
                     @php
                         // Get service name for discharge
                         $serviceName = $discharge->service_name ?? 'Medical Service';
 
                         // Get doctor name without duplicate "Dr."
                         $doctorDisplay = 'N/A';
-                        if(isset($discharge->doctor_name) && !empty($discharge->doctor_name)) {
+                        if (isset($discharge->doctor_name) && !empty($discharge->doctor_name)) {
                             $doctorName = preg_replace('/^Dr\.\s*/i', '', $discharge->doctor_name);
                             $doctorDisplay = 'Dr. ' . $doctorName;
                         }
                     @endphp
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td>{{ \Carbon\Carbon::parse($discharge->created_at ?? $discharge->discharge_date ?? now())->format('M j, Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($discharge->created_at ?? ($discharge->discharge_date ?? now()))->format('M j, Y') }}
+                        </td>
                         <td class="doctor-name">{{ $doctorDisplay }}</td>
                         <td class="service-name">{{ $serviceName }}</td>
                     </tr>
@@ -411,7 +421,7 @@
         </table>
     @endif
 
-    @if($appointments->isEmpty() && $discharges->isEmpty())
+    @if ($appointments->isEmpty() && $discharges->isEmpty())
         <div style="text-align: center; padding: 20px; border: 1px dashed #cbd5e1; border-radius: 8px; color: #94a3b8;">
             No visit history found for this patient.
         </div>
@@ -426,4 +436,5 @@
         <p>© {{ date('Y') }} MediCore. All rights reserved.</p>
     </div>
 </body>
+
 </html>

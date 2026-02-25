@@ -29,7 +29,7 @@ class AppointmentController extends Controller
 
         // Start query for appointments
         $query = Appointment::with(['patient', 'doctor', 'service'])
-            ->orderBy('appointment_date', 'desc');
+            ->orderBy('appointment_date', 'asc');
 
         // Apply search filter
         if (!empty($search)) {
@@ -68,7 +68,7 @@ class AppointmentController extends Controller
         $search = $request->input('search');
 
         $query = Appointment::with(['patient', 'doctor', 'service'])
-            ->orderBy('appointment_date', 'desc');
+            ->orderBy('appointment_date', 'asc');
 
         // Apply search filter
         if (!empty($search)) {
@@ -113,11 +113,14 @@ class AppointmentController extends Controller
             'appointment_date' => 'required|date',
         ]);
 
+                $userId = auth()->id();
         $appointment = Appointment::create([
             'patient_id' => $request->patient_id,
             'doctor_id' => $request->doctor_id,
             'service_id' => $request->service_id,
             'appointment_date' => $request->appointment_date,
+            'created_by' => $userId,
+            'updated_by' => null,
         ]);
 
         // Load relationships
@@ -136,5 +139,42 @@ class AppointmentController extends Controller
                 'appointment_date' => $appointment->appointment_date,
             ]
         ]);
+    }
+
+    public function edit($id)
+    {
+        return view('appointmentsEdit',[
+            'appointment' => Appointment::findOrFail($id),
+            'patients' => Patient::all(),
+            'doctors' => Doctor::all(),
+            'services' => Service::all(),
+        ]);
+    }
+    // Update doctor
+    public function update(Request $request, Appointment $appointment)
+    {
+        // Validation rules
+        $validated = $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => 'required|exists:doctors,id',
+            'service_id' => 'required|exists:services,id',
+            'appointment_date' => 'required|date',
+        ]);
+
+        // Add updated_by
+        $validated['updated_by'] = auth()->id();
+
+        // Update doctor
+        $appointment->update($validated);
+
+        return redirect()->route('appointments.index')
+            ->with('success', 'Appointment updated successfully.');
+    }
+
+    public function destroy(Appointment $appointment)
+    {
+        $appointment->delete();
+
+        return redirect('appointment')->with('success', 'Appointment deleted successfully.');
     }
 }
