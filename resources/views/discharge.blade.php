@@ -136,17 +136,32 @@
                     <tbody id="dischargeBody">
                         @foreach ($discharges as $row)
                             @php
-                                $services = is_array($row->services)
-                                    ? $row->services
-                                    : json_decode($row->services, true);
+                                // Fetch services from relationship if exists
+                                if ($row->appointment && $row->appointment->services) {
+                                    $services = $row->appointment->services
+                                        ->map(function ($s) {
+                                            return [
+                                                'name' => $s->name ?? '-',
+                                                'price' => $s->pivot->price ?? ($s->price ?? 0),
+                                            ];
+                                        })
+                                        ->toArray();
+                                } else {
+                                    $services = is_array($row->services)
+                                        ? $row->services
+                                        : json_decode($row->services, true);
+                                    $services = $services ?? [];
+                                }
 
-                                $services = $services ?? [];
+                                $totalAmount = collect($services)->sum(fn($s) => $s['price'] ?? 0);
+                                $discount = $row->discount ?? 0;
+                                $paid = $row->paid ?? 0;
+                                $balanceAmount = $paid - ($totalAmount - $discount);
 
-                                $balanceAmount = $row->paid - ($row->total - ($row->discount ?? 0));
                                 if ($balanceAmount > 0) {
-                                    $balanceText = ' ' . number_format(abs($balanceAmount), 0) . ' ';
+                                    $balanceText = number_format(abs($balanceAmount), 0);
                                 } elseif ($balanceAmount < 0) {
-                                    $balanceText = 'Due: ' . number_format(abs($balanceAmount), 0) . ' ';
+                                    $balanceText = 'Due: ' . number_format(abs($balanceAmount), 0);
                                 } else {
                                     $balanceText = 'Settled';
                                 }
@@ -159,14 +174,16 @@
                                     <span class="service-preview" onclick="toggleService('srv_{{ $row->id }}')">View
                                         services</span>
                                     <div id="srv_{{ $row->id }}" class="service-box">
-                                        @foreach ($services as $s)
-                                            {{ $s['name'] ?? '-' }} - {{ number_format($s['price'] ?? 0) }}<br>
-                                        @endforeach
+                                        @forelse ($services as $s)
+                                            {{ $s['name'] ?? '-' }} - {{ number_format($s['price'] ?? 0) }} MMK<br>
+                                        @empty
+                                            No services
+                                        @endforelse
                                     </div>
                                 </td>
-                                <td>{{ number_format($row->total, 0) }} </td>
-                                <td>{{ number_format($row->discount, 0) }} </td>
-                                <td>{{ number_format($row->paid, 0) }} </td>
+                                <td>{{ number_format($totalAmount, 0) }} </td>
+                                <td>{{ number_format($discount, 0) }} </td>
+                                <td>{{ number_format($paid, 0) }} </td>
                                 <td>{{ $balanceText }}</td>
                                 <td>{{ $row->created_at }}</td>
                                 <td><button class="action-btn" onclick="printSingle({{ $row->id }})">Print</button>
@@ -270,4 +287,5 @@
             setInterval(fetchDischarges, 5000); // every 5s
         });
     </script>
+
 @endsection

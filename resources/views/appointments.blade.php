@@ -146,42 +146,58 @@
         #dischargeModal .modal-container {
             display: flex;
             max-width: 1000px;
-            width: 100%;
+            width: 95%;
             background: #fff;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0, 0, 0, .2);
+            margin: 20px auto;
+        }
+
+        #dischargeModal .modal-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
         }
 
         #dischargeModal .left-panel {
-            flex: 0 0 30%;
+            flex: 0 0 20%;
             background: #f0f4f8;
-            padding: 20px;
+            padding: 15px;
         }
 
         #dischargeModal .right-panel {
             flex: 1;
-            padding: 20px;
+            padding: 15px;
             overflow: auto;
         }
 
-
         #dischargeModal h3 {
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #0284c7;
+            font-size: 1rem;
+        }
+
+        #dischargeModal p {
+            font-size: 0.85rem;
+            margin-bottom: 6px;
         }
 
         #dischargeModal table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
         }
 
         #dischargeModal th,
         #dischargeModal td {
             border: 1px solid #ddd;
-            padding: 6px;
+            padding: 4px;
         }
 
         #dischargeModal table input {
@@ -189,39 +205,43 @@
             padding: 4px 6px;
             border-radius: 4px;
             border: 1px solid #cfe6ff;
+            font-size: 0.85rem;
         }
 
         #dischargeModal .add-service {
             background: #0d6efd;
             color: #fff;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border: none;
-            padding: 6px;
+            padding: 5px;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 0.85rem;
         }
 
         #dischargeModal .slip {
             background: #fff;
             border: 1px solid #ddd;
-            padding: 10px;
-            margin-top: 15px;
-            font-size: 14px;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 0.85rem;
             max-height: 400px;
             overflow-y: auto;
         }
 
         #dischargeModal .slip h4 {
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: 700;
             color: #0284c7;
+            font-size: 0.9rem;
         }
 
         #dischargeModal .slip .row {
             display: flex;
             justify-content: space-between;
             margin: 2px 0;
+            padding: 3px 0;
         }
 
         #dischargeModal .slip .row.total {
@@ -229,6 +249,33 @@
             border-top: 1px dashed #ccc;
             padding-top: 4px;
             margin-top: 4px;
+        }
+
+        #dischargeModal .add-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        #dischargeModal .add-form-group label {
+            font-size: 0.8rem;
+            margin-bottom: 3px;
+            color: #334155;
+            display: block;
+        }
+
+        #dischargeModal .add-form-group input,
+        #dischargeModal .add-form-group textarea {
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid #cfe6ff;
+            outline: none;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        #dischargeModal .add-form-group textarea {
+            min-height: 50px;
         }
 
         #notification {
@@ -255,61 +302,38 @@
     <div class="app flex min-h-screen">
         @include('layouts.sidebar')
 
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-6 ml-60">
 
-            <div class="flex w-full sm:w-auto gap-2">
+
+            <!-- Update the header section in appointments.blade.php -->
+            <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-semibold text-slate-700">Appointments</h1>
             </div>
 
-            <div class="flex justify-end items-center mb-6 gap-3">
-                <input type="text" id="searchInput" placeholder="Search by ID or Patient Name..."
-                    class="border rounded px-3 py-2 w-64">
+            <div class="flex justify-between items-center mb-6 gap-3">
+                <div class="flex gap-2">
+                    <input type="text" id="searchInput" placeholder="Search by ID, Patient, Doctor or Service..."
+                        class="border rounded px-3 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ request('search') ?? '' }}" autocomplete="off">
+                    <button onclick="performSearch()"
+                        class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
+                        Search
+                    </button>
+                </div>
 
                 <button type="button" onclick="openAddModal()"
                     class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
-                    +Add Appointment
+                    + Add Appointment
                 </button>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 responsive-table">
-                    <thead class="bg-blue-50">
-                        <tr>
-                            <th>ID</th>
-                            <th>Patient</th>
-                            <th>Doctor</th>
-                            <th>Service</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="appointmentsBody">
-                        @foreach ($appointments as $appointment)
-                            <tr id="row-{{ $appointment->id }}">
-                                <td>{{ $appointment->id }}</td>
-                                <td>{{ $appointment->patient->full_name ?? '-' }}</td>
-                                <td>{{ $appointment->doctor->full_name ?? '-' }}</td>
-                                <td>{{ $appointment->service->service_name ?? '-' }}</td>
-                                <td>{{ $appointment->appointment_date }}</td>
-                                <td class="text-center">
-                                    <span class="action-btn edit">Edit</span>
-                                    <span class="action-btn discharge"
-                                        onclick="openDischargeModal(
-                                    '{{ $appointment->id }}',
-                                    '{{ $appointment->patient->full_name ?? '' }}',
-                                    '{{ $appointment->doctor->full_name ?? '' }}',
-                                    '{{ $appointment->service->service_name ?? '' }}',
-                                    '{{ $appointment->appointment_date }}',
-                                    '{{ $appointment->service->service_fee ?? 0 }}',
-                                    '{{ $appointment->doctor->consultation_fee ?? 0 }}'
-                                  )">Discharge</span>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <!-- APPOINTMENT TABLE CONTAINER -->
+            <div id="appointmentTableContainer">
+                @include('appointments.partials.appointment-table', [
+                    'appointments' => $appointments,
+                    'search' => request('search'),
+                ])
             </div>
-
         </main>
     </div>
 
@@ -319,17 +343,16 @@
 
     {{-- ================= ADD MODAL ================= --}}
     <div id="addModal">
-        <div class="add-form-card">
+        <div class="add-form-card ml-60">
             <div class="add-form-title">Appointment Information</div>
 
             <form id="addAppointmentForm" method="POST" action="{{ route('appointments.store') }}">
                 @csrf
 
                 <div class="add-form-grid">
-
                     <div class="add-form-group">
                         <label>Patient Name</label>
-                        <input list="patientList" id="patientNameInput" required>
+                        <input list="patientList" id="patientNameInput" placeholder="Type to search..." required>
                         <datalist id="patientList">
                             @foreach ($patients as $p)
                                 <option value="{{ $p->full_name }}" data-id="{{ $p->id }}"></option>
@@ -339,7 +362,7 @@
 
                     <div class="add-form-group">
                         <label>Doctor</label>
-                        <input list="doctorList" id="doctorNameInput" required>
+                        <input list="doctorList" id="doctorNameInput" placeholder="Type to search..." required>
                         <datalist id="doctorList">
                             @foreach ($doctors as $d)
                                 <option value="{{ $d->full_name }}" data-id="{{ $d->id }}"></option>
@@ -349,7 +372,7 @@
 
                     <div class="add-form-group">
                         <label>Service</label>
-                        <input list="serviceList" id="serviceNameInput" required>
+                        <input list="serviceList" id="serviceNameInput" placeholder="Type to search..." required>
                         <datalist id="serviceList">
                             @foreach ($services as $s)
                                 <option value="{{ $s->service_name }}" data-id="{{ $s->id }}"
@@ -362,7 +385,6 @@
                         <label>Appointment Date</label>
                         <input type="date" name="appointment_date" required>
                     </div>
-
                 </div>
 
                 <div class="add-form-actions">
@@ -373,77 +395,77 @@
         </div>
     </div>
 
-    {{-- ================= DISCHARGE MODAL ================= --}}
+    {{-- ================= COMPACT DISCHARGE MODAL ================= --}}
     <div id="dischargeModal">
-        <div class="modal-container">
+        <div class="modal-wrapper ml-60">
+            <div class="modal-container">
+                <div class="left-panel">
+                    <h3>Patient Info</h3>
+                    <p><strong>Appointment ID:</strong> <span id="dischargeAppointmentIdText"></span></p>
+                    <p><strong>Patient Name:</strong> <span id="dischargePatientName"></span></p>
+                    <p><strong>Doctor Name:</strong> <span id="dischargeDoctorName"></span></p>
+                    <p><strong>Service:</strong> <span id="dischargeServiceName"></span></p>
+                    <p><strong>Date:</strong> <span id="dischargeDate"></span></p>
+                </div>
 
-            <div class="left-panel">
-                <h3>Patient Info</h3>
-                <p><strong>Appointment ID:</strong> <span id="dischargeAppointmentIdText"></span></p>
-                <p><strong>Patient Name:</strong> <span id="dischargePatientName"></span></p>
-                <p><strong>Doctor Name:</strong> <span id="dischargeDoctorName"></span></p>
-                <p><strong>Service:</strong> <span id="dischargeServiceName"></span></p>
-                <p><strong>Date:</strong> <span id="dischargeDate"></span></p>
-            </div>
+                <div class="right-panel">
+                    <h3>Bills</h3>
 
-            <div class="right-panel">
+                    <form id="dischargeForm">
+                        <input type="hidden" id="dischargeAppointmentId">
 
-                <h3>Bills</h3>
+                        <table id="serviceTable">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
 
-                <form id="dischargeForm">
-                    <input type="hidden" id="dischargeAppointmentId">
+                        <button type="button" class="add-service" onclick="addServiceRow()">+ Add Service</button>
 
-                    <table id="serviceTable">
-                        <thead>
-                            <tr>
-                                <th>Service</th>
-                                <th>Price</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                        <div class="add-form-grid">
+                            <div class="add-form-group">
+                                <label>Discount</label>
+                                <input type="number" id="dischargeDiscount" value="0">
+                            </div>
 
-                    <button type="button" class="add-service" onclick="addServiceRow()">+ Add Service</button>
+                            <div class="add-form-group">
+                                <label>Paid</label>
+                                <input type="number" id="dischargePaid" value="0">
+                            </div>
 
-                    <div class="add-form-grid">
-                        <div class="add-form-group">
-                            <label>Discount</label>
-                            <input type="number" id="dischargeDiscount" value="0">
+                            <div class="add-form-group">
+                                <label>Balance / Change</label>
+                                <input type="number" id="dischargeBalance" readonly>
+                            </div>
+
+                            <div class="add-form-group">
+                                <label>Comment</label>
+                                <textarea id="dischargeComment"></textarea>
+                            </div>
                         </div>
 
-                        <div class="add-form-group">
-                            <label>Paid</label>
-                            <input type="number" id="dischargePaid" value="0">
+                        <div class="slip">
+                            <h4>Receipt / Slip</h4>
+                            <div class="row total"><span>Total:</span><span id="slipTotal">0</span></div>
+                            <div class="row"><span>Discount:</span><span id="slipDiscount">0</span></div>
+                            <div class="row total"><span>Payable:</span><span id="slipPayable">0</span></div>
+                            <div class="row"><span>Paid:</span><span id="slipPaid">0</span></div>
+                            <div class="row total"><span>Balance / Change:</span><span id="slipBalance">0</span></div>
                         </div>
 
-                        <div class="add-form-group">
-                            <label>Balance / Change</label>
-                            <input type="number" id="dischargeBalance" readonly>
+                        <div style="margin-top:8px;display:flex;justify-content:flex-end;gap:10px;">
+                            <button type="button" class="btn btn-cancel" onclick="closeDischargeModal()"
+                                style="padding:6px 16px; font-size:0.85rem;">Cancel</button>
+                            <button type="button" class="btn btn-save" onclick="completeDischarge()"
+                                style="padding:6px 16px; font-size:0.85rem;">Complete Discharge</button>
                         </div>
-
-                        <div class="add-form-group">
-                            <label>Comment</label>
-                            <textarea id="dischargeComment"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="slip">
-                        <h4>Receipt / Slip</h4>
-                        <div class="row total"><span>Total:</span><span id="slipTotal">0</span></div>
-                        <div class="row"><span>Discount:</span><span id="slipDiscount">0</span></div>
-                        <div class="row total"><span>Payable:</span><span id="slipPayable">0</span></div>
-                        <div class="row"><span>Paid:</span><span id="slipPaid">0</span></div>
-                        <div class="row total"><span>Balance / Change:</span><span id="slipBalance">0</span></div>
-                    </div>
-
-                    <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:14px;">
-                        <button type="button" class="btn btn-cancel" onclick="closeDischargeModal()">Cancel</button>
-                        <button type="button" class="btn btn-save" onclick="completeDischarge()">Complete
-                            Discharge</button>
-                    </div>
-                </form>
-
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -455,8 +477,13 @@
     </datalist>
 
     <script>
+        let searchTimeout = null;
+        const csrfToken = '{{ csrf_token() }}';
+
+        const addModal = document.getElementById('addModal');
         const dischargeModal = document.getElementById('dischargeModal');
         const serviceTableBody = document.querySelector('#serviceTable tbody');
+        const appointmentsBody = document.getElementById('appointmentsBody');
 
         const dischargeAppointmentId = document.getElementById('dischargeAppointmentId');
         const dischargeAppointmentIdText = document.getElementById('dischargeAppointmentIdText');
@@ -477,7 +504,84 @@
         const slipBalance = document.getElementById('slipBalance');
 
         const notificationMessage = document.getElementById('notificationMessage');
-        const searchInput = document.getElementById('searchInput');
+
+        // Setup search on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function(e) {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        performSearch();
+                    }, 500);
+                });
+
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        performSearch();
+                    }
+                });
+            }
+        });
+
+        // Perform search via AJAX
+        function performSearch(page = 1) {
+            const searchTerm = document.getElementById('searchInput').value;
+
+            // Show loading state
+            const container = document.getElementById('appointmentTableContainer');
+            container.innerHTML =
+                '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
+
+            // Build URL with search term and page
+            let url = '{{ route('appointments.index') }}?page=' + page;
+            if (searchTerm.trim() !== '') {
+                url += '&search=' + encodeURIComponent(searchTerm);
+            }
+
+            // Fetch search results
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.html) {
+                        container.innerHTML = data.html;
+
+                        // Update browser URL without reloading
+                        const newUrl = window.location.pathname + (searchTerm ? '?search=' + encodeURIComponent(
+                            searchTerm) : '');
+                        window.history.pushState({
+                            path: newUrl
+                        }, '', newUrl);
+
+                        // Re-attach event listeners to pagination links
+                        attachPaginationListeners();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    container.innerHTML =
+                        '<div class="text-center py-8 text-red-600">An error occurred while searching. Please try again.</div>';
+                });
+        }
+
+        // Attach listeners to pagination links
+        function attachPaginationListeners() {
+            document.querySelectorAll('.pagination a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = new URL(this.href);
+                    const page = url.searchParams.get('page') || 1;
+                    performSearch(page);
+                });
+            });
+        }
 
         function openAddModal() {
             addModal.classList.add('modal-open');
@@ -488,9 +592,7 @@
         }
 
         /* ================= DISCHARGE ================= */
-
         function openDischargeModal(id, patient, doctor, service, date, servicePrice, consultationFee) {
-
             dischargeModal.style.display = 'flex';
 
             dischargeAppointmentId.value = id;
@@ -518,18 +620,17 @@
         }
 
         function addServiceRow(name = '', price = 0) {
-
             const row = document.createElement('tr');
             row.innerHTML = `
-        <td><input type="text" list="posServiceList" value="${name}"></td>
-        <td><input type="number" value="${price}" min="0"></td>
-        <td>
-            <button type="button"
-                onclick="this.closest('tr').remove();updateTotals();"
-                style="background:red;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
-                Remove
-            </button>
-        </td>`;
+                <td style="padding:4px;"><input type="text" list="posServiceList" value="${name}" style="padding:4px 6px; font-size:0.85rem;"></td>
+                <td style="padding:4px;"><input type="number" value="${price}" min="0" style="padding:4px 6px; font-size:0.85rem;"></td>
+                <td style="padding:4px;">
+                    <button type="button"
+                        onclick="this.closest('tr').remove();updateTotals();"
+                        style="background:red;color:white;border:none;padding:3px 6px;border-radius:4px;cursor:pointer;font-size:0.8rem;">
+                        Remove
+                    </button>
+                </td>`;
 
             serviceTableBody.appendChild(row);
 
@@ -550,7 +651,6 @@
         }
 
         function updateTotals() {
-
             const prices = [...serviceTableBody.querySelectorAll('input[type=number]')]
                 .map(i => parseFloat(i.value) || 0);
 
@@ -572,7 +672,6 @@
         dischargePaid.addEventListener('input', updateTotals);
 
         async function completeDischarge() {
-
             const data = {
                 appointment_id: dischargeAppointmentId.value,
                 services: [...serviceTableBody.querySelectorAll('input[type=text]')].map(i => i.value),
@@ -588,7 +687,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 body: JSON.stringify(data)
             });
@@ -600,6 +699,11 @@
                 const row = document.getElementById('row-' + data.appointment_id);
                 if (row) row.remove();
                 closeDischargeModal();
+
+                // Refresh the current page if we're on it
+                if (window.location.pathname.includes('appointments')) {
+                    performSearch();
+                }
             }
         }
 
@@ -610,18 +714,16 @@
         }
 
         /* ================= ADD APPOINTMENT ================= */
-
         document.getElementById('addAppointmentForm').addEventListener('submit', async function(e) {
-
             e.preventDefault();
 
-            const patientName = patientNameInput.value;
-            const doctorName = doctorNameInput.value;
-            const serviceName = serviceNameInput.value;
+            const patientName = document.getElementById('patientNameInput').value;
+            const doctorName = document.getElementById('doctorNameInput').value;
+            const serviceName = document.getElementById('serviceNameInput').value;
 
-            const p = [...patientList.options].find(o => o.value === patientName);
-            const d = [...doctorList.options].find(o => o.value === doctorName);
-            const s = [...serviceList.options].find(o => o.value === serviceName);
+            const p = [...document.getElementById('patientList').options].find(o => o.value === patientName);
+            const d = [...document.getElementById('doctorList').options].find(o => o.value === doctorName);
+            const s = [...document.getElementById('serviceList').options].find(o => o.value === serviceName);
 
             if (!p || !d || !s) {
                 showNotification('❌ Please select valid Patient, Doctor, and Service.');
@@ -633,7 +735,7 @@
             fd.append('doctor_id', d.dataset.id);
             fd.append('service_id', s.dataset.id);
             fd.append('appointment_date', this.querySelector('[name=appointment_date]').value);
-            fd.append('_token', '{{ csrf_token() }}');
+            fd.append('_token', csrfToken);
 
             const res = await fetch(this.action, {
                 method: 'POST',
@@ -642,84 +744,23 @@
             const result = await res.json();
 
             if (result.success) {
-
-                const a = result.appointment;
-
-                const tr = document.createElement('tr');
-                tr.id = 'row-' + a.id;
-
-                tr.innerHTML = `
-            <td>${a.id}</td>
-            <td>${a.patient_name}</td>
-            <td>${a.doctor_name}</td>
-            <td>${a.service_name}</td>
-            <td>${a.appointment_date}</td>
-            <td class="text-center">
-                <span class="action-btn edit">Edit</span>
-                <span class="action-btn discharge"
-                  onclick="openDischargeModal(
-                    '${a.id}',
-                    '${a.patient_name}',
-                    '${a.doctor_name}',
-                    '${a.service_name}',
-                    '${a.appointment_date}',
-                    ${a.service_fee ?? 0},
-                    ${a.consultation_fee ?? 0}
-                  )">Discharge</span>
-            </td>`;
-
-                appointmentsBody.appendChild(tr);
-
                 this.reset();
                 closeAddModal();
                 showNotification('✅ Appointment added!');
+
+                // Refresh the current page to show new appointment
+                performSearch();
             }
         });
 
-        /* ================= SEARCH ================= */
-
-        searchInput.addEventListener('input', async function() {
-
-            const q = this.value.trim();
-
-            const res = await fetch('/appointments/search?q=' + encodeURIComponent(q), {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            const rows = await res.json();
-
-            const tbody = appointmentsBody;
-            tbody.innerHTML = '';
-
-            rows.forEach(a => {
-
-                const tr = document.createElement('tr');
-                tr.id = 'row-' + a.id;
-
-                tr.innerHTML = `
-            <td>${a.id}</td>
-            <td>${a.patient_name}</td>
-            <td>${a.doctor_name}</td>
-            <td>${a.service_name}</td>
-            <td>${a.appointment_date}</td>
-            <td class="text-center">
-                <span class="action-btn edit">Edit</span>
-                <span class="action-btn discharge"
-                  onclick="openDischargeModal(
-                    '${a.id}',
-                    '${a.patient_name}',
-                    '${a.doctor_name}',
-                    '${a.service_name}',
-                    '${a.appointment_date}',
-                    ${a.service_fee ?? 0},
-                    ${a.consultation_fee ?? 0}
-                  )">Discharge</span>
-            </td>`;
-
-                tbody.appendChild(tr);
-            });
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function() {
+            location.reload();
         });
+
+        function editAppointment(id) {
+            // Implement edit functionality if needed
+            console.log('Edit appointment:', id);
+        }
     </script>
 @endsection

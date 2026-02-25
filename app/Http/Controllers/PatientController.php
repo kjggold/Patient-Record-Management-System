@@ -24,7 +24,7 @@ class PatientController extends Controller
         }
 
         // Paginate the query
-        $patients = $query->paginate(10);
+        $patients = $query->paginate(10)->withQueryString();
 
         // Get doctors for the dropdown (if still needed)
         $doctors = Doctor::all();

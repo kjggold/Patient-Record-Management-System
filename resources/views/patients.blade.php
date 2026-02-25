@@ -13,11 +13,12 @@
 
             <div class="flex justify-end items-center mb-6 gap-3">
                 <!-- Search Input -->
-                <div class="flex gap-2">
-                    <input type="text" id="searchInput" placeholder="Search by id, name, age, phone, doctor..."
+                <!-- Search Input - use a form for server-side search -->
+                <form method="GET" action="{{ route('patients.index') }}" class="flex gap-2" id="searchForm">
+                    <input type="text" name="search" id="searchInput" placeholder="Search by id, name, age, phone..."
                         class="border rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value="{{ request('search') ?? '' }}" autocomplete="off">
-                </div>
+                        value="{{ request('search') }}" autocomplete="off">
+                </form>
 
                 <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
                     + Add Patient
@@ -48,22 +49,21 @@
                                     <button onclick="window.location.href='{{ route('patients.edit', $p->id) }}'"
                                         class="text-amber-600 hover:underline">
                                         Edit
-                                    </button>
+                                        </a>
+                                        <form action="/patients/{{ $p->id }}" method="POST"
+                                            onsubmit="return confirm('Are you sure you want to delete this patient?')">
+                                            @csrf
+                                            @method('DELETE')
 
-                                    <form action="/patients/{{ $p->id }}" method="POST"
-                                        onsubmit="return confirm('Are you sure you want to delete this patient?')"
-                                        style="display:inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="text-red-600 hover:underline">
-                                            Delete
-                                        </button>
-                                    </form>
+                                            <button class="text-red-600 hover:underline">
+                                                Delete
+                                            </button>
+                                        </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-3 text-center text-gray-500">No patients found.</td>
+                                <td colspan="6" class="px-4 py-3 text-center text-gray-500">No patients found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -82,6 +82,7 @@
 
                         <!-- Pagination Links -->
                         <div class="flex items-center gap-1">
+                            <!-- Previous Page Link -->
                             @if ($patients->onFirstPage())
                                 <span class="px-3 py-1.5 rounded border text-gray-400 cursor-not-allowed text-sm">
                                     <i class="fa-solid fa-chevron-left w-3 h-3"></i>
@@ -93,45 +94,62 @@
                                 </a>
                             @endif
 
+                            <!-- Dynamic Page Numbers -->
                             @php
                                 $currentPage = $patients->currentPage();
                                 $lastPage = $patients->lastPage();
                                 $startPage = max(1, $currentPage - 2);
                                 $endPage = min($lastPage, $currentPage + 2);
+
+                                // Always show first page if not in range
                                 if ($startPage > 1) {
                                     $endPage = min($lastPage, $startPage + 4);
                                 }
+
+                                // Always show last page if not in range
                                 if ($endPage < $lastPage) {
                                     $startPage = max(1, $endPage - 4);
                                 }
                             @endphp
 
+                            <!-- First page -->
                             @if ($startPage > 1)
                                 <a href="{{ $patients->url(1) }}"
-                                    class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">1</a>
+                                    class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">
+                                    1
+                                </a>
                                 @if ($startPage > 2)
                                     <span class="px-2 text-gray-400">...</span>
                                 @endif
                             @endif
 
+                            <!-- Page Numbers -->
                             @for ($page = $startPage; $page <= $endPage; $page++)
                                 @if ($page == $currentPage)
                                     <span
-                                        class="px-3 py-1.5 rounded border bg-sky-600 text-white font-medium border-sky-600 text-sm">{{ $page }}</span>
+                                        class="px-3 py-1.5 rounded border bg-sky-600 text-white font-medium border-sky-600 text-sm">
+                                        {{ $page }}
+                                    </span>
                                 @else
                                     <a href="{{ $patients->url($page) }}"
-                                        class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">{{ $page }}</a>
+                                        class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">
+                                        {{ $page }}
+                                    </a>
                                 @endif
                             @endfor
 
+                            <!-- Last page -->
                             @if ($endPage < $lastPage)
                                 @if ($endPage < $lastPage - 1)
                                     <span class="px-2 text-gray-400">...</span>
                                 @endif
                                 <a href="{{ $patients->url($lastPage) }}"
-                                    class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">{{ $lastPage }}</a>
+                                    class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">
+                                    {{ $lastPage }}
+                                </a>
                             @endif
 
+                            <!-- Next Page Link -->
                             @if ($patients->hasMorePages())
                                 <a href="{{ $patients->nextPageUrl() }}"
                                     class="px-3 py-1.5 rounded border text-gray-600 hover:bg-sky-50 hover:border-sky-300 text-sm">
@@ -146,6 +164,20 @@
                     </div>
                 </div>
             @endif
+
+            <!-- VIEW PATIENT MODAL -->
+            <div id="viewModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+                <div class="bg-white rounded-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+                    <h2 class="text-xl font-semibold mb-4 text-slate-700">Patient Details</h2>
+                    <div id="patientDetails" class="grid grid-cols-2 gap-4 text-sm">
+                        <!-- Details will be loaded via AJAX -->
+                    </div>
+                    <div class="text-right mt-6">
+                        <button onclick="closeViewModal()"
+                            class="px-4 py-2 bg-slate-200 rounded hover:bg-slate-300">Close</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ADD PATIENT MODAL -->
             <div id="addModal"
@@ -263,7 +295,7 @@
             </div>
 
             <style>
-                /* === MODAL & FORM CSS (KEEP ALL AS IS) === */
+                /* === MODAL & FORM === */
                 .patient-form-container {
                     background-color: #f6fcff;
                     width: 700px;
@@ -389,11 +421,13 @@
                     transform: translateY(-1px);
                 }
 
+                /* Small text helper */
                 .text-gray-500.text-xs {
                     font-size: 11px;
                     margin-top: 2px;
                 }
 
+                /* Tag styling for conditions and allergies */
                 .tag {
                     background-color: #e0f2fe;
                     color: #0369a1;
@@ -415,9 +449,55 @@
                     color: #dc2626;
                 }
 
+                /* Modal adjustments */
                 #addModal {
                     align-items: flex-start;
                     padding-top: 40px;
+                }
+
+                /* Animation styles */
+                @keyframes slideOut {
+                    from {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+
+                    to {
+                        opacity: 0;
+                        transform: translateX(-20px);
+                    }
+                }
+
+                .slide-out {
+                    animation: slideOut 0.3s ease forwards;
+                }
+
+                /* Notification styles */
+                .transition-all {
+                    transition: all 0.3s ease;
+                }
+
+                .transform {
+                    transform: translateX(100%);
+                }
+
+                .translate-x-0 {
+                    transform: translateX(0);
+                }
+
+                .translate-x-full {
+                    transform: translateX(100%);
+                }
+
+                @media (max-width: 768px) {
+                    .patient-form-container {
+                        width: 95%;
+                        padding: 15px 20px;
+                    }
+
+                    .form-group {
+                        min-width: 100%;
+                    }
                 }
             </style>
         </main>
@@ -509,31 +589,29 @@
 
         /* ---------------- SEARCH FUNCTIONALITY (FROM NEW) ---------------- */
 
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            if (this.value.length > 0) {
+                // Submit the form to trigger server-side search
+                document.getElementById('searchForm').submit();
+            } else if (this.value === '') {
+                // If search is empty, go to the index page without search
+                window.location.href = '{{ route('patients.index') }}';
+            }
+        });
+
+        // Add debounce to avoid too many requests
+        let searchTimeout;
         document.getElementById('searchInput').addEventListener('keyup', function() {
-            const value = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#patientsTable tbody tr');
+            clearTimeout(searchTimeout);
+            const value = this.value;
 
-            rows.forEach(row => {
-                // Get data from each column
-                const id = row.children[0].innerText.toLowerCase();
-                const name = row.children[1].innerText.toLowerCase();
-                const age = row.children[2].innerText.toLowerCase();
-                const phone = row.children[3].innerText.toLowerCase();
-                const doctor = row.children[4].innerText.toLowerCase();
-
-                // Check if any column contains the search value
-                if (
-                    id.includes(value) ||
-                    name.includes(value) ||
-                    age.includes(value) ||
-                    phone.includes(value) ||
-                    doctor.includes(value)
-                ) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
+            searchTimeout = setTimeout(() => {
+                if (value.length > 0) {
+                    document.getElementById('searchForm').submit();
+                } else if (value === '') {
+                    window.location.href = '{{ route('patients.index') }}';
                 }
-            });
+            }, 500); // Wait 500ms after user stops typing
         });
 
         /* ---------------- AGE CALCULATION (FROM OLD) ---------------- */
@@ -1004,7 +1082,7 @@
                     container.find('input[name="known_medical_conditions_hidden"]').remove();
                     container.append(
                         `<input type="hidden" name="known_medical_conditions_hidden" value="${medicalConditions.join('|')}">`
-                    );
+                        );
                 }
 
                 // Add click handlers for remove buttons
@@ -1034,7 +1112,7 @@
                     // Update hidden input for form submission
                     container.find('input[name="allergies_hidden"]').remove();
                     container.append(
-                        `<input type="hidden" name="allergies_hidden" value="${allergies.join('|')}">`);
+                    `<input type="hidden" name="allergies_hidden" value="${allergies.join('|')}">`);
                 }
 
                 // Add click handlers for remove buttons

@@ -26,32 +26,37 @@ class AppointmentController extends Controller
     }
 
     // Store new appointment (AJAX)
-    public function store(Request $request)
-    {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'doctor_id' => 'required|exists:doctors,id',
-            'service_id' => 'required|exists:services,id',
-            'appointment_date' => 'required|date',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'patient_id' => 'required|exists:patients,id',
+        'doctor_id' => 'required|exists:doctors,id',
+        'service_id' => 'required|exists:services,id',
+        'appointment_date' => 'required|date',
+    ]);
 
-        $appointment = Appointment::create([
-            'patient_id' => $request->patient_id,
-            'doctor_id' => $request->doctor_id,
-            'service_id' => $request->service_id,
-            'appointment_date' => $request->appointment_date,
-        ]);
+    $appointment = Appointment::create([
+        'patient_id' => $request->patient_id,
+        'doctor_id' => $request->doctor_id,
+        'service_id' => $request->service_id,
+        'appointment_date' => $request->appointment_date,
+    ]);
 
-        // Return JSON for live table update
-        return response()->json([
-            'success' => true,
-            'appointment' => [
-                'id' => $appointment->id,
-                'patient_name' => $appointment->patient->full_name ?? '-',
-                'doctor_name' => $appointment->doctor->full_name ?? '-',
-                'service_name' => $appointment->service->service_name ?? '-',
-                'appointment_date' => $appointment->appointment_date,
-            ]
-        ]);
-    }
+    // Make sure to include service_fee and consultation_fee
+    $serviceFee = $appointment->service->service_fee ?? 0;
+    $consultationFee = $appointment->doctor->consultation_fee ?? 0;
+
+    return response()->json([
+        'success' => true,
+        'appointment' => [
+            'id' => $appointment->id,
+            'patient_name' => $appointment->patient->full_name ?? '-',
+            'doctor_name' => $appointment->doctor->full_name ?? '-',
+            'service_name' => $appointment->service->service_name ?? '-',
+            'service_fee' => $serviceFee,
+            'consultation_fee' => $consultationFee,
+            'appointment_date' => $appointment->appointment_date,
+        ]
+    ]);
+}
 }

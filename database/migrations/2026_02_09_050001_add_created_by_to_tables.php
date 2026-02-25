@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
+
 return new class extends Migration
 {
     public function up(): void
@@ -11,7 +11,7 @@ return new class extends Migration
         // Add to doctors table
         Schema::table('doctors', function (Blueprint $table) {
             if (!Schema::hasColumn('doctors', 'created_by')) {
-                $table->foreignId('created_by')->nullable()->after('status')->constrained('users')->onDelete('set null');
+                $table->foreignId('created_by')->nullable()->after('email')->constrained('users')->onDelete('set null');
                 $table->foreignId('updated_by')->nullable()->after('created_by')->constrained('users')->onDelete('set null');
             }
         });

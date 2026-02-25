@@ -1,5 +1,5 @@
 <div id="appointmentModal" class="hidden">
-    <div class="add-form-card">
+    <div class="add-form-card ml-60">
         <div class="add-form-title">Appointment Information</div>
 
         <form method="POST" action="{{ route('appointments.store') }}">

@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB; // ← this is required
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -17,8 +17,6 @@ return new class extends Migration
             $table->string('speciality');
             $table->string('phone_number')->unique();
             $table->string('email')->unique();
-            $table->string('status')->default('Active');
-            $table->integer('max_patients');
             $table->timestamps();
         });
 

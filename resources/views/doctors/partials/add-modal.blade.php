@@ -1,5 +1,6 @@
 <!-- ADD DOCTOR MODAL - Compact and screen-fitting -->
-<div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+<div id="addModal" class="fixed inset-0 bg-black/40 hidden flex items-center justify-center z-50">
+
     <div class="min-h-screen flex items-center justify-center p-4">
         <div class="doctor-card">
             <!-- Header with close icon -->
@@ -15,7 +16,6 @@
             <!-- Form Content -->
             <form method="POST" action="{{ route('doctors.store') }}" id="dbDoctorForm">
                 @csrf
-
                 <!-- Form Grid - 2 columns -->
                 <div class="form-grid">
                     <!-- Column 1 -->
@@ -30,11 +30,6 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Experience (Years)</label>
-                        <input type="number" name="experience" placeholder="Enter Years of Experience" min="0">
-                    </div>
-
-                    <div class="form-group">
                         <label>Phone <span class="required">*</span></label>
                         <input type="tel" name="phone_number" placeholder="Enter Phone Number" required>
                     </div>
@@ -43,21 +38,6 @@
                     <div class="form-group">
                         <label>Email</label>
                         <input type="email" name="email" placeholder="Enter Email Address">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Consultation Fee</label>
-                        <input type="number" name="consultation_fee" placeholder="Enter Consultation Fee"
-                            min="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Status <span class="required">*</span></label>
-                        <select name="status" required>
-                            <option value="">Select Status</option>
-                            <option value="Active">Active</option>
-                            <option value="On Leave">On Leave</option>
-                        </select>
                     </div>
                 </div>
 

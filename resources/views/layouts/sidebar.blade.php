@@ -50,14 +50,6 @@
             <a href="#"><i class="fa-solid fa-stethoscope"></i> Services</a>
         @endif
 
-        @if (Route::has('patient-history.index'))
-            <a href="{{ route('patient-history.index') }}"
-                class="{{ request()->routeIs('patient-history.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-history"></i> Patient History
-            </a>
-        @else
-            <a href="#"><i class="fa-solid fa-history"></i> Patient History</a>
-        @endif
 
         <!-- Logout -->
         <form method="POST" action="{{ route('logout') }}" class="logout-form">

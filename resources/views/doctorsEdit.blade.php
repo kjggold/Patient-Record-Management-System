@@ -19,7 +19,7 @@
             <div class="doctor-card mx-auto">
                 <!-- Header -->
                 <div class="header-section">
-                    <h2>Doctor Information</h2>
+                    <h2>Edit Doctor Information</h2>
                 </div>
 
                 <!-- Form Content -->
@@ -69,30 +69,6 @@
                             <input type="email" name="email" placeholder="Enter Email Address"
                                 value="{{ old('email', $doctor->email) }}" required>
                             @error('email')
-                                <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label>Status <span class="required">*</span></label>
-                            <select name="status" required>
-                                <option value="" {{ !old('status', $doctor->status) ? 'selected' : '' }}>Select
-                                    Status</option>
-                                <option value="Active" {{ old('status', $doctor->status) == 'Active' ? 'selected' : '' }}>
-                                    Active</option>
-                                <option value="On Leave"
-                                    {{ old('status', $doctor->status) == 'On Leave' ? 'selected' : '' }}>On Leave</option>
-                            </select>
-                            @error('status')
-                                <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label>Maximum Patients Per Day<span class="required">*</span></label>
-                            <input type="number" name="max_patients" placeholder="Enter maximum" min="0"
-                                value="{{ old('max_patients', $doctor->max_patients) }}" required>
-                            @error('max_patients')
                                 <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
                             @enderror
                         </div>

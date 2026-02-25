@@ -103,31 +103,19 @@
                 <div class="bg-white rounded-xl shadow p-5">
                     <h4 class="text-gray-500">Total Patients</h4>
                     <h2 class="text-2xl font-bold mt-2">{{ $totalPatients ?? 1234 }}</h2>
-                    <span class="text-green-500 flex items-center gap-1 mt-1">
-                        <i class="fa-solid fa-arrow-up"></i> 12% from last month
-                    </span>
                 </div>
                 <div class="bg-white rounded-xl shadow p-5">
-                    <h4 class="text-gray-500">Active Doctors</h4>
+                    <h4 class="text-gray-500">Total Doctors</h4>
                     <h2 class="text-2xl font-bold mt-2">{{ $activeDoctors ?? 45 }}</h2>
-                    <span class="text-green-500 flex items-center gap-1 mt-1">
-                        <i class="fa-solid fa-arrow-up"></i> 3% from last month
-                    </span>
                 </div>
                 <div class="bg-white rounded-xl shadow p-5">
-                    <h4 class="text-gray-500">Appointments Today</h4>
+                    <h4 class="text-gray-500">Total Appointments</h4>
                     <h2 class="text-2xl font-bold mt-2">{{ $appointmentsToday ?? 28 }}</h2>
-                    <span class="text-green-500 flex items-center gap-1 mt-1">
-                        <i class="fa-solid fa-arrow-up"></i> 8% from last month
-                    </span>
                 </div>
                 <div class="bg-white rounded-xl shadow p-5">
-                    <h4 class="text-gray-500">Revenue (This Month)</h4>
-                    <h2 class="text-2xl font-bold mt-2">
-                        {{ number_format($monthlyRevenue ?? 0) }} MMK
-                    </h2>
+                    <h4 class="text-gray-500">Revenue (Month)</h4>
+                    <h2 class="text-2xl font-bold mt-2">${{ $monthlyRevenue ?? 52450 }}</h2>
                 </div>
-
             </section>
 
             <!-- CHARTS -->

@@ -7,25 +7,22 @@
         use App\Models\Patient;
         use App\Models\Appointment;
         use Illuminate\Support\Facades\DB;
-        use Carbon\Carbon;
-        use Illuminate\Support\Str;
 
-        $dateType = request('date_type', 'all');
-        $selectedDate = request('selected_date', now()->format('Y-m-d'));
-
-        if ($dateType === 'all') {
+        // Calculate statistics based on selected date
+        if ($dateType == 'all') {
             $totalPatients = Patient::count();
         } else {
+            // Count distinct patients who have appointments on the selected date
             $totalPatients = Appointment::where(function ($query) use ($dateType, $selectedDate) {
-                if ($dateType === 'today') {
+                if ($dateType == 'today') {
                     $query->whereDate('appointment_date', today());
-                } elseif ($dateType === 'yesterday') {
+                } elseif ($dateType == 'yesterday') {
                     $query->whereDate('appointment_date', today()->subDay());
-                } elseif ($dateType === 'week') {
+                } elseif ($dateType == 'week') {
                     $query->whereBetween('appointment_date', [now()->startOfWeek(), now()->endOfWeek()]);
-                } elseif ($dateType === 'month') {
+                } elseif ($dateType == 'month') {
                     $query->whereMonth('appointment_date', now()->month);
-                } elseif ($dateType === 'custom') {
+                } elseif ($dateType == 'custom') {
                     $query->whereDate('appointment_date', $selectedDate);
                 }
             })
@@ -33,22 +30,23 @@
                 ->count('patient_id');
         }
 
+        // Date display text
         $dateDisplay = '';
-        if ($dateType === 'today') {
+        if ($dateType == 'today') {
             $dateDisplay = 'Today (' . today()->format('M j, Y') . ')';
-        } elseif ($dateType === 'yesterday') {
+        } elseif ($dateType == 'yesterday') {
             $dateDisplay = 'Yesterday (' . today()->subDay()->format('M j, Y') . ')';
-        } elseif ($dateType === 'week') {
+        } elseif ($dateType == 'week') {
             $dateDisplay =
                 'This Week (' .
                 now()->startOfWeek()->format('M j') .
                 ' - ' .
                 now()->endOfWeek()->format('M j, Y') .
                 ')';
-        } elseif ($dateType === 'month') {
+        } elseif ($dateType == 'month') {
             $dateDisplay = 'This Month (' . now()->format('F Y') . ')';
-        } elseif ($dateType === 'custom') {
-            $dateDisplay = Carbon::parse($selectedDate)->format('F j, Y');
+        } elseif ($dateType == 'custom') {
+            $dateDisplay = \Carbon\Carbon::parse($selectedDate)->format('F j, Y');
         } else {
             $dateDisplay = 'All Time';
         }
@@ -60,16 +58,16 @@
 
         {{-- Main Content --}}
         <div class="flex-1 p-6 bg-gray-50 ml-60">
-            {{-- Header --}}
+            {{-- Header with Search on left --}}
             <div class="mb-6">
                 <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Patient History</h1>
+                        <h1 class="text-3xl font-semibold text-slate-700 mb-4">Patient Lists</h1>
                     </div>
 
-                    {{-- Buttons & Filter --}}
+                    {{-- Three Buttons Group - Now on the right side --}}
                     <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3">
-                        {{-- Total Patients --}}
+                        {{-- Total Patients Card --}}
                         <div
                             class="bg-gradient-to-r from-sky-500/20 to-sky-600/20 backdrop-blur-sm rounded-lg shadow border border-sky-200/50 px-3 py-2 min-w-[160px] relative z-10">
                             <div class="flex flex-col">
@@ -83,10 +81,14 @@
                                     </p>
                                 </div>
 
+                                {{-- Date display --}}
                                 <div class="mt-1 pt-2 border-t border-sky-200/50">
-                                    <p class="text-xs text-sky-600 truncate">{{ $dateDisplay }}</p>
+                                    <p class="text-xs text-sky-600 truncate">
+                                        {{ $dateDisplay }}
+                                    </p>
                                 </div>
 
+                                {{-- Clear Filter Button inside the Total Patients card --}}
                                 @if (request()->anyFilled(['search', 'selected_date']) || $dateType != 'all')
                                     <div class="mt-2 pt-2 border-t border-sky-200/50">
                                         <a href="{{ route('patient-history.index') }}"
@@ -103,8 +105,9 @@
                             </div>
                         </div>
 
-                        {{-- Date Filter --}}
+                        {{-- All Time Dropdown and Calendar - Stacked vertically --}}
                         <div class="flex flex-col gap-1.5">
+                            {{-- All Time Button with Dropdown --}}
                             <div class="relative w-40" x-data="{ open: false }" @click.away="open = false">
                                 <button @click="open = !open" type="button"
                                     class="w-full px-3 py-1.5 text-sm bg-gradient-to-r from-sky-500/20 to-sky-600/20 backdrop-blur-sm border border-sky-200/50 rounded-lg transition flex items-center justify-between {{ $dateType == 'all' ? 'text-sky-800 font-medium' : 'text-sky-700 hover:from-sky-500/30 hover:to-sky-600/30' }}">
@@ -116,6 +119,7 @@
                                     </svg>
                                 </button>
 
+                                {{-- Dropdown Menu --}}
                                 <div x-show="open" x-transition:enter="transition ease-out duration-100"
                                     x-transition:enter-start="transform opacity-0 scale-95"
                                     x-transition:enter-end="transform opacity-100 scale-100"
@@ -125,23 +129,51 @@
                                     class="absolute z-50 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 py-1">
                                     <form method="GET" action="{{ route('patient-history.index') }}" class="space-y-1">
                                         <input type="hidden" name="search" value="{{ request('search') }}">
-                                        @foreach (['today', 'yesterday', 'week', 'month', 'all'] as $dt)
-                                            <button type="submit" name="date_type" value="{{ $dt }}"
-                                                class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center justify-between {{ $dateType == $dt ? 'text-sky-600 bg-sky-50' : 'text-gray-700' }}">
-                                                <span>{{ ucfirst($dt == 'week' ? 'This Week' : ($dt == 'all' ? 'All Time' : $dt)) }}</span>
-                                                @if ($dt !== 'all')
-                                                    <span
-                                                        class="text-xs text-gray-500">{{ (($dt == 'today' ? today()->format('M j') : $dt == 'yesterday') ? today()->subDay()->format('M j') : $dt == 'week') ? now()->startOfWeek()->format('M j') . '-' . now()->endOfWeek()->format('j') : now()->format('M Y') }}</span>
-                                                @endif
-                                            </button>
-                                        @endforeach
+
+                                        {{-- Today --}}
+                                        <button type="submit" name="date_type" value="today"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center justify-between {{ $dateType == 'today' ? 'text-sky-600 bg-sky-50' : 'text-gray-700' }}">
+                                            <span>Today</span>
+                                            <span class="text-xs text-gray-500">{{ today()->format('M j') }}</span>
+                                        </button>
+
+                                        {{-- Yesterday --}}
+                                        <button type="submit" name="date_type" value="yesterday"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center justify-between {{ $dateType == 'yesterday' ? 'text-sky-600 bg-sky-50' : 'text-gray-700' }}">
+                                            <span>Yesterday</span>
+                                            <span
+                                                class="text-xs text-gray-500">{{ today()->subDay()->format('M j') }}</span>
+                                        </button>
+
+                                        {{-- Last Week --}}
+                                        <button type="submit" name="date_type" value="week"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center justify-between {{ $dateType == 'week' ? 'text-sky-600 bg-sky-50' : 'text-gray-700' }}">
+                                            <span>This Week</span>
+                                            <span
+                                                class="text-xs text-gray-500">{{ now()->startOfWeek()->format('M j') }}-{{ now()->endOfWeek()->format('j') }}</span>
+                                        </button>
+
+                                        {{-- Last Month --}}
+                                        <button type="submit" name="date_type" value="month"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center justify-between {{ $dateType == 'month' ? 'text-sky-600 bg-sky-50' : 'text-gray-700' }}">
+                                            <span>This Month</span>
+                                            <span class="text-xs text-gray-500">{{ now()->format('M Y') }}</span>
+                                        </button>
+
+                                        {{-- All Time --}}
+                                        <button type="submit" name="date_type" value="all"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-t border-gray-100 {{ $dateType == 'all' ? 'text-sky-600 bg-sky-50' : 'text-gray-700' }}">
+                                            All Time
+                                        </button>
                                     </form>
                                 </div>
                             </div>
 
+                            {{-- Calendar Date Filter --}}
                             <form method="GET" action="{{ route('patient-history.index') }}" class="w-40">
                                 <div class="relative">
-                                    <input type="date" name="selected_date" value="{{ $selectedDate }}"
+                                    <input type="date" name="selected_date"
+                                        value="{{ request('selected_date', date('Y-m-d')) }}"
                                         class="w-full px-3 py-1.5 text-sm border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
                                         onchange="this.form.submit()">
                                     <input type="hidden" name="search" value="{{ request('search') }}">
@@ -153,198 +185,338 @@
                 </div>
             </div>
 
-            {{-- Search Bar --}}
-            <div class="flex justify-between items-center mb-6 gap-3">
-                <form method="GET" action="{{ route('patient-history.index') }}" class="flex items-center gap-2"
-                    id="searchForm">
-                    <input type="text" name="search" placeholder="Search by name, phone, ID, doctor..."
-                        class="border border-sky-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                        value="{{ request('search') ?? '' }}">
-                    <input type="hidden" name="date_type" value="{{ $dateType }}">
-                    <input type="hidden" name="selected_date" value="{{ $selectedDate }}">
-                    <button type="submit" class="px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700">Search</button>
-                </form>
-            </div>
+            {{-- Search and Add Section - Aligned to the right with live search --}}
+            <div class="mb-5">
+                <div class="flex justify-start">
+                    <div class="flex items-center gap-3">
+                        {{-- Live Search Input (No form submission) --}}
+                        <div class="flex items-center gap-2">
+                            <div class="relative">
+                                <input type="text" id="liveSearchInput" placeholder="ID or Name..."
+                                    class="border border-sky-300 rounded-lg px-3 py-2 w-52 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent pr-7 text-sm"
+                                    value="{{ request('search') ?? '' }}" autocomplete="off" autofocus>
 
-            {{-- Patient Cards --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6"
-                id="patientCardsContainer">
-                @forelse($patients as $patient)
-                    @php
-                        $appointmentsQuery = Appointment::where('patient_id', $patient->id);
-                        if ($dateType != 'all') {
-                            $appointmentsQuery->where(function ($q) use ($dateType, $selectedDate) {
-                                if ($dateType == 'today') {
-                                    $q->whereDate('appointment_date', today());
-                                } elseif ($dateType == 'yesterday') {
-                                    $q->whereDate('appointment_date', today()->subDay());
-                                } elseif ($dateType == 'week') {
-                                    $q->whereBetween('appointment_date', [now()->startOfWeek(), now()->endOfWeek()]);
-                                } elseif ($dateType == 'month') {
-                                    $q->whereMonth('appointment_date', now()->month);
-                                } elseif ($dateType == 'custom') {
-                                    $q->whereDate('appointment_date', $selectedDate);
-                                }
-                            });
-                        }
-                        $appointmentsCount = $appointmentsQuery->count();
-                        $lastAppointment = $appointmentsQuery->latest('appointment_date')->first();
-                    @endphp
-
-                    @if ($dateType == 'all' || $appointmentsCount > 0)
-                        <div class="patient-card bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
-                            data-id="{{ $patient->id }}" data-name="{{ strtolower($patient->full_name) }}"
-                            data-phone="{{ strtolower($patient->phone_number ?? '') }}"
-                            data-doctor="{{ strtolower($patient->doctor->full_name ?? '') }}"
-                            data-address="{{ strtolower($patient->address ?? '') }}"
-                            data-blood="{{ strtolower($patient->blood_type ?? '') }}"
-                            data-age="{{ $patient->age ?? '' }}">
-                            {{-- Patient Card Content --}}
-                            <div class="patient-card bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
-                                data-id="{{ $patient->id }}" data-name="{{ strtolower($patient->full_name) }}"
-                                data-phone="{{ strtolower($patient->phone_number ?? '') }}"
-                                data-doctor="{{ strtolower($patient->doctor->full_name ?? '') }}"
-                                data-address="{{ strtolower($patient->address ?? '') }}"
-                                data-blood="{{ strtolower($patient->blood_type ?? '') }}"
-                                data-age="{{ $patient->age ?? '' }}">
-
-                                {{-- Patient Card Header --}}
-                                <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                                    <h2 class="text-lg font-semibold text-gray-800">{{ $patient->full_name }}</h2>
-                                    <span class="text-sm text-gray-500">{{ $appointmentsCount }}
-                                        {{ Str::plural('Appointment', $appointmentsCount) }}</span>
-                                </div>
-
-                                {{-- Patient Details --}}
-                                <div class="px-4 py-3 flex-1 flex flex-col justify-between gap-2">
-                                    <p class="text-sm text-gray-600"><strong>Phone:</strong>
-                                        {{ $patient->phone_number ?? '-' }}</p>
-                                    <p class="text-sm text-gray-600"><strong>Doctor:</strong>
-                                        {{ $patient->doctor->full_name ?? '-' }}</p>
-                                    <p class="text-sm text-gray-600"><strong>Blood Type:</strong>
-                                        {{ $patient->blood_type ?? '-' }}</p>
-                                    <p class="text-sm text-gray-600"><strong>Age:</strong> {{ $patient->age ?? '-' }}</p>
-                                    @if ($lastAppointment)
-                                        <p class="text-sm text-gray-500"><strong>Last Appointment:</strong>
-                                            {{ \Carbon\Carbon::parse($lastAppointment->appointment_date)->format('M j, Y') }}
-                                    @endif
-                                </div>
-
-                                {{-- Optional Actions --}}
-                                <div class="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
-                                    <a href="{{ route('patient-history.show', $patient->id) }}"
-                                        class="px-3 py-1 text-sm text-white bg-sky-600 rounded hover:bg-sky-700">View
-                                        Details</a>
-                                </div>
+                                {{-- Clear search button (appears when search has value) --}}
+                                <button type="button" id="clearSearchBtn" onclick="clearLiveSearch()"
+                                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 {{ !request('search') ? 'hidden' : '' }}">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
                             </div>
 
-                        </div>
-                    @endif
-                @empty
-                    <div
-                        class="col-span-1 sm:col-span-2 lg:grid-cols-3 xl:col-span-4 bg-white rounded-xl shadow-lg border border-gray-200 p-8 text-center">
-                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                            </path>
-                        </svg>
-                        <h3 class="text-lg font-medium text-gray-700 mb-2">
-                            @if ($dateType == 'all')
-                                No patients found
-                            @else
-                                No appointments found for {{ $dateDisplay }}
-                            @endif
-                        </h3>
-                        <p class="text-gray-500 mb-4">
-                            @if ($dateType == 'all')
-                                No patients are registered in the system.
-                            @else
-                                No patients have appointments scheduled for this date.
-                            @endif
-                        </p>
-                        @if ($dateType != 'all')
-                            <a href="{{ route('patient-history.index') }}"
-                                class="inline-block px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition shadow-sm mr-2">Show
-                                All Patients</a>
-                        @endif
-                        <a href="{{ route('patient-history.index', ['date_type' => 'all']) }}"
-                            class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded-lg hover:bg-sky-50 transition">Clear
-                            Date Filter</a>
-                    </div>
-                @endforelse
-            </div>
+                            {{-- Hidden inputs to preserve filter state --}}
+                            <input type="hidden" id="dateTypeInput" value="{{ request('date_type', 'all') }}">
+                            <input type="hidden" id="selectedDateInput" value="{{ request('selected_date') }}">
 
-            {{-- Pagination --}}
-            @if ($patients->hasPages() || $patients->total() > 0)
-                @php
-                    $current = $patients->currentPage();
-                    $last = $patients->lastPage();
-                    $range = 2;
-                @endphp
-                <div class="mt-6">
-                    <div
-                        class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row items-center justify-between">
-                        <p class="text-sm text-gray-700 mb-4 md:mb-0">
-                            Showing <span class="font-medium">{{ ($patients->currentPage() - 1) * 12 + 1 }}</span> to
-                            <span class="font-medium">{{ min($patients->currentPage() * 12, $patients->total()) }}</span>
-                            of
-                            <span class="font-medium">{{ $patients->total() }}</span> patients (12 per page)
-                        </p>
-                        @if ($patients->hasPages())
-                            <nav class="flex items-center space-x-1">
-                                <a href="{{ $patients->previousPageUrl() }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 {{ $patients->onFirstPage() ? 'opacity-50 cursor-not-allowed' : '' }}">
-                                    <span class="sr-only">Previous</span>
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                </a>
-                                @for ($page = 1; $page <= $last; $page++)
-                                    @if ($page == 1 || $page == $last || ($page >= $current - $range && $page <= $current + $range))
-                                        <a href="{{ $patients->url($page) }}"
-                                            class="px-3 py-2 text-sm font-medium border border-gray-300 {{ $page == $current ? 'bg-sky-50 text-sky-600 border-sky-300' : 'bg-white text-gray-500 hover:bg-gray-100' }}">{{ $page }}</a>
-                                    @elseif($page == $current - ($range + 1) || $page == $current + ($range + 1))
-                                        <span class="px-3 py-2 text-sm font-medium text-gray-500">...</span>
-                                    @endif
-                                @endfor
-                                <a href="{{ $patients->nextPageUrl() }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 {{ !$patients->hasMorePages() ? 'opacity-50 cursor-not-allowed' : '' }}">
-                                    <span class="sr-only">Next</span>
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                </a>
-                            </nav>
-                        @endif
+                            {{-- Loading indicator --}}
+                            <div id="searchLoading" class="hidden">
+                                <svg class="animate-spin h-4 w-4 text-sky-500" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                        stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                            </div>
+
+                            <button type="button" onclick="openPatientModal()"
+                                class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition shadow-sm text-sm font-medium whitespace-nowrap">
+                                + Add Patient
+                            </button>
+                        </div>
                     </div>
                 </div>
-            @endif
+            </div>
+
+            {{-- Search Results Summary - This will be updated via AJAX --}}
+            <div id="searchResultsSummary" class="mb-4">
+                @if (request('search'))
+                    <div class="bg-sky-50 border border-sky-200 rounded-lg p-3 flex items-center justify-between">
+                        <div class="flex items-center text-sm text-sky-800">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <span>Search results for "<strong>{{ request('search') }}</strong>"</span>
+                            <span class="ml-2 px-2 py-0.5 bg-sky-200 text-sky-800 rounded-full text-xs">
+                                <span id="patientCount">{{ $patients->total() }}</span>
+                                {{ Str::plural('patient', $patients->total()) }} found
+                            </span>
+                        </div>
+                        <a href="{{ route('patient-history.index', array_merge(request()->except(['search', 'page']))) }}"
+                            class="text-sm text-sky-600 hover:text-sky-800 hover:underline flex items-center">
+                            Clear search
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </a>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Patient Table Container --}}
+            <div id="patientTableContainer">
+                @include('patient-history.patient-table', [
+                    'patients' => $patients,
+                    'dateType' => $dateType,
+                    'selectedDate' => $selectedDate,
+                ])
+            </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchForm = document.getElementById('searchForm');
-            const searchInput = searchForm.querySelector('input[name="search"]');
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    searchForm.submit();
-                }
-            });
-        });
-    </script>
-@endsection
+    {{-- Include Patient Modal --}}
+    @include('add-modals.patient-modal')
 
-@push('styles')
-    <style>
-        .app {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-        }
-    </style>
-@endpush
+    @push('styles')
+        <style>
+            .animate-spin {
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
+
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    @endpush
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('liveSearchInput');
+                const searchLoading = document.getElementById('searchLoading');
+                const clearSearchBtn = document.getElementById('clearSearchBtn');
+                const searchResultsSummary = document.getElementById('searchResultsSummary');
+                const patientTableContainer = document.getElementById('patientTableContainer');
+                const dateTypeInput = document.getElementById('dateTypeInput');
+                const selectedDateInput = document.getElementById('selectedDateInput');
+
+                let searchTimeout;
+                let currentSearchTerm = searchInput.value;
+                let abortController = null;
+
+                // Focus the search input on page load
+                searchInput.focus();
+
+                // Set cursor at the end of the text
+                const len = searchInput.value.length;
+                searchInput.setSelectionRange(len, len);
+
+                // Live search as you type
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value;
+
+                    // Show/hide clear button
+                    if (searchTerm.length > 0) {
+                        clearSearchBtn.classList.remove('hidden');
+                    } else {
+                        clearSearchBtn.classList.add('hidden');
+                    }
+
+                    // Clear any existing timeout
+                    clearTimeout(searchTimeout);
+
+                    // Cancel any pending request
+                    if (abortController) {
+                        abortController.abort();
+                    }
+
+                    // Show loading indicator
+                    searchLoading.classList.remove('hidden');
+
+                    // Set a new timeout to search after user stops typing
+                    searchTimeout = setTimeout(function() {
+                        performLiveSearch(searchTerm);
+                    }, 300); // 300ms delay
+                });
+
+                // Function to perform live search
+                function performLiveSearch(searchTerm) {
+                    // Create new abort controller
+                    abortController = new AbortController();
+
+                    // Get current filter values
+                    const dateType = dateTypeInput.value;
+                    const selectedDate = selectedDateInput.value;
+
+                    // Build URL with parameters
+                    const url = new URL('{{ route('patient-history.index') }}');
+                    url.searchParams.append('search', searchTerm);
+                    url.searchParams.append('date_type', dateType);
+                    url.searchParams.append('selected_date', selectedDate);
+                    url.searchParams.append('ajax', 'true');
+
+                    // Perform AJAX request
+                    fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                            },
+                            signal: abortController.signal
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Update the patient table container with the new HTML
+                            patientTableContainer.innerHTML = data.html;
+
+                            // Update search results summary
+                            updateSearchSummary(searchTerm, data.count);
+
+                            // Update browser URL without reloading
+                            updateBrowserUrl(searchTerm);
+
+                            // Hide loading indicator
+                            searchLoading.classList.add('hidden');
+
+                            // Keep focus on search input
+                            searchInput.focus();
+                        })
+                        .catch(error => {
+                            if (error.name !== 'AbortError') {
+                                console.error('Search error:', error);
+                                searchLoading.classList.add('hidden');
+                            }
+                        });
+                }
+
+                // Function to update search summary
+                function updateSearchSummary(searchTerm, count) {
+                    let summaryHtml = '';
+
+                    if (searchTerm && searchTerm.length > 0) {
+                        const dateType = dateTypeInput.value;
+                        const selectedDate = selectedDateInput.value;
+                        const baseUrl = '{{ route('patient-history.index') }}';
+                        const clearUrl = `${baseUrl}?date_type=${dateType}&selected_date=${selectedDate}`;
+
+                        summaryHtml = `
+                    <div class="bg-sky-50 border border-sky-200 rounded-lg p-3 flex items-center justify-between">
+                        <div class="flex items-center text-sm text-sky-800">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <span>Search results for "<strong>${searchTerm}</strong>"</span>
+                            <span class="ml-2 px-2 py-0.5 bg-sky-200 text-sky-800 rounded-full text-xs">
+                                <span id="patientCount">${count}</span> ${count === 1 ? 'patient' : 'patients'} found
+                            </span>
+                        </div>
+                        <a href="${clearUrl}"
+                           class="text-sm text-sky-600 hover:text-sky-800 hover:underline flex items-center">
+                            Clear search
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </a>
+                    </div>
+                `;
+                    } else {
+                        summaryHtml = '';
+                    }
+
+                    searchResultsSummary.innerHTML = summaryHtml;
+                }
+
+                // Function to update browser URL without reload
+                function updateBrowserUrl(searchTerm) {
+                    const url = new URL(window.location);
+                    if (searchTerm && searchTerm.length > 0) {
+                        url.searchParams.set('search', searchTerm);
+                    } else {
+                        url.searchParams.delete('search');
+                    }
+                    window.history.pushState({}, '', url);
+                }
+
+                // Clear search function
+                window.clearLiveSearch = function() {
+                    searchInput.value = '';
+                    searchInput.focus();
+                    clearSearchBtn.classList.add('hidden');
+                    performLiveSearch('');
+                };
+
+                // Handle back/forward buttons
+                window.addEventListener('popstate', function() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const searchTerm = urlParams.get('search') || '';
+
+                    searchInput.value = searchTerm;
+                    if (searchTerm) {
+                        clearSearchBtn.classList.remove('hidden');
+                    } else {
+                        clearSearchBtn.classList.add('hidden');
+                    }
+
+                    performLiveSearch(searchTerm);
+                });
+
+                // Confirm delete function
+                window.confirmDelete = function(patientId) {
+                    if (confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
+                        document.getElementById('delete-form-' + patientId).submit();
+                    }
+                };
+
+                // Open patient modal function
+                window.openPatientModal = function() {
+                    const modal = document.getElementById('patientModal');
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                        document.body.classList.add('overflow-hidden');
+                    } else {
+                        // Try to find modal with common IDs
+                        const possibleModals = ['addModal', 'patientModal', 'addPatientModal'];
+                        for (const modalId of possibleModals) {
+                            const foundModal = document.getElementById(modalId);
+                            if (foundModal) {
+                                foundModal.classList.remove('hidden');
+                                document.body.classList.add('overflow-hidden');
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                // Close modal function
+                window.closePatientModal = function() {
+                    const modal = document.getElementById('patientModal');
+                    if (modal) {
+                        modal.classList.add('hidden');
+                        document.body.classList.remove('overflow-hidden');
+                    }
+                };
+
+                // Close modal when clicking outside
+                document.addEventListener('click', function(e) {
+                    const modal = document.getElementById('patientModal');
+                    if (modal && e.target === modal) {
+                        closePatientModal();
+                    }
+                });
+
+                // Close modal with Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        closePatientModal();
+                    }
+                });
+            });
+        </script>
+    @endpush
+@endsection

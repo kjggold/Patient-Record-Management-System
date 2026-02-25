@@ -46,8 +46,6 @@ class DoctorPatientSeeder extends Seeder
                 'speciality' => $specialties[$specialtyIndex],
                 'phone_number' => $doctorPhone,
                 'email' => 'doctor' . $i . '@medical.com',
-                'status' => rand(0, 1) ? 'Active' : 'On leave',
-                'max_patients' => rand(10, 20),
                 'created_by' => $randomAdmin->id,
                 'updated_by' => null,
                 'created_at' => $doctorCreatedAt,
@@ -68,7 +66,9 @@ class DoctorPatientSeeder extends Seeder
                         ['min' => 0, 'max' => 17, 'label' => 'child'],    // 0-17 years old
                         ['min' => 18, 'max' => 64, 'label' => 'adult'],   // 18-64 years old
                         ['min' => 65, 'max' => 90, 'label' => 'senior'],  // 65+ years old
-                    ];foreach ($ageGroups as $ageGroup) {
+                    ];
+
+                    foreach ($ageGroups as $ageGroup) {
                     $randomAdmin = $admins->random();
                     $patientPhone = $this->generateUniquePatientPhone();
 
@@ -76,7 +76,7 @@ class DoctorPatientSeeder extends Seeder
                     $age = rand($ageGroup['min'], $ageGroup['max']);
                     $dateOfBirth = Carbon::now()->subYears($age)->subMonths(rand(0, 11))->subDays(rand(0, 30));
 
-                    // BOTH registration_date AND created_at should be recent (last 10 days)
+                    // **BOTH registration_date AND created_at should be recent (last 10 days)**
                     $recentDate = $this->generateRecentDate();
 
                     Patient::create([
@@ -132,7 +132,9 @@ class DoctorPatientSeeder extends Seeder
         } while (in_array($phone, $this->usedPatientPhoneNumbers));
 
         return $phone;
-    }private function generateRandomName(): string
+    }
+
+    private function generateRandomName(): string
     {
         $firstNames = [
             // Male

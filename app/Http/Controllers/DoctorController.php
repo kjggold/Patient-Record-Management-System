@@ -7,6 +7,8 @@ use App\Models\Doctor;
 
 class DoctorController extends Controller
 {
+    // NO CONSTRUCTOR HERE - Remove it if you have one
+
     public function index(Request $request)
     {
         $query = Doctor::query();
@@ -17,23 +19,24 @@ class DoctorController extends Controller
             $query->where('full_name', 'LIKE', "%{$search}%");
         }
 
-        $doctors = $query->paginate(10);
-        return view('doctors',compact('doctors'));
+        $doctors = $query->paginate(10)->withQueryString();
+        return view('doctors', compact('doctors'));
     }
 
-    // Change method name to 'store' to match route
     public function store(Request $request)
     {
-        // Uncomment and use validation
         $validated = $request->validate([
             'full_name' => 'required|string|max:100',
             'speciality' => 'required|string|max:100',
-            'experience' => 'nullable|integer|min:0|max:999',
-            'phone_number' => 'required|string|max:100',
+            'phone_number' => 'required|string|max:100|unique:doctors,phone_number',
             'email' => 'required|email|unique:doctors,email|max:100',
-            'consultation_fee' => 'required|integer|min:0|max:9999999999',
-            'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
         ]);
+
+        // Get authenticated user ID
+        $userId = auth()->id();
+
+        // Add created_by to validated data
+        $validated['created_by'] = $userId;
 
         // Create doctor with validated data
         Doctor::create($validated);
@@ -42,30 +45,25 @@ class DoctorController extends Controller
         return redirect('doctors')->with('success', 'Doctor added successfully!');
     }
 
-    public function edit($id)
+    // Show edit form
+    public function edit(Doctor $doctor)
     {
-        $doctor = Doctor::findOrFail($id);
-
         return view('doctorsEdit', compact('doctor'));
     }
 
-    /**
-     * Update the specified doctor in storage.
-     */
-    public function update(Request $request, $id)
+    // Update doctor
+    public function update(Request $request, Doctor $doctor)
     {
-        $doctor = Doctor::findOrFail($id);
-
         // Validation rules
         $validated = $request->validate([
             'full_name' => 'required|string|max:100',
             'speciality' => 'required|string|max:100',
-            'experience' => 'nullable|integer|min:0|max:999',
-            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
-            'phone_number' => 'required|string|max:100',
-            'consultation_fee' => 'required|integer|min:0|max:9999999999',
-            'status' => 'required|string|in:Active,Inactive,On Leave|max:20',
+            'phone_number' => 'required|string|max:100|unique:doctors,phone_number,' . $doctor->id,
+            'email' => 'required|email|max:100|unique:doctors,email,' . $doctor->id,
         ]);
+
+        // Add updated_by
+        $validated['updated_by'] = auth()->id();
 
         // Update doctor
         $doctor->update($validated);
@@ -74,15 +72,10 @@ class DoctorController extends Controller
             ->with('success', 'Doctor updated successfully.');
     }
 
-    /**
-     * Remove the specified doctor from storage.
-     */
-    public function destroy($id)
+    public function destroy(Doctor $doctor)
     {
-        $doctor = Doctor::findOrFail($id);
         $doctor->delete();
 
-        return redirect()->route('doctors.index')
-            ->with('success', 'Doctor deleted successfully.');
+        return redirect('doctors')->with('success', 'Doctor deleted successfully.');
     }
 }

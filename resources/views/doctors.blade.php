@@ -12,9 +12,12 @@
             </div>
             <div class="flex justify-end items-center mb-6 gap-3">
                 <div class="flex gap-2">
-                    <!-- only added id, no UI change -->
-                    <input type="text" id="searchInput" placeholder="Search by id, name, speciality..."
-                        class="border rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <form method="GET" action="{{ route('doctors.index') }}" id="searchForm" class="flex">
+                        <input type="text" name="search" id="searchInput"
+                            placeholder="Search by id, name, speciality..."
+                            class="border rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value="{{ request('search') }}" autocomplete="off">
+                    </form>
                 </div>
                 <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
                     + Add Doctor
@@ -30,7 +33,6 @@
                             <th class="px-6 py-3">Name</th>
                             <th class="px-6 py-3">Specialty</th>
                             <th class="px-6 py-3">Phone</th>
-                            <th class="px-6 py-3 text-center">Status</th>
                             <th class="px-6 py-3 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -43,17 +45,19 @@
                                 </td>
                                 <td class="px-6 py-4 text-gray-700">{{ $doctor->speciality }}</td>
                                 <td class="px-6 py-4 text-gray-700">{{ $doctor->phone_number }}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <span
-                                        class="{{ $doctor->status == 'Active' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700' }} px-3 py-1 rounded-full text-sm">
-                                        {{ $doctor->status }}
-                                    </span>
+                                <td class="px-6 py-4 text-center space-x-2">
+                                    <button class="text-amber-600 hover:underline"
+                                        onclick="window.location.href='{{ route('doctors.edit', $doctor->id) }}'">Edit</a>
+                                        <form action="/doctors/{{ $doctor->id }}" method="POST"
+                                            onsubmit="return confirm('Are you sure you want to delete this doctor?')">
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button class="text-red-600 hover:underline">
+                                                Delete
+                                            </button>
+                                        </form>
                                 </td>
-                                <td class="px-6 py-4 text-center space-x-3">
-                                    <button class="text-amber-600 hover:text-amber-700 hover:underline"
-                                        onclick="window.location.href='{{ route('doctors.edit', $doctor->id) }}'">Edit</button>
-                                    <button class="text-red-600 hover:text-red-700 hover:underline"
-                                        onclick="deleteDoctor({{ $doctor->id }})">Delete</button>
                                 </td>
                             </tr>
                         @empty
@@ -96,10 +100,12 @@
                                 $startPage = max(1, $currentPage - 2);
                                 $endPage = min($lastPage, $currentPage + 2);
 
+                                // Always show first page if not in range
                                 if ($startPage > 1) {
                                     $endPage = min($lastPage, $startPage + 4);
                                 }
 
+                                // Always show last page if not in range
                                 if ($endPage < $lastPage) {
                                     $startPage = max(1, $endPage - 4);
                                 }
@@ -164,145 +170,27 @@
     @include('doctors.partials.add-modal')
 
     @push('styles')
-        <style>
-            /* Sidebar styles */
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 220px;
-                height: 100vh;
-                background-color: #1e293b;
-                color: #f8fafc;
-                padding: 20px 15px;
-                z-index: 1000;
-                overflow-y: auto;
-                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-            }
-
-            .sidebar .logo {
-                font-size: 25px;
-                font-weight: 700;
-                margin-bottom: 30px;
-                color: #080808;
-                text-align: left;
-                padding-left: 5px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .sidebar nav {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .sidebar nav a {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 12px 16px;
-                border-radius: 10px;
-                font-size: 17px;
-                text-decoration: none;
-                font-weight: 500;
-                width: 100%;
-                background: none;
-                border: none;
-                cursor: pointer;
-            }
-
-            .sidebar nav a:hover {
-                background: rgba(59, 130, 246, 0.2);
-                transform: translateX(5px);
-            }
-
-            .sidebar nav a.active {
-                background: rgba(133, 173, 236, 0.3);
-                font-weight: 500;
-            }
-
-            .sidebar nav a i {
-                width: 20px;
-                text-align: center;
-                font-size: 16px;
-            }
-
-            nav .logout {
-                color: #e93e3e;
-                margin-top: 8px;
-                padding: 12px 16px;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                font-weight: 500;
-                transition: all 0.2s ease;
-            }
-
-            nav .logout:hover {
-                background: rgba(242, 14, 14, 0.2);
-                color: #ff1010;
-            }
-
-            .logout-form {
-                margin-top: 0;
-            }
-
-            .sidebar::-webkit-scrollbar {
-                width: 5px;
-            }
-
-            .sidebar::-webkit-scrollbar-track {
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-            .sidebar::-webkit-scrollbar-thumb {
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 10px;
-            }
-
-            .sidebar::-webkit-scrollbar-thumb:hover {
-                background: rgba(255, 255, 255, 0.3);
-            }
-
-            main {
-                margin-left: 220px;
-                padding: 20px;
-            }
-        </style>
     @endpush
 
     @push('scripts')
         <script>
             /* ---------------- SEARCH (ID, NAME, SPECIALTY) ---------------- */
 
+            let searchTimeout;
+
             document.getElementById('searchInput').addEventListener('keyup', function() {
+                clearTimeout(searchTimeout);
+                const value = this.value;
 
-                const value = this.value.toLowerCase();
-                const rows = document.querySelectorAll('#doctorsTable tbody tr');
-
-                rows.forEach(row => {
-
-                    const id = row.children[0].innerText.toLowerCase();
-                    const name = row.children[1].innerText.toLowerCase();
-                    const speciality = row.children[2].innerText.toLowerCase();
-                    const phone = row.children[3].innerText.toLowerCase();
-                    const status = row.children[4].innerText.toLowerCase();
-
-                    if (
-                        id.includes(value) ||
-                        name.includes(value) ||
-                        speciality.includes(value) ||
-                        phone.includes(value) ||
-                        status.includes(value)
-                    ) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
+                searchTimeout = setTimeout(() => {
+                    if (value.length > 0) {
+                        // Submit the form to trigger server-side search with pagination
+                        document.getElementById('searchForm').submit();
+                    } else if (value === '') {
+                        // If search is empty, go to the index page without search
+                        window.location.href = '{{ route('doctors.index') }}';
                     }
-
-                });
-
+                }, 500); // Wait 500ms after user stops typing
             });
 
             function openAddModal() {
@@ -313,6 +201,22 @@
             function closeAddModal() {
                 document.getElementById('addModal').classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
+            }
+
+            // Doctor functions
+            function openViewModal(doctorId) {
+                // Fetch doctor details via AJAX
+                fetch(`/doctors/${doctorId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Create and show a view modal for doctor details
+                        // You'll need to implement this similar to patient view modal
+                        alert('View doctor details for ID: ' + doctorId);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching doctor details:', error);
+                        alert('Error loading doctor details');
+                    });
             }
 
             function deleteDoctor(doctorId) {
@@ -339,6 +243,7 @@
                 }
             }
 
+            // Close modal when clicking outside
             document.addEventListener('click', function(e) {
                 const modal = document.getElementById('addModal');
                 if (modal && e.target.id === 'addModal') {
@@ -346,6 +251,7 @@
                 }
             });
 
+            // Close modal with Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closeAddModal();
