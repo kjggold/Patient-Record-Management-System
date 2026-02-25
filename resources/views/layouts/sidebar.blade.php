@@ -14,12 +14,13 @@
         @endif --}}
 
         @if (Route::has('patientHistory.index'))
-        <a href="{{ route('patientHistory.index') }}" class="{{ request()->routeIs('patientHistory.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-user"></i> Patients
-        </a>
-    @else
-        <a href="#"><i class="fa-solid fa-user"></i> Patients</a>
-    @endif
+            <a href="{{ route('patientHistory.index') }}"
+                class="{{ request()->routeIs('patientHistory.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-user"></i> Patients
+            </a>
+        @else
+            <a href="#"><i class="fa-solid fa-user"></i> Patients</a>
+        @endif
 
         @if (Route::has('doctors.index'))
             <a href="{{ route('doctors.index') }}" class="{{ request()->routeIs('doctors.*') ? 'active' : '' }}">
@@ -86,7 +87,7 @@
     }
 
     .sidebar .logo {
-        font-size: 24px;
+        font-size: 27px;
         font-weight: 700;
         margin-bottom: 30px;
         color: #000000;
@@ -108,7 +109,7 @@
         gap: 12px;
         padding: 14px 16px;
         border-radius: 10px;
-        font-size: 15px;
+        font-size: 17px;
         text-decoration: none;
         color: #000000;
         font-weight: 500;
@@ -122,14 +123,12 @@
 
     .sidebar nav a:hover {
         background: rgba(255, 255, 255, 0.1);
-        color: #000000;
+
         transform: translateX(5px);
     }
 
     .sidebar nav a.active {
         background: rgba(59, 130, 246, 0.2);
-        color: #000000;
-        border-left: 4px solid #3b82f6;
     }
 
     .sidebar nav a i {
@@ -140,13 +139,13 @@
 
     /* Logout styling */
     nav .logout {
-        color: #f87171;
+        color: #be1c1c;
         margin-top: auto;
     }
 
     nav .logout:hover {
         background: rgba(239, 68, 68, 0.1);
-        color: #fca5a5;
+        color: #de1818;
     }
 
     .logout-form {
