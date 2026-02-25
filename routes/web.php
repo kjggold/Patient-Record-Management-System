@@ -89,12 +89,12 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-// Admin approval links (from email, signed URLs)
-Route::get('/admin/registrations/{registrationRequest}/approve', [AdminUserApprovalController::class, 'approve'])
+// Admin approval links - using token instead of ID
+Route::get('/admin/registrations/approve/{token}', [App\Http\Controllers\AdminUserApprovalController::class, 'approve'])
     ->name('admin.registrations.approve')
     ->middleware('signed');
 
-Route::get('/admin/registrations/{registrationRequest}/decline', [AdminUserApprovalController::class, 'decline'])
+Route::get('/admin/registrations/decline/{token}', [App\Http\Controllers\AdminUserApprovalController::class, 'decline'])
     ->name('admin.registrations.decline')
     ->middleware('signed');
 

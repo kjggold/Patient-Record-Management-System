@@ -108,12 +108,7 @@
                                     <p class="text-xs font-medium text-gray-500 mb-1">Phone Number</p>
                                     <p class="text-sm font-medium text-gray-800">{{ $patient->phone_number ?? 'N/A' }}</p>
                                 </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 mb-1">Email</p>
-                                    <p class="text-sm font-medium text-gray-800">
-                                        {{ $patient->email ?? 'Not provided' }}
-                                    </p>
-                                </div>
+                                
                                 <div>
                                     <p class="text-xs font-medium text-gray-500 mb-1">Address</p>
                                     <p class="text-sm font-medium text-gray-800">{{ $patient->address ?? 'N/A' }}</p>
@@ -147,19 +142,7 @@
                                         {{ $patient->alcohol_consumption ? ucfirst($patient->alcohol_consumption) : 'None' }}
                                     </p>
                                 </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 mb-1">Assigned Doctor</p>
-                                    <p class="text-sm font-medium text-gray-800">
-                                        @if($patient->doctor)
-                                            Dr. {{ $patient->doctor->full_name }}
-                                            @if($patient->doctor->speciality)
-                                                <span class="text-gray-500">({{ $patient->doctor->speciality }})</span>
-                                            @endif
-                                        @else
-                                            Not Assigned
-                                        @endif
-                                    </p>
-                                </div>
+
                                 <div>
                                     <p class="text-xs font-medium text-gray-500 mb-1">Last Visit</p>
                                     <p class="text-sm font-medium text-gray-800">

@@ -15,6 +15,12 @@ class RegistrationRequest extends Model
         'encrypted_password',
         'ip_address',
         'user_agent',
+        'approval_token', // Add this
+        'status',         // Add this
+    ];
+
+    // Optional: cast status to string
+    protected $casts = [
+        'status' => 'string',
     ];
 }
-

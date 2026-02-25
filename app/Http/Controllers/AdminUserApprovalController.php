@@ -4,64 +4,129 @@ namespace App\Http\Controllers;
 
 use App\Models\RegistrationRequest;
 use App\Models\User;
+use App\Models\AuthEvent;
+use App\Mail\RegistrationApprovedMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\RegistrationApprovedMail;
+use Illuminate\Support\Facades\Log;
 
 class AdminUserApprovalController extends Controller
 {
-    /**
-     * Approve a registration request (via signed URL from email).
-     */
-    public function approve(Request $request, RegistrationRequest $registrationRequest)
+    public function approve(Request $request, $token)
     {
-        // If this request was already processed/deleted, show a friendly message.
-        if (!$registrationRequest->exists) {
-            return view('auth.approval-result', [
-                'title' => 'Already Processed',
-                'message' => 'This registration request was already processed.',
-                'status' => 'info',
+        try {
+            // Find by token instead of ID
+            $registrationRequest = RegistrationRequest::where('approval_token', $token)
+                                                      ->where('status', 'pending')
+                                                      ->first();
+
+            if (!$registrationRequest) {
+                return view('approval-result', [
+                    'title' => 'Approval Failed',
+                    'status' => 'error',
+                    'message' => 'Registration request not found, already processed, or invalid token.'
+                ]);
+            }
+
+            // Decrypt the password
+            $decryptedPassword = Crypt::decryptString($registrationRequest->encrypted_password);
+
+            // Create the user
+            $user = User::create([
+                'name' => $registrationRequest->name,
+                'email' => $registrationRequest->email,
+                'password' => Hash::make($decryptedPassword),
+                'role' => 'user',
+                'status' => 'active',
+                'email_verified_at' => now(),
+            ]);
+
+            // Send approval email to the user
+            Mail::to($user->email)->send(new RegistrationApprovedMail($user));
+
+            // Update registration request status
+            $registrationRequest->update([
+                'status' => 'approved',
+                'approval_token' => null, // Clear the token
+            ]);
+
+            // Log the approval
+            AuthEvent::create([
+                'event_type' => 'registration_approved',
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => (string) $request->userAgent(),
+                'success' => true,
+                'meta' => ['registration_id' => $registrationRequest->id]
+            ]);
+
+            return view('approval-result', [
+                'title' => 'Registration Approved',
+                'status' => 'success',
+                'message' => "Registration successful for {$user->email}. The account is now created and the user can log in and access the dashboard."
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Registration approval failed: ' . $e->getMessage());
+
+            return view('approval-result', [
+                'title' => 'Approval Failed',
+                'status' => 'error',
+                'message' => 'An error occurred while processing the approval. Please contact support.'
             ]);
         }
-
-        // Create user only on approve.
-        $plainPassword = Crypt::decryptString($registrationRequest->encrypted_password);
-        $user = User::create([
-            'name'     => $registrationRequest->name,
-            'email'    => $registrationRequest->email,
-            'password' => $plainPassword, // hashed by cast
-            'role'     => 'user',
-            'status'   => 'active',
-        ]);
-
-        // Notify the user that their registration has been approved.
-        Mail::to($user->email)->send(new RegistrationApprovedMail($user));
-
-        // Remove request after processing
-        $registrationRequest->delete();
-
-        return view('auth.approval-result', [
-            'title' => 'Registration Approved',
-            'message' => "Registration successful for {$user->email}. The account is now created and the user can log in and access the dashboard.",
-            'status' => 'success',
-        ]);
     }
 
-    /**
-     * Decline a registration request (via signed URL from email).
-     */
-    public function decline(Request $request, RegistrationRequest $registrationRequest)
+    public function decline(Request $request, $token)
     {
-        // Decline means: do not create user; remove the request from DB.
-        $email = $registrationRequest->email;
-        $registrationRequest->delete();
+        try {
+            // Find by token instead of ID
+            $registrationRequest = RegistrationRequest::where('approval_token', $token)
+                                                      ->where('status', 'pending')
+                                                      ->first();
 
-        return view('auth.approval-result', [
-            'title' => 'Registration Declined',
-            'message' => "Registration declined for {$email}. No user account was created.",
-            'status' => 'warning',
-        ]);
+            if (!$registrationRequest) {
+                return view('approval-result', [
+                    'title' => 'Decline Failed',
+                    'status' => 'error',
+                    'message' => 'Registration request not found, already processed, or invalid token.'
+                ]);
+            }
+
+            // Update registration request status
+            $registrationRequest->update([
+                'status' => 'declined',
+                'approval_token' => null,
+            ]);
+
+            // Log the decline
+            AuthEvent::create([
+                'event_type' => 'registration_declined',
+                'user_id' => null,
+                'email' => $registrationRequest->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => (string) $request->userAgent(),
+                'success' => true,
+                'meta' => ['registration_id' => $registrationRequest->id]
+            ]);
+
+            return view('approval-result', [
+                'title' => 'Registration Declined',
+                'status' => 'warning',
+                'message' => "Registration for {$registrationRequest->email} has been declined."
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Registration decline failed: ' . $e->getMessage());
+
+            return view('approval-result', [
+                'title' => 'Decline Failed',
+                'status' => 'error',
+                'message' => 'An error occurred while processing the decline.'
+            ]);
+        }
     }
 }
-

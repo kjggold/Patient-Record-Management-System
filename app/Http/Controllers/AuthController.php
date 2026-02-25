@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 use App\Models\AuthEvent;
 use App\Models\RegistrationRequest;
 use App\Models\User;
@@ -102,6 +103,9 @@ class AuthController extends Controller
                 ->with('open_modal', 'register');
         }
 
+        // Generate a unique token for approval
+        $approvalToken = Str::random(64);
+
         // Create a registration request (no user row yet)
         $regRequest = RegistrationRequest::create([
             'name'     => $request->name,
@@ -109,6 +113,8 @@ class AuthController extends Controller
             'encrypted_password' => Crypt::encryptString($request->password),
             'ip_address' => $request->ip(),
             'user_agent' => (string) $request->userAgent(),
+            'approval_token' => $approvalToken,
+            'status' => 'pending',
         ]);
 
         // Find main admin (by role) to notify
@@ -118,7 +124,7 @@ class AuthController extends Controller
             Mail::to($mainAdmin->email)->send(new NewUserRegistrationMail($regRequest, $mainAdmin));
         }
 
-        // Optionally still log registration attempt
+        // Log registration attempt
         AuthEvent::create([
             'event_type' => 'register',
             'user_id'    => null,
@@ -126,9 +132,9 @@ class AuthController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => (string) $request->userAgent(),
             'success'    => true,
+            'meta'       => ['registration_id' => $regRequest->id]
         ]);
 
-        // Do not log the user in yet – wait for approval (show message on register page)
         return redirect()->route('register')
             ->with('status', 'Registration submitted. Waiting for main admin approval.');
     }

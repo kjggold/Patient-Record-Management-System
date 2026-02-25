@@ -18,8 +18,13 @@ class NewUserRegistrationMail extends Mailable
 
     public function build(): self
     {
-        $approveUrl = URL::signedRoute('admin.registrations.approve', ['registrationRequest' => $this->request->id]);
-        $declineUrl = URL::signedRoute('admin.registrations.decline', ['registrationRequest' => $this->request->id]);
+        // Make sure the token exists
+        if (!$this->request->approval_token) {
+            throw new \Exception('Approval token is missing for registration #' . $this->request->id);
+        }
+
+        $approveUrl = URL::signedRoute('admin.registrations.approve', ['token' => $this->request->approval_token]);
+        $declineUrl = URL::signedRoute('admin.registrations.decline', ['token' => $this->request->approval_token]);
 
         return $this->subject('New user registration request')
             ->view('emails.new-user-registration', [
@@ -30,4 +35,3 @@ class NewUserRegistrationMail extends Mailable
             ]);
     }
 }
-
