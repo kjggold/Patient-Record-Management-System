@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Service;
-use App\Models\Doctor;
 
 class ServiceController extends Controller
 {
@@ -18,8 +17,8 @@ class ServiceController extends Controller
             return $this->searchServices($request);
         }
 
-        // Start query builder
-        $query = Service::query();
+        // Start query builder - Order by ID ascending
+        $query = Service::query()->orderBy('id', 'desc');
 
         // Apply search filter if search term exists
         if (!empty($search)) {
@@ -27,8 +26,8 @@ class ServiceController extends Controller
             $query->where('service_name', 'like', $searchTerm);
         }
 
-        // Order and paginate results
-        $services = $query->orderBy('service_name', 'asc')->paginate(10);
+        // Get paginated results
+        $services = $query->paginate(10);
 
         // Append search parameter to pagination links if search exists
         if (!empty($search)) {
@@ -45,7 +44,7 @@ class ServiceController extends Controller
     {
         $search = $request->input('search');
 
-        $query = Service::query();
+        $query = Service::query()->orderBy('id', 'asc');
 
         // Apply search filter
         if (!empty($search)) {
@@ -53,8 +52,7 @@ class ServiceController extends Controller
             $query->where('service_name', 'like', $searchTerm);
         }
 
-        // Order and paginate
-        $services = $query->orderBy('service_name', 'asc')->paginate(10);
+        $services = $query->paginate(10);
 
         // Return JSON response with the table HTML and updated info
         return response()->json([
@@ -81,5 +79,32 @@ class ServiceController extends Controller
 
         return redirect()->route('services.index')
             ->with('success', 'Service added successfully!');
+    }
+
+    public function edit(Service $service)
+    {
+        return view('services.edit', compact('service'));
+    }
+
+    public function update(Request $request, Service $service)
+    {
+        $validated = $request->validate([
+            'service_name' => 'required|string|max:255',
+            'service_fee' => 'required|string|max:100',
+            'description' => 'nullable|string'
+        ]);
+
+        $service->update($validated);
+
+        return redirect()->route('services.index')
+            ->with('success', 'Service updated successfully.');
+    }
+
+    public function destroy(Service $service)
+    {
+        $service->delete();
+
+        return redirect()->route('services.index')
+            ->with('success', 'Service deleted successfully.');
     }
 }

@@ -164,7 +164,7 @@
         }
 
         #dischargeModal .left-panel {
-            flex: 0 0 30%;
+            flex: 0 0 20%;
             background: #f0f4f8;
             padding: 15px;
         }

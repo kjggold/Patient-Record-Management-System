@@ -26,29 +26,13 @@ class DashboardController extends Controller
 
         $appointmentsToday = Appointment::count();
 
+        // Calculate monthly revenue from discharged patients (total paid amount)
         $monthlyRevenue = Discharge::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
-            ->selectRaw('SUM(total - IFNULL(discount,0)) as revenue')
-            ->value('revenue') ?? 0;
+            ->sum('paid') ?? 0;  // Use sum of 'paid' instead of total-discount
 
-        // // Calculate monthly revenue (assuming appointments have fees)
-        // $monthlyRevenue = Appointment::whereMonth('created_at', now()->month)
-        //     ->whereYear('created_at', now()->year)
-        //     ->sum('fee') ?? 0;
-
-        // // Get today's appointments with patient and doctor info
-        // $appointments = Appointment::with(['patient', 'doctor'])
-        //     ->whereDate('appointment_date', $today)
-        //     ->orderBy('appointment_time')
-        //     ->limit(5)
-        //     ->get()
-        //     ->map(function ($appointment) {
-        //         return [
-        //             'patient' => $appointment->patient->full_name ?? 'Unknown',
-        //             'doctor' => $appointment->doctor->full_name ?? 'Unknown',
-        //             'status' => $appointment->status ?? 'scheduled'
-        //         ];
-        //     });
+        // Alternative: If you want to show total paid (revenue) in dollars
+        $monthlyRevenueUSD = number_format($monthlyRevenue / 1000, 2); // Convert to thousands with 2 decimals
 
         // Get patient statistics for chart
         $patientStats = $this->getPatientStatistics();
@@ -58,18 +42,18 @@ class DashboardController extends Controller
             'activeDoctors',
             'appointmentsToday',
             'monthlyRevenue',
-            // 'appointments',
             'patientStats',
             'doctors',
             'patients',
-            'services'
+            'services',
+            'monthlyRevenueUSD'  // Pass the formatted USD value if needed
         ));
     }
 
     private function getPatientStatistics()
     {
-        // Get data for last 8 days (NOT 9!)
-        $startDate = Carbon::now()->subDays(7);  // Changed back to 7
+        // Get data for last 8 days
+        $startDate = Carbon::now()->subDays(7);
         $endDate = Carbon::now();
 
         $dates = [];
@@ -77,7 +61,7 @@ class DashboardController extends Controller
         $currentDate = $startDate->copy();
 
         // Create 8 days of data
-        for ($i = 0; $i < 8; $i++) {  // Changed to 8
+        for ($i = 0; $i < 8; $i++) {
             $dateStr = $currentDate->format('Y-m-d');
             $dates[] = $dateStr;
             $labels[] = $currentDate->format('j M');
@@ -91,19 +75,19 @@ class DashboardController extends Controller
                 SUM(CASE WHEN age BETWEEN 18 AND 64 THEN 1 ELSE 0 END) as adult_count,
                 SUM(CASE WHEN age >= 65 THEN 1 ELSE 0 END) as elderly_count
             ')
-            ->whereDate('registration_date', '>=', $startDate)  // Use whereDate
-            ->whereDate('registration_date', '<=', $endDate)    // Use whereDate
+            ->whereDate('registration_date', '>=', $startDate)
+            ->whereDate('registration_date', '<=', $endDate)
             ->groupBy(DB::raw('DATE(registration_date)'))
             ->orderBy('date')
             ->get()
             ->keyBy('date');
 
         // Initialize arrays with 8 elements
-        $childData = array_fill(0, 8, 0);    // 8 elements
+        $childData = array_fill(0, 8, 0);
         $adultData = array_fill(0, 8, 0);
         $elderlyData = array_fill(0, 8, 0);
 
-        // Fill data - IMPORTANT: Use correct index
+        // Fill data
         foreach ($dates as $index => $date) {
             if (isset($stats[$date])) {
                 $childData[$index] = (int)$stats[$date]->child_count;

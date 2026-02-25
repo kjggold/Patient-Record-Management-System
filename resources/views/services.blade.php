@@ -14,36 +14,40 @@
             </div>
 
             <div class="flex justify-between items-center mb-6 gap-3">
-                <!-- Search Input -->
-                <div class="relative w-full md:w-auto">
-                    <input type="text"
-                           id="searchInput"
-                           placeholder="Search by name..."
-                           class="w-full md:w-80 border border-blue-300 rounded-lg px-4 py-2 pl-10 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                           value="{{ request('search') ?? '' }}"
-                           autocomplete="off">
-
-                    <!-- Search Icon - Left side -->
-                    <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-
-                    <!-- Clear button - Right side -->
-                    <button onclick="clearSearch()"
-                            id="clearSearchBtn"
-                            class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 {{ request('search') ? '' : 'hidden' }}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                <!-- Search Input - Left side -->
+                <div class="flex gap-2">
+                    <div class="relative">
+                        <input type="text"
+                               id="searchInput"
+                               placeholder="Search by name..."
+                               class="border rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 pl-8"
+                               value="{{ request('search') ?? '' }}"
+                               autocomplete="off">
+                        <!-- Search Icon -->
+                        <svg class="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                    </button>
-                </div>
 
-                <!-- Add Service Button -->
+                        <!-- Clear button - appears when search has value -->
+                        <button onclick="clearSearch()"
+                                id="clearSearchBtn"
+                                class="absolute right-2 top-2.5 text-gray-400 hover:text-gray-600 {{ request('search') ? '' : 'hidden' }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div>
+                        <!-- Add Service Button - Right side -->
                 <button onclick="openAddServiceModal()"
                     class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-plus"></i>
                     Add Service
                 </button>
+                    </div>
+                </div>
+
+
             </div>
 
             <!-- SERVICE TABLE CONTAINER -->
@@ -54,50 +58,7 @@
         </div> <!-- End of main content -->
     </div> <!-- End of app container -->
 
-    <!-- ADD SERVICE MODAL -->
-    <div id="addServiceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden ml-60">
-            <div class="flex justify-between items-center p-6 border-b">
-                <h2 class="text-xl font-bold text-gray-800">Add Service</h2>
-                <button onclick="closeAddServiceModal()"
-                        class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-            </div>
-
-            <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px)">
-                <form id="addServiceForm" method="POST" action="{{ route('services.store') }}">
-                    @csrf
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="serviceName">Service Name</label>
-                        <input type="text" id="serviceName" name="service_name" placeholder="Enter service name"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            value="{{ old('service_name') }}" required>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="serviceFee">Service Fee</label>
-                        <input type="text" id="serviceFee" name="service_fee" placeholder="Enter fee amount"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            value="{{ old('service_fee') }}" required>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="serviceDescription">Description
-                            <span class="text-gray-500 font-normal text-sm">(Optional)</span></label>
-                        <textarea id="serviceDescription" name="description" placeholder="Optional description" rows="3"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('description') }}</textarea>
-                    </div>
-                </form>
-            </div>
-
-            <div class="p-6 border-t bg-gray-50 flex justify-end gap-3">
-                <button onclick="closeAddServiceModal()"
-                    class="px-6 py-2.5 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg transition-colors duration-300">Cancel</button>
-                <button type="submit" form="addServiceForm"
-                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-300">Save
-                    Service</button>
-            </div>
-        </div>
-    </div>
+    @include('add-modals.service-modal')
 @endsection
 
 @push('scripts')
@@ -317,5 +278,12 @@
                 closeAddServiceModal();
             }
         });
+
+        // Delete service function
+        function deleteService(serviceId) {
+            if (confirm('Are you sure you want to delete this service?')) {
+                document.getElementById(`delete-form-${serviceId}`).submit();
+            }
+        }
     </script>
 @endpush

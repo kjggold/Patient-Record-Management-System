@@ -99,24 +99,24 @@
             </header>
 
             <!-- KPI CARDS -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-xl shadow p-5">
-                    <h4 class="text-gray-500">Total Patients</h4>
-                    <h2 class="text-2xl font-bold mt-2">{{ $totalPatients ?? 1234 }}</h2>
-                </div>
-                <div class="bg-white rounded-xl shadow p-5">
-                    <h4 class="text-gray-500">Total Doctors</h4>
-                    <h2 class="text-2xl font-bold mt-2">{{ $activeDoctors ?? 45 }}</h2>
-                </div>
-                <div class="bg-white rounded-xl shadow p-5">
-                    <h4 class="text-gray-500">Total Appointments</h4>
-                    <h2 class="text-2xl font-bold mt-2">{{ $appointmentsToday ?? 28 }}</h2>
-                </div>
-                <div class="bg-white rounded-xl shadow p-5">
-                    <h4 class="text-gray-500">Revenue (Month)</h4>
-                    <h2 class="text-2xl font-bold mt-2">${{ $monthlyRevenue ?? 52450 }}</h2>
-                </div>
-            </section>
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow p-5">
+        <h4 class="text-gray-500">Total Patients</h4>
+        <h2 class="text-2xl font-bold mt-2">{{ $totalPatients ?? 1234 }}</h2>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5">
+        <h4 class="text-gray-500">Total Doctors</h4>
+        <h2 class="text-2xl font-bold mt-2">{{ $activeDoctors ?? 45 }}</h2>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5">
+        <h4 class="text-gray-500">Total Appointments</h4>
+        <h2 class="text-2xl font-bold mt-2">{{ $appointmentsToday ?? 28 }}</h2>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5">
+        <h4 class="text-gray-500">Total Revenue</h4>
+        <h2 class="text-2xl font-bold mt-2">{{ number_format($monthlyRevenue) }} MMK</h2>
+    </div>
+</section>
 
             <!-- CHARTS -->
             <section class="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6 mb-8">
