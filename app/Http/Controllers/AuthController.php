@@ -103,19 +103,19 @@ class AuthController extends Controller
                 ->with('open_modal', 'register');
         }
 
-        // Generate a unique token for approval
-        $approvalToken = Str::random(64);
+       // Generate a unique token for approval
+$approvalToken = Str::random(64);
 
-        // Create a registration request (no user row yet)
-        $regRequest = RegistrationRequest::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'encrypted_password' => Crypt::encryptString($request->password),
-            'ip_address' => $request->ip(),
-            'user_agent' => (string) $request->userAgent(),
-            'approval_token' => $approvalToken,
-            'status' => 'pending',
-        ]);
+// Create a registration request
+$regRequest = RegistrationRequest::create([
+    'name'     => $request->name,
+    'email'    => $request->email,
+    'encrypted_password' => Crypt::encryptString($request->password),
+    'ip_address' => $request->ip(),
+    'user_agent' => (string) $request->userAgent(),
+    'approval_token' => $approvalToken, // This should now save since column exists
+    'status' => 'pending',
+]);
 
         // Find main admin (by role) to notify
         $mainAdmin = User::where('role', 'main_admin')->first();
