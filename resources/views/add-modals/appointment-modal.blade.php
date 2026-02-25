@@ -23,32 +23,46 @@
                     </datalist>
                 </div>
 
-                <!-- Doctor -->
+                <!-- Service -->
                 <div class="add-form-group">
-                    <label>Doctor</label>
-                    <input list="doctorList" id="doctorNameInput" placeholder="Type doctor name" required>
-                    <datalist id="doctorList">
-                        @foreach ($doctors as $doctor)
-                            <option value="{{ $doctor->full_name }}" data-id="{{ $doctor->id }}"></option>
+                    <label>Service</label>
+                    <input list="serviceList" id="serviceNameInput" placeholder="Type to search..." required>
+                    <datalist id="serviceList">
+                        @foreach ($services as $s)
+                            <option value="{{ $s->service_name }}" data-id="{{ $s->id }}" data-price="{{ $s->service_fee }}"></option>
                         @endforeach
                     </datalist>
                 </div>
 
-                <!-- Service -->
+                <!-- Speciality -->
                 <div class="add-form-group">
-                    <label>Service</label>
-                    <input list="serviceList" id="serviceNameInput" placeholder="Type service name" required>
-                    <datalist id="serviceList">
-                        @foreach ($services as $service)
-                            <option value="{{ $service->service_name }}" data-id="{{ $service->id }}"></option>
+                    <label>Speciality</label>
+                    <select id="specialitySelect" class="w-full p-3 rounded-lg border border-gray-300 bg-white" onchange="filterDoctorsBySpeciality()">
+                        <option value="">Select Speciality</option>
+                        @php
+                            $uniqueSpecialities = $doctors->pluck('speciality')->unique()->sort();
+                        @endphp
+                        @foreach ($uniqueSpecialities as $speciality)
+                            <option value="{{ $speciality }}">{{ $speciality }}</option>
                         @endforeach
-                    </datalist>
+                    </select>
+                </div>
+
+                <!-- Doctor -->
+                <div class="add-form-group">
+                    <label>Doctor</label>
+                    <select id="doctorSelect" class="w-full p-3 rounded-lg border border-gray-300 bg-white" onchange="updateDoctorId()" required>
+                        <option value="">Select Doctor</option>
+                        @foreach ($doctors as $doctor)
+                            <option value="{{ $doctor->id }}" data-speciality="{{ $doctor->speciality }}">{{ $doctor->full_name }} - {{ $doctor->speciality }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <!-- Date -->
                 <div class="add-form-group">
                     <label>Appointment Date</label>
-                    <input type="date" name="appointment_date" required>
+                    <input type="date" name="appointment_date" id="appointmentDate" required>
                 </div>
 
             </div>
@@ -60,32 +74,116 @@
         </form>
     </div>
 </div>
+
 <script>
-    function openAddModal() {
+    // Make sure modal is hidden initially
+    document.addEventListener('DOMContentLoaded', function() {
+        closeAppointmentModal();
+    });
+
+    function openAppointmentModal() {
         document.getElementById('appointmentModal').classList.remove('hidden');
+        document.getElementById('appointmentModal').style.display = 'flex';
     }
 
-    function closeAddModal() {
+    function closeAppointmentModal() {
         document.getElementById('appointmentModal').classList.add('hidden');
+        document.getElementById('appointmentModal').style.display = 'none';
     }
+    
 
-    // Map datalist selections → hidden IDs
+    // Map datalist selections → hidden IDs (for patient and service only)
     function bindDatalist(inputId, listId, hiddenId) {
         const input = document.getElementById(inputId);
         const list = document.getElementById(listId);
         const hidden = document.getElementById(hiddenId);
 
+        if (!input || !list || !hidden) return;
+
         input.addEventListener('change', () => {
             const option = Array.from(list.options)
                 .find(o => o.value === input.value);
             hidden.value = option ? option.dataset.id : '';
+            console.log(`${hiddenId} set to:`, hidden.value);
+        });
+
+        // Also handle input event to clear if typing
+        input.addEventListener('input', () => {
+            const option = Array.from(list.options)
+                .find(o => o.value === input.value);
+            if (!option) {
+                hidden.value = '';
+            }
         });
     }
 
+    // Bind patient and service datalists (doctor is handled separately)
     bindDatalist('patientNameInput', 'patientList', 'patientIdInput');
-    bindDatalist('doctorNameInput', 'doctorList', 'doctorIdInput');
     bindDatalist('serviceNameInput', 'serviceList', 'serviceIdInput');
+
+    // Handle doctor selection
+    function updateDoctorId() {
+        const doctorSelect = document.getElementById('doctorSelect');
+        const doctorIdInput = document.getElementById('doctorIdInput');
+        const specialitySelect = document.getElementById('specialitySelect');
+        
+        if (doctorSelect.value) {
+            doctorIdInput.value = doctorSelect.value;
+            
+            // Update speciality based on selected doctor
+            const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
+            const doctorSpeciality = selectedOption.getAttribute('data-speciality');
+            
+            // Find and select matching speciality
+            for (let i = 0; i < specialitySelect.options.length; i++) {
+                if (specialitySelect.options[i].value === doctorSpeciality) {
+                    specialitySelect.selectedIndex = i;
+                    break;
+                }
+            }
+        } else {
+            doctorIdInput.value = '';
+        }
+        console.log('doctorIdInput set to:', doctorIdInput.value);
+    }
+
+    function filterDoctorsBySpeciality() {
+        const speciality = document.getElementById('specialitySelect').value;
+        const doctorSelect = document.getElementById('doctorSelect');
+        const options = doctorSelect.options;
+        const doctorIdInput = document.getElementById('doctorIdInput');
+        
+        // Show all options if no speciality selected
+        if (!speciality) {
+            for (let i = 0; i < options.length; i++) {
+                options[i].style.display = '';
+                options[i].disabled = false;
+            }
+            doctorSelect.value = '';
+            doctorIdInput.value = '';
+            return;
+        }
+        
+        // Filter doctors by speciality
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            if (option.value === '') continue;
+            
+            const doctorSpeciality = option.getAttribute('data-speciality');
+            if (doctorSpeciality && doctorSpeciality === speciality) {
+                option.style.display = '';
+                option.disabled = false;
+            } else {
+                option.style.display = 'none';
+                option.disabled = true;
+            }
+        }
+        
+        doctorSelect.value = '';
+        doctorIdInput.value = '';
+    }
 </script>
+
 <style>
     /* Keep all your existing styles exactly as they were */
     :root {
@@ -138,17 +236,18 @@
 
     /* Add Modal */
     #appointmentModal {
+        display: none;
         position: fixed;
         inset: 0;
-        z-index: 50;
-        background: rgba(0, 0, 0, .5);
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.5);
         justify-content: center;
         align-items: center;
         overflow: auto;
         padding: 1rem;
     }
 
-    #appointmentModal .modal-open {
+    #appointmentModal:not(.hidden) {
         display: flex !important;
     }
 
@@ -158,7 +257,9 @@
         background: var(--bg);
         border-radius: 16px;
         padding: 40px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, .1);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        position: relative;
+        margin: 0 auto;
     }
 
     #appointmentModal .add-form-title {
@@ -178,6 +279,7 @@
         font-size: 16px;
         margin-bottom: 8px;
         color: #334155;
+        display: block;
     }
 
     #appointmentModal .add-form-group input,
@@ -189,6 +291,7 @@
         outline: none;
         font-size: 15px;
         width: 100%;
+        background: white;
     }
 
     #appointmentModal .add-form-actions {
@@ -223,5 +326,10 @@
 
     #appointmentModal .btn-cancel:hover {
         background: #cbd5e1;
+    }
+
+    /* Hidden class */
+    .hidden {
+        display: none !important;
     }
 </style>

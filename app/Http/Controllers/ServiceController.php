@@ -185,9 +185,46 @@ class ServiceController extends Controller
             'description' => 'nullable|string'
         ]);
 
+        // Get authenticated user ID
+        $userId = auth()->id();
+
+        // Add created_by to validated data
+        $validated['created_by'] = $userId;
+
         Service::create($validated);
 
         return redirect()->route('services.index')
             ->with('success', 'Service added successfully!');
+    }
+
+    public function edit(Service $service)
+    {
+        return view('servicesEdit', compact('service'));
+    }
+
+    public function update(Request $request, Service $service)
+    {
+        // Fixed validation - remove non-existent fields
+        $validated = $request->validate([
+            'service_name' => 'required|string|max:255',
+            'service_fee' => 'required|string|max:100',
+            'description' => 'nullable|string'
+        ]);
+
+        // Add updated_by
+        $validated['updated_by'] = auth()->id();
+
+        // Update service
+        $service->update($validated);
+
+        return redirect()->route('services.index')
+            ->with('success', 'Service updated successfully.');
+    }
+
+    public function destroy(Service $service)
+    {
+        $service->delete();
+
+        return redirect('services')->with('success', 'Service deleted successfully.');
     }
 }

@@ -18,6 +18,8 @@ class Doctor extends Model
         'email',
         'consultation_fee',
         'status',
+        'created_by',
+        'updated_by',
     ];
 
     // Add these relationships

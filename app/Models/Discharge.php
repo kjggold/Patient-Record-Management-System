@@ -17,6 +17,8 @@ class Discharge extends Model
         'discount',
         'paid',
         'balance',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [

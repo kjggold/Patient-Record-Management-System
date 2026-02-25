@@ -68,6 +68,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{patient}/edit', [PatientHistoryController::class, 'edit'])->name('edit');
         Route::put('/{patient}', [PatientHistoryController::class, 'update'])->name('update');
 
+        Route::get('/{services}/edit', [ServiceController::class, 'edit'])->name('edit');
+        Route::put('/{services}', [ServiceController::class, 'update'])->name('update');
+
         //add new patient datas
         Route::post('/patients', [PatientHistoryController::class, 'store'])->name('patients.store');
 

@@ -36,10 +36,7 @@
                             {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <button onclick="editAppointment({{ $appointment->id }})"
-                                    class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1 rounded-md text-xs font-medium transition">
-                                    Edit
-                                </button>
+                                <button class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1 rounded-md text-xs font-medium transition" onclick="window.location.href='{{ route('appointments.edit', $appointment->id) }}'">Edit</button>
                                 <button
                                     onclick="openDischargeModal(
                                     '{{ $appointment->id }}',
@@ -82,6 +79,10 @@
 </div>
 
 {{-- PAGINATION - Same style as doctors table --}}
+
+@php
+    use Illuminate\Support\Str;
+@endphp
 @if ($appointments->hasPages())
     <div class="mt-6 bg-white rounded-xl shadow px-4 py-4 border-t">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -13,5 +13,7 @@ class Service extends Model
         'service_name',
         'service_fee',
         'description',
+        'created_by',
+        'updated_by',
     ];
 }

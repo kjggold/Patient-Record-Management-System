@@ -40,6 +40,7 @@
                                         <th class="px-6 py-3">Fee</th>
                                         <th class="px-6 py-3">Description</th>
                                         <th class="px-6 py-3">Created At</th>
+                                        <th class="px-6 py-3 text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y">
@@ -51,6 +52,19 @@
                                             <td class="px-6 py-4 text-gray-600">{{ $service->description }}</td>
                                             <td class="px-6 py-4 text-gray-500 text-sm">
                                                 {{ $service->created_at?->format('Y-m-d H:i') }}</td>
+                                            <td class="px-6 py-4 text-center space-x-2">
+                                                <button class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1 rounded-md text-xs font-medium transition"
+                                                    onclick="window.location.href='{{ route('services.edit', $service->id) }}'">Edit</a>
+                                                    <form action="/services/{{ $service->id }}" method="POST"
+                                                        onsubmit="return confirm('Are you sure you want to delete this service?')">
+                                                        @csrf
+                                                        @method('DELETE')
+
+                                                        <button class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md text-xs font-medium transition">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

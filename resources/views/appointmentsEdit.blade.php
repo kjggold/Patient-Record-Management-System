@@ -7,7 +7,7 @@
 
         @include('layouts.sidebar')
 
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-6 ml-60">
 
             {{-- HEADER --}}
             <div class="flex w-full sm:w-auto gap-2 mb-6">
@@ -37,7 +37,7 @@
                         {{-- Patient --}}
                         <div class="form-group">
                             <label>Patient <span class="required">*</span></label>
-                            <select name="patient_id" required>
+                            <select name="patient_id" id="patientSelect" required>
                                 <option value="">Select Patient</option>
                                 @foreach ($patients as $patient)
                                     <option value="{{ $patient->id }}"
@@ -51,27 +51,10 @@
                             @enderror
                         </div>
 
-                        {{-- Doctor --}}
-                        <div class="form-group">
-                            <label>Doctor <span class="required">*</span></label>
-                            <select name="doctor_id" required>
-                                <option value="">Select Doctor</option>
-                                @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}"
-                                        {{ old('doctor_id', $appointment->doctor_id) == $doctor->id ? 'selected' : '' }}>
-                                        {{ $doctor->full_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('doctor_id')
-                                <span class="text-red-500">{{ $message }}</span>
-                            @enderror
-                        </div>
-
                         {{-- Service --}}
                         <div class="form-group">
                             <label>Service <span class="required">*</span></label>
-                            <select name="service_id" required>
+                            <select name="service_id" id="serviceSelect" required>
                                 <option value="">Select Service</option>
                                 @foreach ($services as $service)
                                     <option value="{{ $service->id }}"
@@ -81,6 +64,38 @@
                                 @endforeach
                             </select>
                             @error('service_id')
+                                <span class="text-red-500">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Speciality --}}
+                        <div class="form-group">
+                            <label>Speciality</label>
+                            <select id="specialitySelect" class="w-full p-3 rounded-lg border border-gray-300 bg-white" onchange="filterDoctorsBySpeciality()">
+                                <option value="">All Specialities</option>
+                                @php
+                                    $uniqueSpecialities = $doctors->pluck('speciality')->unique()->sort();
+                                @endphp
+                                @foreach ($uniqueSpecialities as $speciality)
+                                    <option value="{{ $speciality }}">{{ $speciality }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Doctor --}}
+                        <div class="form-group">
+                            <label>Doctor <span class="required">*</span></label>
+                            <select name="doctor_id" id="doctorSelect" required onchange="updateSpecialityFromDoctor()">
+                                <option value="">Select Doctor</option>
+                                @foreach ($doctors as $doctor)
+                                    <option value="{{ $doctor->id }}" 
+                                        data-speciality="{{ $doctor->speciality }}"
+                                        {{ old('doctor_id', $appointment->doctor_id) == $doctor->id ? 'selected' : '' }}>
+                                        {{ $doctor->full_name }} - {{ $doctor->speciality }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('doctor_id')
                                 <span class="text-red-500">{{ $message }}</span>
                             @enderror
                         </div>
@@ -195,6 +210,7 @@
             background: linear-gradient(to right, #10b981, #059669);
             color: white;
             font-weight: 600;
+            cursor: pointer;
         }
 
         .cancel-btn {
@@ -240,4 +256,74 @@
             font-size: .85rem;
         }
     </style>
+
+    <script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the currently selected doctor and set speciality
+            const doctorSelect = document.getElementById('doctorSelect');
+            const specialitySelect = document.getElementById('specialitySelect');
+            
+            // Set the speciality based on the selected doctor
+            if (doctorSelect.value) {
+                updateSpecialityFromDoctor();
+            }
+        });
+
+        function filterDoctorsBySpeciality() {
+            const speciality = document.getElementById('specialitySelect').value;
+            const doctorSelect = document.getElementById('doctorSelect');
+            const options = doctorSelect.options;
+            
+            // Store the currently selected value
+            const currentValue = doctorSelect.value;
+            
+            // Show/hide options based on speciality
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                if (option.value === '') continue; // Skip the placeholder option
+                
+                const doctorSpeciality = option.getAttribute('data-speciality');
+                
+                if (!speciality || (doctorSpeciality && doctorSpeciality === speciality)) {
+                    option.style.display = '';
+                    option.disabled = false;
+                } else {
+                    option.style.display = 'none';
+                    option.disabled = true;
+                }
+            }
+            
+            // If the currently selected doctor is not in the filtered list, clear selection
+            const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
+            if (selectedOption && selectedOption.disabled) {
+                doctorSelect.value = '';
+            }
+        }
+
+        function updateSpecialityFromDoctor() {
+            const doctorSelect = document.getElementById('doctorSelect');
+            const specialitySelect = document.getElementById('specialitySelect');
+            const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
+            
+            if (selectedOption && selectedOption.value) {
+                const doctorSpeciality = selectedOption.getAttribute('data-speciality');
+                
+                // Find and select matching speciality
+                for (let i = 0; i < specialitySelect.options.length; i++) {
+                    if (specialitySelect.options[i].value === doctorSpeciality) {
+                        specialitySelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Reset filter when needed
+        function resetFilter() {
+            const specialitySelect = document.getElementById('specialitySelect');
+            specialitySelect.value = '';
+            filterDoctorsBySpeciality();
+        }
+    </script>
 @endsection

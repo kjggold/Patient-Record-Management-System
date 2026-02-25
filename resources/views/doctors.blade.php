@@ -46,14 +46,14 @@
                                 <td class="px-6 py-4 text-gray-700">{{ $doctor->speciality }}</td>
                                 <td class="px-6 py-4 text-gray-700">{{ $doctor->phone_number }}</td>
                                 <td class="px-6 py-4 text-center space-x-2">
-                                    <button class="text-amber-600 hover:underline"
+                                    <button class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1 rounded-md text-xs font-medium transition"
                                         onclick="window.location.href='{{ route('doctors.edit', $doctor->id) }}'">Edit</a>
                                         <form action="/doctors/{{ $doctor->id }}" method="POST"
                                             onsubmit="return confirm('Are you sure you want to delete this doctor?')">
                                             @csrf
                                             @method('DELETE')
 
-                                            <button class="text-red-600 hover:underline">
+                                            <button class="text-red-600 hover:text-amredber-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md text-xs font-medium transition">
                                                 Delete
                                             </button>
                                         </form>
