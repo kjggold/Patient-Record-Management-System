@@ -16,8 +16,6 @@
                     Welcome to MediCore Patient Record System
                 </h1>
 
-
-
                 <!-- User Profile with Dropdown -->
                 @auth
                 <div class="relative" x-data="{ open: false }">
@@ -99,83 +97,210 @@
             </header>
 
             <!-- KPI CARDS -->
-<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow p-5">
-        <h4 class="text-gray-500">Total Patients</h4>
-        <h2 class="text-2xl font-bold mt-2">{{ $totalPatients ?? 1234 }}</h2>
-    </div>
-    <div class="bg-white rounded-xl shadow p-5">
-        <h4 class="text-gray-500">Total Doctors</h4>
-        <h2 class="text-2xl font-bold mt-2">{{ $activeDoctors ?? 45 }}</h2>
-    </div>
-    <div class="bg-white rounded-xl shadow p-5">
-        <h4 class="text-gray-500">Total Appointments</h4>
-        <h2 class="text-2xl font-bold mt-2">{{ $appointmentsToday ?? 28 }}</h2>
-    </div>
-    <div class="bg-white rounded-xl shadow p-5">
-        <h4 class="text-gray-500">Total Revenue</h4>
-        <h2 class="text-2xl font-bold mt-2">{{ number_format($monthlyRevenue) }} MMK</h2>
-    </div>
-</section>
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow p-5">
+                    <h4 class="text-gray-500">Total Patients</h4>
+                    <h2 class="text-2xl font-bold mt-2">{{ $totalPatients ?? 1234 }}</h2>
+                </div>
+                <div class="bg-white rounded-xl shadow p-5">
+                    <h4 class="text-gray-500">Total Doctors</h4>
+                    <h2 class="text-2xl font-bold mt-2">{{ $activeDoctors ?? 45 }}</h2>
+                </div>
+                <div class="bg-white rounded-xl shadow p-5">
+                    <h4 class="text-gray-500">Total Appointments</h4>
+                    <h2 class="text-2xl font-bold mt-2">{{ $appointmentsToday ?? 28 }}</h2>
+                </div>
+                <div class="bg-white rounded-xl shadow p-5">
+                    <h4 class="text-gray-500">Total Revenue</h4>
+                    <h2 class="text-2xl font-bold mt-2">{{ number_format($monthlyRevenue) }} MMK</h2>
+                </div>
+            </section>
 
             <!-- CHARTS -->
             <section class="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6 mb-8">
                 <div class="flex-1 bg-white rounded-xl shadow p-4 min-h-[420px]">
-
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold">Patient Overview</h3>
                     </div>
-                    <div class="h-[340px]">  <!-- Adjust height as needed -->
+                    <div class="h-[340px]">
                         <canvas id="patientChart"></canvas>
                     </div>
                 </div>
-                <!-- Quick Actions (replacing Revenue graph) -->
-                <div class="flex-1 bg-white rounded-xl shadow p-5 min-h-[420px]">
 
+                <!-- Quick Actions with Hover Animations -->
+                <div class="flex-1 bg-white rounded-xl shadow p-5 min-h-[420px]">
                     <h3 class="text-xl font-semibold mb-4">Quick Actions</h3>
 
-                    <!-- Same structure as bottom -->
+                    <!-- Animation Styles -->
+                    <style>
+                        .action-button {
+                            transition: all 0.3s ease;
+                            position: relative;
+                            overflow: hidden;
+                            background: linear-gradient(145deg, #eff6ff, #dbeafe);
+                            background-size: 200% 200%;
+                            width: 100%;
+                            height: 56px;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            padding: 0 16px;
+                            border-radius: 8px;
+                            color: #111827;
+                            font-weight: 500;
+                            border: none;
+                            cursor: pointer;
+                        }
+
+                        .action-button:hover {
+                            /* transform: translateY(-5px) scale(1.02); */
+                            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                            background: linear-gradient( #7ba6e7);
+                            color: blackwhite !important;
+                            background-size: 200% 200%;
+                            /* animation: gradientShift 1s ease infinite, pulse 1s ease infinite; */
+                        }
+
+                        /* .action-button:active {
+                            transform: translateY(0) scale(0.98); */
+                        }
+
+                        /* Ripple effect */
+                        .action-button::after {
+                            content: '';
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            width: 5px;
+                            height: 5px;
+                            background: rgba(255, 255, 255, 0.5);
+                            opacity: 0;
+                            border-radius: 100%;
+                            transform: scale(1, 1) translate(-50%);
+                            transform-origin: 50% 50%;
+                        }
+
+                        .action-button:hover::after {
+                            animation: ripple 0.6s ease-out;
+                        }
+
+                        /* Glowing border effect */
+                        .action-button::before {
+                            content: '';
+                            position: absolute;
+                            top: -2px;
+                            left: -2px;
+                            right: -2px;
+                            bottom: -2px;
+                            background: linear-gradient(45deg, #3b82f6, #22d3ee, #3b82f6, #22d3ee);
+                            border-radius: 12px;
+                            opacity: 0;
+                            transition: opacity 0.3s ease;
+                            z-index: -1;
+                        }
+
+                        .action-button:hover::before {
+                            opacity: 1;
+                            animation: glowing 1.5s ease infinite;
+                        }
+
+                        /* Icon animation
+                        .action-button i {
+                            transition: all 0.4s ease;
+                            font-size: 1.25rem;
+                        }
+
+                        .action-button:hover i {
+                            transform: rotate(360deg) scale(1.2);
+                            color: #ffffff;
+                        } */
+
+                        /* Text animation */
+                        .action-button span {
+                            transition: all 0.3s ease;
+                            position: relative;
+                            display: inline-block;
+                            font-size: 1rem;
+                        }
+
+                        .action-button:hover span {
+                            transform: translateX(5px);
+                            letter-spacing: 1px;
+                        }
+
+                        /* Keyframe Animations */
+                        @keyframes gradientShift {
+                            0% { background-position: 0% 50%; }
+                            50% { background-position: 100% 50%; }
+                            100% { background-position: 0% 50%; }
+                        }
+
+                        @keyframes pulse {
+                            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+                            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+                            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+                        }
+
+                        @keyframes ripple {
+                            0% {
+                                transform: scale(0, 0);
+                                opacity: 0.5;
+                            }
+                            100% {
+                                transform: scale(40, 40);
+                                opacity: 0;
+                            }
+                        }
+
+                        @keyframes glowing {
+                            0% { filter: blur(5px); opacity: 0.5; }
+                            50% { filter: blur(10px); opacity: 0.8; }
+                            100% { filter: blur(5px); opacity: 0.5; }
+                        }
+
+                        /* Container styles */
+                        .action-container {
+                            background-color: #f9fafb;
+                            border-radius: 8px;
+                            padding: 8px;
+                            transition: all 0.3s ease;
+                        }
+
+                        .action-container:hover {
+                            background-color: #f3f4f6;
+                        }
+                    </style>
+
                     <div class="flex flex-col gap-3 h-full">
-
-                        <div class="rounded-lg bg-gray-50 p-2">
-                            <button onclick="openAddModal()"
-                                class="w-full h-14 flex items-center gap-3 px-4 rounded-lg
-                                    bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
+                        <div class="action-container">
+                            <button onclick="openAddModal()" class="action-button">
                                 <i class="fa-solid fa-user-plus"></i>
-                                Add Doctor
+                                <span>Add Doctor</span>
                             </button>
                         </div>
 
-                        <div class="rounded-lg bg-gray-50 p-2">
-                            <button onclick="openPatientModal()"
-                                class="w-full h-14 flex items-center gap-3 px-4 rounded-lg
-                                    bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
+                        <div class="action-container">
+                            <button onclick="openPatientModal()" class="action-button">
                                 <i class="fa-solid fa-user-plus"></i>
-                                Add Patient
+                                <span>Add Patient</span>
                             </button>
                         </div>
 
-                        <div class="rounded-lg bg-gray-50 p-2">
-                            <button onclick="openAppointmentModal()"
-                                class="w-full h-14 flex items-center gap-3 px-4 rounded-lg
-                                    bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
+                        <div class="action-container">
+                            <button onclick="openAppointmentModal()" class="action-button">
                                 <i class="fa-solid fa-calendar-plus"></i>
-                                Add Appointment
+                                <span>Add Appointment</span>
                             </button>
                         </div>
 
-                        <div class="rounded-lg bg-gray-50 p-2">
-                            <button onclick="openAddServiceModal()"
-                                class="w-full h-14 flex items-center gap-3 px-4 rounded-lg
-                                    bg-blue-50 hover:bg-blue-400 text-gray-900 font-medium transition">
+                        <div class="action-container">
+                            <button onclick="openAddServiceModal()" class="action-button">
                                 <i class="fa-solid fa-file-invoice-dollar"></i>
-                                Add Service
+                                <span>Add Service</span>
                             </button>
                         </div>
-
                     </div>
                 </div>
-
             </section>
         </main>
     </div>
@@ -315,7 +440,6 @@
             });
         }
 
-
         // Initialize patient chart on page load
         document.addEventListener('DOMContentLoaded', function () {
             // Always load 7-day chart
@@ -369,7 +493,6 @@
             document.getElementById('appointmentModal').classList.remove('flex');
         }
     </script>
-
 @endpush
 
 @push('styles')

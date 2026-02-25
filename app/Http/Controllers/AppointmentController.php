@@ -29,7 +29,7 @@ class AppointmentController extends Controller
 
         // Start query for appointments
         $query = Appointment::with(['patient', 'doctor', 'service'])
-            ->orderBy('appointment_date', 'asc');
+            ->orderBy('appointment_date', 'desc');
 
         // Apply search filter
         if (!empty($search)) {
@@ -68,7 +68,7 @@ class AppointmentController extends Controller
         $search = $request->input('search');
 
         $query = Appointment::with(['patient', 'doctor', 'service'])
-            ->orderBy('appointment_date', 'asc');
+            ->orderBy('appointment_date', 'desc');
 
         // Apply search filter
         if (!empty($search)) {
