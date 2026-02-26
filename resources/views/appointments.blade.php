@@ -305,34 +305,31 @@
         <main class="flex-1 p-6 ml-60">
 
 
-            <!-- Update the header section in appointments.blade.php -->
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-semibold text-slate-700">Appointments</h1>
-            </div>
+    <!-- Update the header section in appointments.blade.php -->
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold text-slate-700">Appointments</h1>
+</div>
 
-            <div class="flex justify-between items-center mb-6 gap-3">
-                <div class="flex gap-2">
-                    <input type="text" id="searchInput" placeholder="Search by ID, Patient, Doctor or Service..."
-                        class="border rounded px-3 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value="{{ request('search') ?? '' }}" autocomplete="off">
-                    <button onclick="performSearch()"
-                        class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
-                        Search
-                    </button>
-                </div>
+<div class="flex justify-between items-center mb-6 gap-3">
+    <div class="flex gap-2">
+        <input type="text" id="searchInput" placeholder="Search by ID, Patient, Doctor or Service..."
+            class="border rounded px-3 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value="{{ request('search') ?? '' }}"
+            autocomplete="off">
+        <button onclick="performSearch()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
+            Search
+        </button>
+    </div>
 
-                <button type="button" onclick="openAddModal()"
-                    class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
-                    + Add Appointment
-                </button>
-            </div>
+    <button type="button" onclick="openAddModal()"
+        class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
+        + Add Appointment
+    </button>
+</div>
 
             <!-- APPOINTMENT TABLE CONTAINER -->
             <div id="appointmentTableContainer">
-                @include('appointments.partials.appointment-table', [
-                    'appointments' => $appointments,
-                    'search' => request('search'),
-                ])
+                @include('appointments.partials.appointment-table', ['appointments' => $appointments, 'search' => request('search')])
             </div>
         </main>
     </div>
@@ -350,52 +347,57 @@
                 @csrf
 
                 <div class="add-form-grid">
-                    <div class="add-form-group">
-                        <label>Patient Name</label>
-                        <input list="patientList" id="patientNameInput" placeholder="Type to search..." required>
-                        <datalist id="patientList">
-                            @foreach ($patients as $p)
-                                <option value="{{ $p->full_name }}" data-id="{{ $p->id }}"></option>
-                            @endforeach
-                        </datalist>
-                    </div>
-
-                    <div class="add-form-group">
-                        <label>Service</label>
-                        <input list="serviceList" id="serviceNameInput" placeholder="Type to search..." required>
-                        <datalist id="serviceList">
-                            @foreach ($services as $s)
-                                <option value="{{ $s->service_name }}" data-id="{{ $s->id }}"
-                                    data-price="{{ $s->service_fee }}"></option>
-                            @endforeach
-                        </datalist>
-                    </div>
-
-                    <div class="add-form-group">
-                        <label>Speciality</label>
-                        <select id="specialitySelect" class="w-full p-3 rounded-lg border border-gray-300 bg-white" onchange="filterDoctorsBySpeciality()">
-                            <option value="">Select Speciality</option>
-                            @foreach ($doctors as $doctor)
-                                <option value="{{ $doctor->speciality }}">{{ $doctor->speciality }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="add-form-group">
-                        <label>Doctor</label>
-                        <select name="doctor_id" id="doctorSelect" class="w-full p-3 rounded-lg border border-gray-300 bg-white" onchange="updateSpecialityFromDoctor()" required>
-                            <option value="">Select Doctor</option>
-                            @foreach ($doctors as $doctor)
-                                <option value="{{ $doctor->id }}" data-speciality="{{ $doctor->speciality }}">{{ $doctor->full_name }} - {{ $doctor->speciality }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="add-form-group">
-                        <label>Appointment Date</label>
-                        <input type="date" name="appointment_date" required>
-                    </div>
+                <div class="add-form-group">
+                    <label>Patient Name</label>
+                    <input list="patientList" id="patientNameInput" placeholder="Type to search..." required>
+                    <datalist id="patientList">
+                        @foreach ($patients as $p)
+                            <option value="{{ $p->full_name }}" data-id="{{ $p->id }}"></option>
+                        @endforeach
+                    </datalist>
                 </div>
+
+                <div class="add-form-group">
+                    <label>Service</label>
+                    <input list="serviceList" id="serviceNameInput" placeholder="Type to search..." required>
+                    <datalist id="serviceList">
+                        @foreach ($services as $s)
+                            <option value="{{ $s->service_name }}" data-id="{{ $s->id }}"
+                                data-price="{{ $s->service_fee }}"></option>
+                        @endforeach
+                    </datalist>
+                </div>
+
+                <div class="add-form-group">
+                    <label>Speciality (Filter)</label>
+                    <input list="specialityList" id="specialityInput" placeholder="Type to filter doctors by speciality..." onchange="filterDoctorsBySpeciality()">
+                    <datalist id="specialityList">
+                        @foreach ($doctors->unique('speciality') as $doctor)
+                            <option value="{{ $doctor->speciality }}">{{ $doctor->speciality }}</option>
+                        @endforeach
+                    </datalist>
+                </div>
+
+                <div class="add-form-group">
+                    <label>Doctor</label>
+                    <input list="doctorList" id="doctorNameInput" placeholder="Type to search doctor..." onchange="updateSpecialityFromDoctor()" required>
+                    <datalist id="doctorList">
+                        @foreach ($doctors as $doctor)
+                            <option value="{{ $doctor->full_name }}" 
+                                    data-id="{{ $doctor->id }}" 
+                                    data-speciality="{{ $doctor->speciality }}"
+                                    title="{{ $doctor->speciality }}">
+                                {{ $doctor->full_name }} - {{ $doctor->speciality }}
+                            </option>
+                        @endforeach
+                    </datalist>
+                </div>
+
+                <div class="add-form-group">
+                    <label>Appointment Date</label>
+                    <input type="date" name="appointment_date" required>
+                </div>
+            </div>
 
                 <div class="add-form-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeAddModal()">Cancel</button>
@@ -469,10 +471,8 @@
                         </div>
 
                         <div style="margin-top:8px;display:flex;justify-content:flex-end;gap:10px;">
-                            <button type="button" class="btn btn-cancel" onclick="closeDischargeModal()"
-                                style="padding:6px 16px; font-size:0.85rem;">Cancel</button>
-                            <button type="button" class="btn btn-save" onclick="completeDischarge()"
-                                style="padding:6px 16px; font-size:0.85rem;">Complete Discharge</button>
+                            <button type="button" class="btn btn-cancel" onclick="closeDischargeModal()" style="padding:6px 16px; font-size:0.85rem;">Cancel</button>
+                            <button type="button" class="btn btn-save" onclick="completeDischarge()" style="padding:6px 16px; font-size:0.85rem;">Complete Discharge</button>
                         </div>
                     </form>
                 </div>
@@ -541,44 +541,39 @@
 
             // Show loading state
             const container = document.getElementById('appointmentTableContainer');
-            container.innerHTML =
-                '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
+            container.innerHTML = '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div><p class="mt-2 text-gray-600">Searching...</p></div>';
 
             // Build URL with search term and page
-            let url = '{{ route('appointments.index') }}?page=' + page;
+            let url = '{{ route("appointments.index") }}?page=' + page;
             if (searchTerm.trim() !== '') {
                 url += '&search=' + encodeURIComponent(searchTerm);
             }
 
             // Fetch search results
             fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.html) {
-                        container.innerHTML = data.html;
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.html) {
+                    container.innerHTML = data.html;
 
-                        // Update browser URL without reloading
-                        const newUrl = window.location.pathname + (searchTerm ? '?search=' + encodeURIComponent(
-                            searchTerm) : '');
-                        window.history.pushState({
-                            path: newUrl
-                        }, '', newUrl);
+                    // Update browser URL without reloading
+                    const newUrl = window.location.pathname + (searchTerm ? '?search=' + encodeURIComponent(searchTerm) : '');
+                    window.history.pushState({ path: newUrl }, '', newUrl);
 
-                        // Re-attach event listeners to pagination links
-                        attachPaginationListeners();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    container.innerHTML =
-                        '<div class="text-center py-8 text-red-600">An error occurred while searching. Please try again.</div>';
-                });
+                    // Re-attach event listeners to pagination links
+                    attachPaginationListeners();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="text-center py-8 text-red-600">An error occurred while searching. Please try again.</div>';
+            });
         }
 
         // Attach listeners to pagination links
@@ -685,8 +680,7 @@
             const data = {
                 appointment_id: dischargeAppointmentId.value,
                 services: [...serviceTableBody.querySelectorAll('input[type=text]')].map(i => i.value),
-                price: [...serviceTableBody.querySelectorAll('input[type=number]')].map(i => parseFloat(i.value) ||
-                    0),
+                price: [...serviceTableBody.querySelectorAll('input[type=number]')].map(i => parseFloat(i.value) || 0),
                 discount: parseFloat(dischargeDiscount.value) || 0,
                 paid: parseFloat(dischargePaid.value) || 0,
                 balance: parseFloat(dischargeBalance.value) || 0,
@@ -727,90 +721,39 @@
         document.getElementById('addAppointmentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // Get the input values
-            const patientNameInput = document.getElementById('patientNameInput').value;
-            const doctorSelect = document.getElementById('doctorSelect');
-            const serviceNameInput = document.getElementById('serviceNameInput').value;
-            const appointmentDate = this.querySelector('[name=appointment_date]').value;
+            const patientName = document.getElementById('patientNameInput').value;
+            const doctorName = document.getElementById('doctorNameInput').value;
+            const serviceName = document.getElementById('serviceNameInput').value;
 
-            // Get doctor ID from select
-            const doctorId = doctorSelect.value;
-            
-            // Find patient and service from datalists
-            const patientOptions = [...document.getElementById('patientList').options];
-            const serviceOptions = [...document.getElementById('serviceList').options];
-            
-            const selectedPatient = patientOptions.find(o => o.value === patientNameInput);
-            const selectedService = serviceOptions.find(o => o.value === serviceNameInput);
+            const p = [...document.getElementById('patientList').options].find(o => o.value === patientName);
+            const d = [...document.getElementById('doctorList').options].find(o => o.value === doctorName);
+            const s = [...document.getElementById('serviceList').options].find(o => o.value === serviceName);
 
-            // Validate selections
-            if (!selectedPatient) {
-                showNotification('❌ Please select a valid Patient from the list.');
-                return;
-            }
-            
-            if (!doctorId) {
-                showNotification('❌ Please select a Doctor.');
-                return;
-            }
-            
-            if (!selectedService) {
-                showNotification('❌ Please select a valid Service from the list.');
-                return;
-            }
-            
-            if (!appointmentDate) {
-                showNotification('❌ Please select an Appointment Date.');
+            if (!p || !d || !s) {
+                showNotification('❌ Please select valid Patient, Doctor, and Service.');
                 return;
             }
 
-            // Create FormData and append values
             const fd = new FormData();
-            fd.append('patient_id', selectedPatient.dataset.id);
-            fd.append('doctor_id', doctorId);
-            fd.append('service_id', selectedService.dataset.id);
-            fd.append('appointment_date', appointmentDate);
+            fd.append('patient_id', p.dataset.id);
+            fd.append('doctor_id', d.dataset.id);
+            fd.append('service_id', s.dataset.id);
+            fd.append('appointment_date', this.querySelector('[name=appointment_date]').value);
             fd.append('_token', csrfToken);
 
-            try {
-                // Show loading state
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Saving...';
-                submitBtn.disabled = true;
+            const res = await fetch(this.action, {
+                method: 'POST',
+                body: fd
+            });
+            const result = await res.json();
 
-                const res = await fetch(this.action, {
-                    method: 'POST',
-                    body: fd,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                const result = await res.json();
+            if (result.success) {
+                this.reset();
+                closeAddModal();
+                showNotification('✅ Appointment added!');
 
-                // Reset button state
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-
-                if (result.success) {
-                    this.reset();
-                    closeAddModal();
-                    showNotification('✅ Appointment added successfully!');
-                    // Refresh the appointments table
-                    performSearch();
-                } else {
-                    showNotification('❌ Error: ' + (result.message || 'Failed to add appointment'));
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showNotification('❌ Network error. Please try again.');
-                
-                // Reset button state
-                const submitBtn = this.querySelector('button[type="submit"]');
-                submitBtn.textContent = 'Save Appointment';
-                submitBtn.disabled = false;
+                // Refresh the current page to show new appointment
+                performSearch();
             }
         });
 
@@ -824,53 +767,89 @@
             console.log('Edit appointment:', id);
         }
 
-        function filterDoctorsBySpeciality() {
-            const speciality = document.getElementById('specialitySelect').value;
-            const doctorSelect = document.getElementById('doctorSelect');
-            const options = doctorSelect.options;
-            
-            // Show all options if no speciality selected
-            if (!speciality) {
-                for (let i = 0; i < options.length; i++) {
-                    options[i].style.display = '';
-                }
-                doctorSelect.value = '';
-                return;
-            }
-            
-            // Filter doctors by speciality
-            let firstVisible = null;
-            for (let i = 0; i < options.length; i++) {
-                const option = options[i];
-                if (option.value === '') continue;
-                
-                const doctorSpeciality = option.getAttribute('data-speciality');
-                if (doctorSpeciality && doctorSpeciality.toLowerCase().includes(speciality.toLowerCase())) {
-                    option.style.display = '';
-                    if (!firstVisible) firstVisible = option;
-                } else {
-                    option.style.display = 'none';
-                }
-            }
-            
-            doctorSelect.value = '';
-        }
+        // Store all doctors data for filtering
+const doctorsData = [
+    @foreach ($doctors as $doctor)
+    {
+        id: {{ $doctor->id }},
+        name: "{{ $doctor->full_name }}",
+        speciality: "{{ $doctor->speciality }}"
+    },
+    @endforeach
+];
 
-        function updateSpecialityFromDoctor() {
-            const doctorSelect = document.getElementById('doctorSelect');
-            const specialitySelect = document.getElementById('specialitySelect');
-            const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
-            
-            if (selectedOption && selectedOption.value) {
-                const doctorSpeciality = selectedOption.getAttribute('data-speciality');
-                // Find and select matching speciality
-                for (let i = 0; i < specialitySelect.options.length; i++) {
-                    if (specialitySelect.options[i].value.toLowerCase() === doctorSpeciality.toLowerCase()) {
-                        specialitySelect.selectedIndex = i;
-                        break;
-                    }
+// Function to filter doctors based on selected speciality
+function filterDoctorsBySpeciality() {
+    const specialityInput = document.getElementById('specialityInput').value.toLowerCase();
+    const doctorDatalist = document.getElementById('doctorList');
+    const doctorInput = document.getElementById('doctorNameInput');
+    
+    // Clear current doctor selection
+    doctorInput.value = '';
+    
+    // Remove all current options
+    while (doctorDatalist.firstChild) {
+        doctorDatalist.removeChild(doctorDatalist.firstChild);
+    }
+    
+    // Filter and add doctors that match the speciality
+    let hasMatches = false;
+    doctorsData.forEach(doctor => {
+        if (specialityInput === '' || doctor.speciality.toLowerCase().includes(specialityInput)) {
+            hasMatches = true;
+            const option = document.createElement('option');
+            option.value = doctor.name;
+            option.setAttribute('data-id', doctor.id);
+            option.setAttribute('data-speciality', doctor.speciality);
+            option.textContent = `${doctor.name} - ${doctor.speciality}`;
+            doctorDatalist.appendChild(option);
+        }
+    });
+    
+    // If no matches, show a "no results" indicator
+    if (!hasMatches && specialityInput !== '') {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No doctors found for this speciality';
+        option.disabled = true;
+        doctorDatalist.appendChild(option);
+    }
+}
+
+// Function to update speciality when doctor is selected
+function updateSpecialityFromDoctor() {
+    const doctorInput = document.getElementById('doctorNameInput').value;
+    const doctorOptions = document.getElementById('doctorList').options;
+    const specialityInput = document.getElementById('specialityInput');
+    
+    // Find the selected doctor in the datalist
+    for (let i = 0; i < doctorOptions.length; i++) {
+            const option = doctorOptions[i];
+            if (option.value === doctorInput) {
+                const doctorSpeciality = option.getAttribute('data-speciality');
+                if (doctorSpeciality) {
+                    specialityInput.value = doctorSpeciality;
                 }
+                break;
             }
         }
+    }
+
+    // Add event listener for when doctor is selected via keyboard/click
+    document.getElementById('doctorNameInput').addEventListener('input', function(e) {
+        // Small delay to allow datalist selection to register
+        setTimeout(updateSpecialityFromDoctor, 100);
+    });
+
+    // Initialize speciality filter on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial filter to show all doctors
+        filterDoctorsBySpeciality();
+        
+        // Add event listener for speciality input changes
+        document.getElementById('specialityInput').addEventListener('input', function() {
+            filterDoctorsBySpeciality();
+        });
+    });
     </script>
 @endsection

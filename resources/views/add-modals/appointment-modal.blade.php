@@ -11,66 +11,62 @@
             <input type="hidden" name="service_id" id="serviceIdInput">
 
             <div class="add-form-grid">
-
-                <!-- Patient -->
                 <div class="add-form-group">
                     <label>Patient Name</label>
-                    <input list="patientList" id="patientNameInput" placeholder="Type patient name" required>
+                    <input list="patientList" id="patientNameInput" placeholder="Type to search..." required>
                     <datalist id="patientList">
-                        @foreach ($patients as $patient)
-                            <option value="{{ $patient->full_name }}" data-id="{{ $patient->id }}"></option>
+                        @foreach ($patients as $p)
+                            <option value="{{ $p->full_name }}" data-id="{{ $p->id }}"></option>
                         @endforeach
                     </datalist>
                 </div>
 
-                <!-- Service -->
                 <div class="add-form-group">
                     <label>Service</label>
                     <input list="serviceList" id="serviceNameInput" placeholder="Type to search..." required>
                     <datalist id="serviceList">
                         @foreach ($services as $s)
-                            <option value="{{ $s->service_name }}" data-id="{{ $s->id }}" data-price="{{ $s->service_fee }}"></option>
+                            <option value="{{ $s->service_name }}" data-id="{{ $s->id }}"
+                                data-price="{{ $s->service_fee }}"></option>
                         @endforeach
                     </datalist>
                 </div>
 
-                <!-- Speciality -->
                 <div class="add-form-group">
-                    <label>Speciality</label>
-                    <select id="specialitySelect" class="w-full p-3 rounded-lg border border-gray-300 bg-white" onchange="filterDoctorsBySpeciality()">
-                        <option value="">Select Speciality</option>
-                        @php
-                            $uniqueSpecialities = $doctors->pluck('speciality')->unique()->sort();
-                        @endphp
-                        @foreach ($uniqueSpecialities as $speciality)
-                            <option value="{{ $speciality }}">{{ $speciality }}</option>
+                    <label>Speciality (Filter)</label>
+                    <input list="specialityList" id="specialityInput" placeholder="Type to filter doctors by speciality..." onchange="filterDoctorsBySpeciality()">
+                    <datalist id="specialityList">
+                        @foreach ($doctors->unique('speciality') as $doctor)
+                            <option value="{{ $doctor->speciality }}">{{ $doctor->speciality }}</option>
                         @endforeach
-                    </select>
+                    </datalist>
                 </div>
 
-                <!-- Doctor -->
                 <div class="add-form-group">
                     <label>Doctor</label>
-                    <select id="doctorSelect" class="w-full p-3 rounded-lg border border-gray-300 bg-white" onchange="updateDoctorId()" required>
-                        <option value="">Select Doctor</option>
+                    <input list="doctorList" id="doctorNameInput" placeholder="Type to search doctor..." onchange="updateSpecialityFromDoctor()" required>
+                    <datalist id="doctorList">
                         @foreach ($doctors as $doctor)
-                            <option value="{{ $doctor->id }}" data-speciality="{{ $doctor->speciality }}">{{ $doctor->full_name }} - {{ $doctor->speciality }}</option>
+                            <option value="{{ $doctor->full_name }}" 
+                                    data-id="{{ $doctor->id }}" 
+                                    data-speciality="{{ $doctor->speciality }}"
+                                    title="{{ $doctor->speciality }}">
+                                {{ $doctor->full_name }} - {{ $doctor->speciality }}
+                            </option>
                         @endforeach
-                    </select>
+                    </datalist>
                 </div>
 
-                <!-- Date -->
                 <div class="add-form-group">
                     <label>Appointment Date</label>
-                    <input type="date" name="appointment_date" id="appointmentDate" required>
+                    <input type="date" name="appointment_date" required>
                 </div>
-
             </div>
 
-            <div class="add-form-actions">
-                <button type="button" class="btn btn-cancel" onclick="closeAppointmentModal()">Cancel</button>
-                <button type="submit" class="btn btn-save">Save Appointment</button>
-            </div>
+                <div class="add-form-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeAppointmentModal()">Cancel</button>
+                    <button type="submit" class="btn btn-save">Save Appointment</button>
+                </div>
         </form>
     </div>
 </div>
@@ -90,94 +86,6 @@
         document.getElementById('appointmentModal').classList.add('hidden');
         document.getElementById('appointmentModal').style.display = 'none';
     }
-    
-    // document.getElementById('addAppointmentForm').addEventListener('submit', async function(e) {
-//     e.preventDefault();
-
-//     // Get the input values
-//     const patientNameInput = document.getElementById('patientNameInput').value;
-//     const doctorSelect = document.getElementById('doctorSelect');
-//     const serviceNameInput = document.getElementById('serviceNameInput').value;
-//     const appointmentDate = this.querySelector('[name=appointment_date]').value;
-
-//     // Get doctor ID from select
-//     const doctorId = doctorSelect.value;
-    
-//     // Find patient and service from datalists
-//     const patientOptions = [...document.getElementById('patientList').options];
-//     const serviceOptions = [...document.getElementById('serviceList').options];
-    
-//     const selectedPatient = patientOptions.find(o => o.value === patientNameInput);
-//     const selectedService = serviceOptions.find(o => o.value === serviceNameInput);
-
-//     // Validate selections
-//     if (!selectedPatient) {
-//         showNotification('❌ Please select a valid Patient from the list.');
-//         return;
-//     }
-    
-//     if (!doctorId) {
-//         showNotification('❌ Please select a Doctor.');
-//         return;
-//     }
-    
-//     if (!selectedService) {
-//         showNotification('❌ Please select a valid Service from the list.');
-//         return;
-//     }
-    
-//     if (!appointmentDate) {
-//         showNotification('❌ Please select an Appointment Date.');
-//         return;
-//     }
-
-//     // Create FormData and append values
-//     const fd = new FormData();
-//     fd.append('patient_id', selectedPatient.dataset.id);
-//     fd.append('doctor_id', doctorId);
-//     fd.append('service_id', selectedService.dataset.id);
-//     fd.append('appointment_date', appointmentDate);
-//     fd.append('_token', csrfToken);
-
-//     try {
-//         // Show loading state
-//         const submitBtn = this.querySelector('button[type="submit"]');
-//         const originalText = submitBtn.textContent;
-//         submitBtn.textContent = 'Saving...';
-//         submitBtn.disabled = true;
-
-//         const res = await fetch(this.action, {
-//             method: 'POST',
-//             body: fd,
-//             headers: {
-//                 'X-Requested-With': 'XMLHttpRequest',
-//                 'Accept': 'application/json'
-//             }
-//         });
-        
-//         const result = await res.json();
-
-//         if (result.success) {
-//             this.reset();
-//             closeAppointmentModal();
-//             showNotification('✅ Appointment added successfully!');
-            
-//             // 🟢 ADD THIS LINE - Redirect to appointments page
-//             window.location.href = '{{ route("appointments.index") }}';
-            
-//         } else {
-//             showNotification('❌ Error: ' + (result.message || 'Failed to add appointment'));
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//         showNotification('❌ Network error. Please try again.');
-//     } finally {
-//         // Reset button state
-//         const submitBtn = this.querySelector('button[type="submit"]');
-//         submitBtn.textContent = 'Save Appointment';
-//         submitBtn.disabled = false;
-//     }
-// });
 
     // Map datalist selections → hidden IDs (for patient and service only)
     function bindDatalist(inputId, listId, hiddenId) {
@@ -207,68 +115,92 @@
     // Bind patient and service datalists (doctor is handled separately)
     bindDatalist('patientNameInput', 'patientList', 'patientIdInput');
     bindDatalist('serviceNameInput', 'serviceList', 'serviceIdInput');
+    bindDatalist('doctorNameInput', 'doctorList', 'doctorIdInput');
 
-    // Handle doctor selection
-    function updateDoctorId() {
-        const doctorSelect = document.getElementById('doctorSelect');
-        const doctorIdInput = document.getElementById('doctorIdInput');
-        const specialitySelect = document.getElementById('specialitySelect');
-        
-        if (doctorSelect.value) {
-            doctorIdInput.value = doctorSelect.value;
-            
-            // Update speciality based on selected doctor
-            const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
-            const doctorSpeciality = selectedOption.getAttribute('data-speciality');
-            
-            // Find and select matching speciality
-            for (let i = 0; i < specialitySelect.options.length; i++) {
-                if (specialitySelect.options[i].value === doctorSpeciality) {
-                    specialitySelect.selectedIndex = i;
-                    break;
+            // Store all doctors data for filtering
+const doctorsData = [
+    @foreach ($doctors as $doctor)
+    {
+        id: {{ $doctor->id }},
+        name: "{{ $doctor->full_name }}",
+        speciality: "{{ $doctor->speciality }}"
+    },
+    @endforeach
+];
+
+// Function to filter doctors based on selected speciality
+function filterDoctorsBySpeciality() {
+    const specialityInput = document.getElementById('specialityInput').value.toLowerCase();
+    const doctorDatalist = document.getElementById('doctorList');
+    const doctorInput = document.getElementById('doctorNameInput');
+    
+    // Clear current doctor selection
+    doctorInput.value = '';
+    
+    // Remove all current options
+    while (doctorDatalist.firstChild) {
+        doctorDatalist.removeChild(doctorDatalist.firstChild);
+    }
+    
+    // Filter and add doctors that match the speciality
+    let hasMatches = false;
+    doctorsData.forEach(doctor => {
+        if (specialityInput === '' || doctor.speciality.toLowerCase().includes(specialityInput)) {
+            hasMatches = true;
+            const option = document.createElement('option');
+            option.value = doctor.name;
+            option.setAttribute('data-id', doctor.id);
+            option.setAttribute('data-speciality', doctor.speciality);
+            option.textContent = `${doctor.name} - ${doctor.speciality}`;
+            doctorDatalist.appendChild(option);
+        }
+    });
+    
+    // If no matches, show a "no results" indicator
+    if (!hasMatches && specialityInput !== '') {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No doctors found for this speciality';
+        option.disabled = true;
+        doctorDatalist.appendChild(option);
+    }
+}
+
+// Function to update speciality when doctor is selected
+function updateSpecialityFromDoctor() {
+    const doctorInput = document.getElementById('doctorNameInput').value;
+    const doctorOptions = document.getElementById('doctorList').options;
+    const specialityInput = document.getElementById('specialityInput');
+    
+    // Find the selected doctor in the datalist
+    for (let i = 0; i < doctorOptions.length; i++) {
+            const option = doctorOptions[i];
+            if (option.value === doctorInput) {
+                const doctorSpeciality = option.getAttribute('data-speciality');
+                if (doctorSpeciality) {
+                    specialityInput.value = doctorSpeciality;
                 }
+                break;
             }
-        } else {
-            doctorIdInput.value = '';
         }
-        console.log('doctorIdInput set to:', doctorIdInput.value);
     }
 
-    function filterDoctorsBySpeciality() {
-        const speciality = document.getElementById('specialitySelect').value;
-        const doctorSelect = document.getElementById('doctorSelect');
-        const options = doctorSelect.options;
-        const doctorIdInput = document.getElementById('doctorIdInput');
+    // Add event listener for when doctor is selected via keyboard/click
+    document.getElementById('doctorNameInput').addEventListener('input', function(e) {
+        // Small delay to allow datalist selection to register
+        setTimeout(updateSpecialityFromDoctor, 100);
+    });
+
+    // Initialize speciality filter on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial filter to show all doctors
+        filterDoctorsBySpeciality();
         
-        // Show all options if no speciality selected
-        if (!speciality) {
-            for (let i = 0; i < options.length; i++) {
-                options[i].style.display = '';
-                options[i].disabled = false;
-            }
-            doctorSelect.value = '';
-            doctorIdInput.value = '';
-            return;
-        }
-        
-        // Filter doctors by speciality
-        for (let i = 0; i < options.length; i++) {
-            const option = options[i];
-            if (option.value === '') continue;
-            
-            const doctorSpeciality = option.getAttribute('data-speciality');
-            if (doctorSpeciality && doctorSpeciality === speciality) {
-                option.style.display = '';
-                option.disabled = false;
-            } else {
-                option.style.display = 'none';
-                option.disabled = true;
-            }
-        }
-        
-        doctorSelect.value = '';
-        doctorIdInput.value = '';
-    }
+        // Add event listener for speciality input changes
+        document.getElementById('specialityInput').addEventListener('input', function() {
+            filterDoctorsBySpeciality();
+        });
+    });
 </script>
 
 <style>
