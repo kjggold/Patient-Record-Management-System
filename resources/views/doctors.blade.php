@@ -30,19 +30,17 @@
             <h1 class="text-2xl font-semibold text-slate-700">Doctor Lists</h1>
         </div>
 
-        <div class="flex justify-between items-center mb-6 gap-3">
+        <div class="flex justify-end items-center mb-6 gap-3">
             <!-- Search Input -->
             <div class="flex gap-2">
-                <input type="text" id="searchInput" placeholder="Search by name, specialty, phone or email"
-                    class="border rounded px-3 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="text" id="searchInput" placeholder="Search by name, specialty"
+                    class="border rounded px-3 py-2 w-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value="{{ request('search') ?? '' }}"
                     autocomplete="off">
-                    <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
+                    <button onclick="openAddModal()" class="bg-sky-600 text-white px-2 py-2 rounded-lg shadow hover:bg-sky-700">
                         + Add Doctor
                     </button>
             </div>
-
-
         </div>
 
         <!-- DOCTOR TABLE CONTAINER -->

@@ -310,14 +310,14 @@
     <h1 class="text-2xl font-semibold text-slate-700">Appointments</h1>
 </div>
 
-<div class="flex justify-between items-center mb-6 gap-3">
+<div class="flex justify-end items-center mb-6 gap-3">
     <div class="flex gap-2">
         <input type="text" id="searchInput" placeholder="Search by ID, Patient, Doctor or Service..."
-            class="border rounded px-3 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="border rounded px-3 py-2 w-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value="{{ request('search') ?? '' }}"
             autocomplete="off">
             <button type="button" onclick="openAddModal()"
-            class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
+            class="bg-sky-600 text-white px-2 py-2 rounded-lg shadow hover:bg-sky-700">
             + Add Appointment
         </button>
     </div>
@@ -345,42 +345,57 @@
                 @csrf
 
                 <div class="add-form-grid">
-                    <div class="add-form-group">
-                        <label>Patient Name</label>
-                        <input list="patientList" id="patientNameInput" placeholder="Type to search..." required>
-                        <datalist id="patientList">
-                            @foreach ($patients as $p)
-                                <option value="{{ $p->full_name }}" data-id="{{ $p->id }}"></option>
-                            @endforeach
-                        </datalist>
-                    </div>
-
-                    <div class="add-form-group">
-                        <label>Doctor</label>
-                        <input list="doctorList" id="doctorNameInput" placeholder="Type to search..." required>
-                        <datalist id="doctorList">
-                            @foreach ($doctors as $d)
-                                <option value="{{ $d->full_name }}" data-id="{{ $d->id }}"></option>
-                            @endforeach
-                        </datalist>
-                    </div>
-
-                    <div class="add-form-group">
-                        <label>Service</label>
-                        <input list="serviceList" id="serviceNameInput" placeholder="Type to search..." required>
-                        <datalist id="serviceList">
-                            @foreach ($services as $s)
-                                <option value="{{ $s->service_name }}" data-id="{{ $s->id }}"
-                                    data-price="{{ $s->service_fee }}"></option>
-                            @endforeach
-                        </datalist>
-                    </div>
-
-                    <div class="add-form-group">
-                        <label>Appointment Date</label>
-                        <input type="date" name="appointment_date" required>
-                    </div>
+                <div class="add-form-group">
+                    <label>Patient Name</label>
+                    <input list="patientList" id="patientNameInput" placeholder="Type to search..." required>
+                    <datalist id="patientList">
+                        @foreach ($patients as $p)
+                            <option value="{{ $p->full_name }}" data-id="{{ $p->id }}"></option>
+                        @endforeach
+                    </datalist>
                 </div>
+
+                <div class="add-form-group">
+                    <label>Service</label>
+                    <input list="serviceList" id="serviceNameInput" placeholder="Type to search..." required>
+                    <datalist id="serviceList">
+                        @foreach ($services as $s)
+                            <option value="{{ $s->service_name }}" data-id="{{ $s->id }}"
+                                data-price="{{ $s->service_fee }}"></option>
+                        @endforeach
+                    </datalist>
+                </div>
+
+                <div class="add-form-group">
+                    <label>Speciality (Filter)</label>
+                    <input list="specialityList" id="specialityInput" placeholder="Type to filter doctors by speciality..." onchange="filterDoctorsBySpeciality()">
+                    <datalist id="specialityList">
+                        @foreach ($doctors->unique('speciality') as $doctor)
+                            <option value="{{ $doctor->speciality }}">{{ $doctor->speciality }}</option>
+                        @endforeach
+                    </datalist>
+                </div>
+
+                <div class="add-form-group">
+                    <label>Doctor</label>
+                    <input list="doctorList" id="doctorNameInput" placeholder="Type to search doctor..." onchange="updateSpecialityFromDoctor()" required>
+                    <datalist id="doctorList">
+                        @foreach ($doctors as $doctor)
+                            <option value="{{ $doctor->full_name }}"
+                                    data-id="{{ $doctor->id }}"
+                                    data-speciality="{{ $doctor->speciality }}"
+                                    title="{{ $doctor->speciality }}">
+                                {{ $doctor->full_name }} - {{ $doctor->speciality }}
+                            </option>
+                        @endforeach
+                    </datalist>
+                </div>
+
+                <div class="add-form-group">
+                    <label>Appointment Date</label>
+                    <input type="date" name="appointment_date" required>
+                </div>
+            </div>
 
                 <div class="add-form-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeAddModal()">Cancel</button>
@@ -749,5 +764,90 @@
             // Implement edit functionality if needed
             console.log('Edit appointment:', id);
         }
+
+        // Store all doctors data for filtering
+const doctorsData = [
+    @foreach ($doctors as $doctor)
+    {
+        id: {{ $doctor->id }},
+        name: "{{ $doctor->full_name }}",
+        speciality: "{{ $doctor->speciality }}"
+    },
+    @endforeach
+];
+
+// Function to filter doctors based on selected speciality
+function filterDoctorsBySpeciality() {
+    const specialityInput = document.getElementById('specialityInput').value.toLowerCase();
+    const doctorDatalist = document.getElementById('doctorList');
+    const doctorInput = document.getElementById('doctorNameInput');
+
+    // Clear current doctor selection
+    doctorInput.value = '';
+
+    // Remove all current options
+    while (doctorDatalist.firstChild) {
+        doctorDatalist.removeChild(doctorDatalist.firstChild);
+    }
+
+    // Filter and add doctors that match the speciality
+    let hasMatches = false;
+    doctorsData.forEach(doctor => {
+        if (specialityInput === '' || doctor.speciality.toLowerCase().includes(specialityInput)) {
+            hasMatches = true;
+            const option = document.createElement('option');
+            option.value = doctor.name;
+            option.setAttribute('data-id', doctor.id);
+            option.setAttribute('data-speciality', doctor.speciality);
+            option.textContent = `${doctor.name} - ${doctor.speciality}`;
+            doctorDatalist.appendChild(option);
+        }
+    });
+
+    // If no matches, show a "no results" indicator
+    if (!hasMatches && specialityInput !== '') {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No doctors found for this speciality';
+        option.disabled = true;
+        doctorDatalist.appendChild(option);
+    }
+}
+
+// Function to update speciality when doctor is selected
+function updateSpecialityFromDoctor() {
+    const doctorInput = document.getElementById('doctorNameInput').value;
+    const doctorOptions = document.getElementById('doctorList').options;
+    const specialityInput = document.getElementById('specialityInput');
+
+    // Find the selected doctor in the datalist
+    for (let i = 0; i < doctorOptions.length; i++) {
+            const option = doctorOptions[i];
+            if (option.value === doctorInput) {
+                const doctorSpeciality = option.getAttribute('data-speciality');
+                if (doctorSpeciality) {
+                    specialityInput.value = doctorSpeciality;
+                }
+                break;
+            }
+        }
+    }
+
+    // Add event listener for when doctor is selected via keyboard/click
+    document.getElementById('doctorNameInput').addEventListener('input', function(e) {
+        // Small delay to allow datalist selection to register
+        setTimeout(updateSpecialityFromDoctor, 100);
+    });
+
+    // Initialize speciality filter on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial filter to show all doctors
+        filterDoctorsBySpeciality();
+
+        // Add event listener for speciality input changes
+        document.getElementById('specialityInput').addEventListener('input', function() {
+            filterDoctorsBySpeciality();
+        });
+    });
     </script>
 @endsection

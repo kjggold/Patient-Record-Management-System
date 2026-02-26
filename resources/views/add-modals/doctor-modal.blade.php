@@ -38,8 +38,9 @@
                 </div>
 
                 <div class="footer-buttons">
-                    <button type="submit" class="submit-btn">Submit</button>
                     <button type="button" onclick="closeAddModal()" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="submit-btn">Submit</button>
+
                 </div>
             </form>
         </div>
