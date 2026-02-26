@@ -58,6 +58,9 @@ Route::get('/patient-history/{patient}/download-report', [App\Http\Controllers\P
 Route::post('/appointments', [AppointmentController::class, 'store'])
     ->name('appointments.store');
 
+Route::post('/appointments/store_dashboard', [AppointmentController::class, 'store_dashboard'])
+    ->name('appointments.store_dashboard');
+
 Route::middleware(['auth'])->group(function () {
     // Patient History Routes
     Route::prefix('patient-history')->name('patient-history.')->group(function () {

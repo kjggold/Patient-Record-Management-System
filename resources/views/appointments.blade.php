@@ -724,95 +724,95 @@
         }
 
         /* ================= ADD APPOINTMENT ================= */
-document.getElementById('addAppointmentForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+        document.getElementById('addAppointmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-    // Get the input values
-    const patientNameInput = document.getElementById('patientNameInput').value;
-    const doctorSelect = document.getElementById('doctorSelect');
-    const serviceNameInput = document.getElementById('serviceNameInput').value;
-    const appointmentDate = this.querySelector('[name=appointment_date]').value;
+            // Get the input values
+            const patientNameInput = document.getElementById('patientNameInput').value;
+            const doctorSelect = document.getElementById('doctorSelect');
+            const serviceNameInput = document.getElementById('serviceNameInput').value;
+            const appointmentDate = this.querySelector('[name=appointment_date]').value;
 
-    // Get doctor ID from select
-    const doctorId = doctorSelect.value;
-    
-    // Find patient and service from datalists
-    const patientOptions = [...document.getElementById('patientList').options];
-    const serviceOptions = [...document.getElementById('serviceList').options];
-    
-    const selectedPatient = patientOptions.find(o => o.value === patientNameInput);
-    const selectedService = serviceOptions.find(o => o.value === serviceNameInput);
+            // Get doctor ID from select
+            const doctorId = doctorSelect.value;
+            
+            // Find patient and service from datalists
+            const patientOptions = [...document.getElementById('patientList').options];
+            const serviceOptions = [...document.getElementById('serviceList').options];
+            
+            const selectedPatient = patientOptions.find(o => o.value === patientNameInput);
+            const selectedService = serviceOptions.find(o => o.value === serviceNameInput);
 
-    // Validate selections
-    if (!selectedPatient) {
-        showNotification('❌ Please select a valid Patient from the list.');
-        return;
-    }
-    
-    if (!doctorId) {
-        showNotification('❌ Please select a Doctor.');
-        return;
-    }
-    
-    if (!selectedService) {
-        showNotification('❌ Please select a valid Service from the list.');
-        return;
-    }
-    
-    if (!appointmentDate) {
-        showNotification('❌ Please select an Appointment Date.');
-        return;
-    }
+            // Validate selections
+            if (!selectedPatient) {
+                showNotification('❌ Please select a valid Patient from the list.');
+                return;
+            }
+            
+            if (!doctorId) {
+                showNotification('❌ Please select a Doctor.');
+                return;
+            }
+            
+            if (!selectedService) {
+                showNotification('❌ Please select a valid Service from the list.');
+                return;
+            }
+            
+            if (!appointmentDate) {
+                showNotification('❌ Please select an Appointment Date.');
+                return;
+            }
 
-    // Create FormData and append values
-    const fd = new FormData();
-    fd.append('patient_id', selectedPatient.dataset.id);
-    fd.append('doctor_id', doctorId);
-    fd.append('service_id', selectedService.dataset.id);
-    fd.append('appointment_date', appointmentDate);
-    fd.append('_token', csrfToken);
+            // Create FormData and append values
+            const fd = new FormData();
+            fd.append('patient_id', selectedPatient.dataset.id);
+            fd.append('doctor_id', doctorId);
+            fd.append('service_id', selectedService.dataset.id);
+            fd.append('appointment_date', appointmentDate);
+            fd.append('_token', csrfToken);
 
-    try {
-        // Show loading state
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Saving...';
-        submitBtn.disabled = true;
+            try {
+                // Show loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Saving...';
+                submitBtn.disabled = true;
 
-        const res = await fetch(this.action, {
-            method: 'POST',
-            body: fd,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
+                const res = await fetch(this.action, {
+                    method: 'POST',
+                    body: fd,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const result = await res.json();
+
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+
+                if (result.success) {
+                    this.reset();
+                    closeAddModal();
+                    showNotification('✅ Appointment added successfully!');
+                    // Refresh the appointments table
+                    performSearch();
+                } else {
+                    showNotification('❌ Error: ' + (result.message || 'Failed to add appointment'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('❌ Network error. Please try again.');
+                
+                // Reset button state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Save Appointment';
+                submitBtn.disabled = false;
             }
         });
-        
-        const result = await res.json();
-
-        // Reset button state
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-
-        if (result.success) {
-            this.reset();
-            closeAddModal();
-            showNotification('✅ Appointment added successfully!');
-            // Refresh the appointments table
-            performSearch();
-        } else {
-            showNotification('❌ Error: ' + (result.message || 'Failed to add appointment'));
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification('❌ Network error. Please try again.');
-        
-        // Reset button state
-        const submitBtn = this.querySelector('button[type="submit"]');
-        submitBtn.textContent = 'Save Appointment';
-        submitBtn.disabled = false;
-    }
-});
 
         // Handle browser back/forward buttons
         window.addEventListener('popstate', function() {

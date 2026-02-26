@@ -127,6 +127,10 @@ class AppointmentController extends Controller
         // Load relationships
         $appointment->load(['patient', 'doctor', 'service']);
 
+        if ($request->force_redirect) {
+            return redirect()->route('appointments.index')->with('success', 'Created');
+        }
+
         // Return JSON for live table update
         return response()->json([
             'success' => true,
@@ -140,6 +144,30 @@ class AppointmentController extends Controller
                 'appointment_date' => $appointment->appointment_date,
             ]
         ]);
+    }
+
+    public function store_dashboard(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => 'required|exists:doctors,id',
+            'service_id' => 'required|exists:services,id',
+            'appointment_date' => 'required|date',
+        ]);
+
+        $userId = auth()->id();
+        Appointment::create([
+            'patient_id' => $request->patient_id,
+            'doctor_id' => $request->doctor_id,
+            'service_id' => $request->service_id,
+            'appointment_date' => $request->appointment_date,
+            'created_by' => $userId,
+            'updated_by' => null,
+        ]);
+
+        // Redirect back with success message
+        return redirect('appointments')->with('success', 'Appointment added successfully!');
     }
 
     public function edit($id)
