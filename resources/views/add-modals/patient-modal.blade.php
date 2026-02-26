@@ -1,4 +1,4 @@
-<!-- ADD PATIENT MODAL -->
+<<!-- ADD PATIENT MODAL -->
 <div id="patientModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 overflow-auto py-10 ">
     <div class="patient-form-container ml-80">
         <form method="POST" action="{{ route('patients.store') }}" id="patientForm" enctype="multipart/form-data">
@@ -31,10 +31,40 @@
                 </div>
             </div>
 
+            <!-- Fixed Phone Number and Address Row -->
             <div class="form-row">
                 <div class="form-group">
                     <label class="required">Phone Number</label>
-                    <input type="tel" name="phone_number" id="phone_number" placeholder="Enter Phone Number" required>
+                    <div class="phone-input-container">
+                        <div class="country-code-selector">
+                            <select name="country_code" id="country_code" class="country-code">
+                                <option value="+95" selected>+95 (Myanmar)</option>
+                                <option value="+1">+1 (USA/Canada)</option>
+                                <option value="+44">+44 (UK)</option>
+                                <option value="+61">+61 (Australia)</option>
+                                <option value="+65">+65 (Singapore)</option>
+                                <option value="+86">+86 (China)</option>
+                                <option value="+81">+81 (Japan)</option>
+                                <option value="+82">+82 (South Korea)</option>
+                                <option value="+66">+66 (Thailand)</option>
+                                <option value="+84">+84 (Vietnam)</option>
+                                <option value="+60">+60 (Malaysia)</option>
+                                <option value="+62">+62 (Indonesia)</option>
+                                <option value="+63">+63 (Philippines)</option>
+                                <option value="+91">+91 (India)</option>
+                                <option value="+94">+94 (Sri Lanka)</option>
+                                <option value="+977">+977 (Nepal)</option>
+                            </select>
+                        </div>
+                        <div class="phone-number-field">
+                            <input type="tel" name="phone_number" id="phone_number"
+                                   placeholder="Enter numbers only"
+                                   oninput="validatePhoneNumber(this)"
+                                   maxlength="15">
+                        </div>
+                    </div>
+                    <small class="text-gray-500 text-xs mt-1 block" id="phone-hint">
+                    </small>
                 </div>
                 <div class="form-group">
                     <label class="required">Address</label>
@@ -43,6 +73,7 @@
             </div>
 
             <!-- Medical History Section -->
+            <h2 class="section-title">Medical History</h2>
             <div class="form-row">
                 <div class="form-group">
                     <label>Known Medical Conditions</label>
@@ -361,6 +392,78 @@
             min-width: 100%;
         }
     }
+
+    /* Phone input styling */
+#patientModal .phone-input-container {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+#patientModal .country-code-selector {
+    flex: 0 0 120px;
+}
+
+#patientModal .country-code {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid #c8e1f3;
+    font-size: 13px;
+    background-color: #fff;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    padding-right: 28px;
+}
+
+#patientModal .country-code:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    outline: none;
+}
+
+#patientModal .phone-number-field {
+    flex: 1;
+}
+
+#patientModal .phone-number-field input {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #c8e1f3;
+    font-size: 13px;
+    background-color: #fff;
+}
+
+#patientModal .phone-number-field input:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    outline: none;
+}
+
+#patientModal .phone-number-field input.error {
+    border-color: #ef4444;
+}
+
+#patientModal .phone-number-field input.error:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+/* Responsive adjustment */
+@media (max-width: 480px) {
+    #patientModal .phone-input-container {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    #patientModal .country-code-selector {
+        flex: auto;
+    }
+}
 </style>
 
 @push('scripts')
@@ -510,6 +613,205 @@
 
             input.value = phone;
         }
+
+        /* ---------------- PHONE NUMBER VALIDATION ---------------- */
+function validatePhoneNumber(input) {
+    // Remove any non-digit characters
+    let phone = input.value.replace(/\D/g, '');
+
+    // Get the selected country code
+    const countryCode = document.getElementById('country_code').value;
+
+    // Store the original cursor position
+    const cursorPos = input.selectionStart;
+    const originalLength = input.value.length;
+
+    // Update the input value with only digits
+    input.value = phone;
+
+    // Validate based on country
+    const country = countryCode.replace('+', '');
+    let isValid = true;
+    let hintMessage = '';
+
+    switch(country) {
+        case '95': // Myanmar
+            if (phone.length === 0) {
+                isValid = false;
+                hintMessage = 'Phone number is required';
+            } else if (phone.length < 7) {
+                isValid = false;
+                hintMessage = 'Myanmar phone numbers should be at least 7 digits';
+            } else if (phone.length > 10) {
+                isValid = false;
+                hintMessage = 'Myanmar phone numbers should not exceed 10 digits';
+            } else {
+                hintMessage = `Valid Myanmar phone number (${phone.length} digits)`;
+            }
+            break;
+        case '1': // USA/Canada
+            if (phone.length === 0) {
+                isValid = false;
+                hintMessage = 'Phone number is required';
+            } else if (phone.length !== 10) {
+                isValid = false;
+                hintMessage = 'USA/Canada phone numbers should be exactly 10 digits';
+            } else {
+                hintMessage = 'Valid USA/Canada phone number';
+            }
+            break;
+        case '44': // UK
+            if (phone.length === 0) {
+                isValid = false;
+                hintMessage = 'Phone number is required';
+            } else if (phone.length < 10 || phone.length > 11) {
+                isValid = false;
+                hintMessage = 'UK phone numbers should be 10-11 digits';
+            } else {
+                hintMessage = 'Valid UK phone number';
+            }
+            break;
+        case '61': // Australia
+            if (phone.length === 0) {
+                isValid = false;
+                hintMessage = 'Phone number is required';
+            } else if (phone.length !== 9) {
+                isValid = false;
+                hintMessage = 'Australian phone numbers should be exactly 9 digits';
+            } else {
+                hintMessage = 'Valid Australian phone number';
+            }
+            break;
+        case '65': // Singapore
+            if (phone.length === 0) {
+                isValid = false;
+                hintMessage = 'Phone number is required';
+            } else if (phone.length !== 8) {
+                isValid = false;
+                hintMessage = 'Singapore phone numbers should be exactly 8 digits';
+            } else {
+                hintMessage = 'Valid Singapore phone number';
+            }
+            break;
+        case '86': // China
+            if (phone.length === 0) {
+                isValid = false;
+                hintMessage = 'Phone number is required';
+            } else if (phone.length < 11 || phone.length > 12) {
+                isValid = false;
+                hintMessage = 'Chinese phone numbers should be 11-12 digits';
+            } else {
+                hintMessage = 'Valid Chinese phone number';
+            }
+            break;
+        default:
+            // Generic validation for other countries (7-15 digits)
+            if (phone.length === 0) {
+                isValid = false;
+                hintMessage = 'Phone number is required';
+            } else if (phone.length < 7) {
+                isValid = false;
+                hintMessage = 'Phone number should be at least 7 digits';
+            } else if (phone.length > 15) {
+                isValid = false;
+                hintMessage = 'Phone number should not exceed 15 digits';
+            } else {
+                hintMessage = `Valid phone number (${phone.length} digits)`;
+            }
+    }
+
+    // Update the hint text
+    const hintElement = document.getElementById('phone-hint');
+    if (hintElement) {
+        hintElement.textContent = hintMessage;
+        hintElement.className = `text-xs mt-1 block ${isValid ? 'text-green-600' : 'text-red-500'}`;
+    }
+
+    // Add/remove error class
+    if (isValid) {
+        input.classList.remove('error');
+    } else {
+        input.classList.add('error');
+    }
+
+    // Adjust cursor position if needed
+    if (input.value.length !== originalLength) {
+        input.setSelectionRange(cursorPos, cursorPos);
+    }
+
+    return isValid;
+}
+
+// Update the form validation function to include phone validation
+function validateForm() {
+    const fullName = document.getElementById('full_name').value.trim();
+    const age = document.getElementById('age').value;
+    const dob = document.getElementById('date_of_birth').value;
+    const phone = document.getElementById('phone_number').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const regDate = document.getElementById('registration_date').value;
+
+    // Basic validation
+    if (!fullName) {
+        alert('Please enter full name');
+        return false;
+    }
+
+    if (!age || age < 0 || age > 120) {
+        alert('Please enter a valid age (0-120)');
+        return false;
+    }
+
+    if (!dob) {
+        alert('Please select date of birth');
+        return false;
+    }
+
+    // Phone validation
+    if (!phone) {
+        alert('Please enter a phone number');
+        return false;
+    }
+
+    if (!validatePhoneNumber(document.getElementById('phone_number'))) {
+        alert('Please enter a valid phone number for the selected country');
+        return false;
+    }
+
+    if (!address) {
+        alert('Please enter address');
+        return false;
+    }
+
+    if (!regDate) {
+        alert('Please select registration date');
+        return false;
+    }
+
+    // Check if registration date is not in the future
+    const today = new Date().toISOString().split('T')[0];
+    if (regDate > today) {
+        alert('Registration date cannot be in the future');
+        return false;
+    }
+
+    return true;
+}
+
+// Add event listener for country code change
+document.addEventListener('DOMContentLoaded', function() {
+    const countryCodeSelect = document.getElementById('country_code');
+    const phoneInput = document.getElementById('phone_number');
+
+    if (countryCodeSelect && phoneInput) {
+        countryCodeSelect.addEventListener('change', function() {
+            validatePhoneNumber(phoneInput);
+        });
+
+        // Initial validation
+        validatePhoneNumber(phoneInput);
+    }
+});
 
         /* ---------------- DELETE PATIENT FUNCTION ---------------- */
         function deletePatient(patientId, patientName) {

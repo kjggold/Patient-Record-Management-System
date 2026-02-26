@@ -53,14 +53,6 @@
                     </div>
                 @endif
 
-                @if ($errors->any())
-                    <div class="mb-4 rounded-lg bg-red-50 border border-red-400 text-red-900 px-4 py-3 text-sm">
-                        @foreach ($errors->all() as $error)
-                            <div>{{ $error }}</div>
-                        @endforeach
-                    </div>
-                @endif
-
                 {{-- Check if user just registered by looking for registration status --}}
                 @php
                     $justRegistered = session('status') && str_contains(session('status'), 'Waiting for main admin approval');
@@ -91,17 +83,80 @@
                     <form method="POST" action="{{ route('register') }}" class="space-y-6">
                         @csrf
 
-                        <input type="text" name="name" placeholder="Full Name" value="{{ old('name') }}" required
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-900 placeholder-gray-400">
+                        {{-- Name field with error --}}
+                        <div>
+                            <input type="text" name="name" placeholder="Full Name" value="{{ old('name') }}" required
+                                class="w-full px-4 py-3 rounded-lg border {{ $errors->has('name') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300' }} focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-900 placeholder-gray-400">
+                            @error('name')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                        <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-900 placeholder-gray-400">
+                        {{-- Email field with error --}}
+                        <div>
+                            <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required
+                                class="w-full px-4 py-3 rounded-lg border {{ $errors->has('email') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300' }} focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-900 placeholder-gray-400">
+                            @error('email')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
 
-                        <input type="password" name="password" placeholder="Password" required
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-900 placeholder-gray-400">
+                            {{-- Show helpful message for invalid email --}}
+                            @if($errors->has('email') && str_contains($errors->first('email'), 'valid email'))
+                                
+                            @endif
+                        </div>
 
-                        <input type="password" name="password_confirmation" placeholder="Confirm Password" required
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-900 placeholder-gray-400">
+                        {{-- Password field with eye toggle --}}
+                        <div>
+                            <div class="relative">
+                                <input type="password" name="password" id="password" placeholder="Password" required
+                                    class="w-full px-4 py-3 rounded-lg border {{ $errors->has('password') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300' }} focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-900 placeholder-gray-400 pr-10">
+                                <button type="button" id="togglePassword"
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                                    <!-- Eye slash icon (visible when password is hidden - DEFAULT) -->
+                                    <svg id="eyeSlashIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                                    </svg>
+                                    <!-- Eye icon (visible when password is shown) -->
+                                    <svg id="eyeIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            @error('password')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Confirm Password field with eye toggle --}}
+                        <div>
+                            <div class="relative">
+                                <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Confirm Password" required
+                                    class="w-full px-4 py-3 rounded-lg border {{ $errors->has('password_confirmation') ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300' }} focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-900 placeholder-gray-400 pr-10">
+                                <button type="button" id="toggleConfirmPassword"
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                                    <!-- Eye slash icon (visible when password is hidden - DEFAULT) -->
+                                    <svg id="confirmEyeSlashIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                                    </svg>
+                                    <!-- Eye icon (visible when password is shown) -->
+                                    <svg id="confirmEyeIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            @error('password_confirmation')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
                         <button type="submit"
                             class="w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
@@ -120,6 +175,61 @@
         </div>
 
     </div>
+
+    <!-- Password Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle for Password field
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const eyeSlashIcon = document.getElementById('eyeSlashIcon');
+
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    // Toggle the type attribute
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+
+                    // Toggle the eye icons
+                    if (type === 'text') {
+                        // Password is visible - show OPEN eye icon
+                        eyeSlashIcon.classList.add('hidden');
+                        eyeIcon.classList.remove('hidden');
+                    } else {
+                        // Password is hidden - show CROSSED eye icon
+                        eyeSlashIcon.classList.remove('hidden');
+                        eyeIcon.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Toggle for Confirm Password field
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+            const confirmPasswordInput = document.getElementById('password_confirmation');
+            const confirmEyeIcon = document.getElementById('confirmEyeIcon');
+            const confirmEyeSlashIcon = document.getElementById('confirmEyeSlashIcon');
+
+            if (toggleConfirmPassword && confirmPasswordInput) {
+                toggleConfirmPassword.addEventListener('click', function() {
+                    // Toggle the type attribute
+                    const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    confirmPasswordInput.setAttribute('type', type);
+
+                    // Toggle the eye icons
+                    if (type === 'text') {
+                        // Password is visible - show OPEN eye icon
+                        confirmEyeSlashIcon.classList.add('hidden');
+                        confirmEyeIcon.classList.remove('hidden');
+                    } else {
+                        // Password is hidden - show CROSSED eye icon
+                        confirmEyeSlashIcon.classList.remove('hidden');
+                        confirmEyeIcon.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
 
     <!-- Animations -->
     <style>

@@ -88,56 +88,86 @@ class AuthController extends Controller
     }
 
     // Handle registration
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users|unique:registration_requests,email',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+    // Handle registration
+// Handle registration
+public function register(Request $request)
+{
+    // Debug: Check if we're getting the request
+    \Log::info('Registration attempt', ['email' => $request->email]);
+    
+    // Custom email validation
+    $email = $request->email;
 
-        if ($validator->fails()) {
-            return back()
-                ->withErrors($validator)
-                ->withInput($request->only('name', 'email'))
-                ->with('open_modal', 'register');
-        }
-
-       // Generate a unique token for approval
-$approvalToken = Str::random(64);
-
-// Create a registration request
-$regRequest = RegistrationRequest::create([
-    'name'     => $request->name,
-    'email'    => $request->email,
-    'encrypted_password' => Crypt::encryptString($request->password),
-    'ip_address' => $request->ip(),
-    'user_agent' => (string) $request->userAgent(),
-    'approval_token' => $approvalToken, // This should now save since column exists
-    'status' => 'pending',
-]);
-
-        // Find main admin (by role) to notify
-        $mainAdmin = User::where('role', 'main_admin')->first();
-
-        if ($mainAdmin) {
-            Mail::to($mainAdmin->email)->send(new NewUserRegistrationMail($regRequest, $mainAdmin));
-        }
-
-        // Log registration attempt
-        AuthEvent::create([
-            'event_type' => 'register',
-            'user_id'    => null,
-            'email'      => $regRequest->email,
-            'ip_address' => $request->ip(),
-            'user_agent' => (string) $request->userAgent(),
-            'success'    => true,
-            'meta'       => ['registration_id' => $regRequest->id]
-        ]);
-
-        return redirect()->route('register')
-            ->with('status', 'Registration submitted. Waiting for main admin approval.');
+    // Basic email format validation
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return back()
+            ->withErrors(['email' => 'Please enter a valid email address.'])
+            ->withInput($request->only('name', 'email'))
+            ->with('open_modal', 'register');
     }
+
+    // Check if email already exists
+    $emailExists = User::where('email', $email)->exists() ||
+                   RegistrationRequest::where('email', $email)->exists();
+
+    if ($emailExists) {
+        return back()
+            ->withErrors(['email' => 'This email is already registered or has a pending registration request.'])
+            ->withInput($request->only('name', 'email'))
+            ->with('open_modal', 'register');
+    }
+
+    $validator = Validator::make($request->all(), [
+        'name'     => 'required|string|max:255',
+        'password' => 'required|string|min:6|confirmed',
+    ], [
+        'password.min' => 'Password must be at least 6 characters.',
+        'password.confirmed' => 'Password confirmation does not match.',
+    ]);
+
+    if ($validator->fails()) {
+        return back()
+            ->withErrors($validator)
+            ->withInput($request->only('name', 'email'))
+            ->with('open_modal', 'register');
+    }
+
+    // Generate a unique token for approval
+    $approvalToken = Str::random(64);
+
+    // Create a registration request
+    $regRequest = RegistrationRequest::create([
+        'name'     => $request->name,
+        'email'    => $request->email,
+        'encrypted_password' => Crypt::encryptString($request->password),
+        'ip_address' => $request->ip(),
+        'user_agent' => (string) $request->userAgent(),
+        'approval_token' => $approvalToken,
+        'status' => 'pending',
+    ]);
+
+    // Find main admin (by role) to notify
+    $mainAdmin = User::where('role', 'main_admin')->first();
+
+    if ($mainAdmin) {
+        Mail::to($mainAdmin->email)->send(new NewUserRegistrationMail($regRequest, $mainAdmin));
+    }
+
+    // Log registration attempt
+    AuthEvent::create([
+        'event_type' => 'register',
+        'user_id'    => null,
+        'email'      => $regRequest->email,
+        'ip_address' => $request->ip(),
+        'user_agent' => (string) $request->userAgent(),
+        'success'    => true,
+        'meta'       => ['registration_id' => $regRequest->id]
+    ]);
+
+    return redirect()->route('register')
+        ->with('status', 'Registration submitted. Waiting for main admin approval.');
+}
+
 
     // Dashboard
     public function dashboard()

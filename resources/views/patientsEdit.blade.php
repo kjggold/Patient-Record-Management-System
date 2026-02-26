@@ -10,54 +10,6 @@
         <!-- MAIN CONTENT -->
         <main class="flex-1 p-6 ml-60">
 
-            <!-- Info Message Display -->
-            @if(session('info'))
-                <div class="mb-6 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md" id="infoMessage">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                            </svg>
-                            <span class="font-medium">{{ session('info') }}</span>
-                        </div>
-                        <button onclick="this.parentElement.parentElement.remove()" class="text-blue-600 hover:text-blue-800">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            @endif
-
-            <!-- Success Message Display -->
-            @if(session('success'))
-                <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md" id="successMessage" role="alert">
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                            </svg>
-                            <div>
-                                <span class="font-medium">{{ session('success') }}</span>
-                                <p class="text-sm text-green-600 mt-1">Patient #{{ $patient->id }} has been updated.</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <a href="{{ route('patient-history.index') }}"
-                               class="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition">
-                                Back to Patient History
-                            </a>
-                            <button onclick="this.parentElement.parentElement.parentElement.remove()"
-                                    class="text-green-600 hover:text-green-800">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
             <!-- Error Message Display -->
             @if($errors->any())
                 <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
@@ -79,7 +31,7 @@
 
             <!-- EDIT PATIENT FORM -->
             <div class="bg-white rounded-xl shadow p-6">
-                <form method="POST" action="{{ route('patients.update', $patient->id) }}" id="patientForm">
+                <form method="POST" action="{{ route('patient-history.update', $patient->id) }}" id="patientForm">
                     @csrf
                     @method('PUT')
 
@@ -109,23 +61,8 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Date of Birth</label>
-                            <!-- Display current date from DB -->
-                            <div class="mb-1 text-sm text-gray-600">
-                                Current:
-                                @if($patient->date_of_birth)
-                                    {{ \Carbon\Carbon::parse($patient->date_of_birth)->format('m/d/Y') }}
-                                @elseif($patient->date_of_birth_year && $patient->date_of_birth_month && $patient->date_of_birth_day)
-                                    {{ $patient->date_of_birth_month }}/{{ $patient->date_of_birth_day }}/{{ $patient->date_of_birth_year }}
-                                @else
-                                    Not set
-                                @endif
-                            </div>
                             <input type="date" name="date_of_birth" id="date_of_birth"
-                                   value="{{ old('date_of_birth', $patient->date_of_birth ?
-                                        \Carbon\Carbon::parse($patient->date_of_birth)->format('Y-m-d') :
-                                        ($patient->date_of_birth_year && $patient->date_of_birth_month && $patient->date_of_birth_day
-                                        ? sprintf('%04d-%02d-%02d', $patient->date_of_birth_year, $patient->date_of_birth_month, $patient->date_of_birth_day)
-                                        : '')) }}"
+                                   value="{{ old('date_of_birth', $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('Y-m-d') : '') }}"
                                    required>
                             @error('date_of_birth')
                                 <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -136,12 +73,12 @@
                             <div class="radio-group">
                                 <label>
                                     <input type="radio" name="sex_gender" value="male"
-                                           {{ old('sex_gender', strtolower($patient->sex_gender)) == 'male' ? 'checked' : '' }}>
+                                           {{ old('sex_gender', strtolower(trim($patient->sex_gender))) == 'male' ? 'checked' : '' }}>
                                     Male
                                 </label>
                                 <label>
                                     <input type="radio" name="sex_gender" value="female"
-                                           {{ old('sex_gender', strtolower($patient->sex_gender)) == 'female' ? 'checked' : '' }}>
+                                           {{ old('sex_gender', strtolower(trim($patient->sex_gender))) == 'female' ? 'checked' : '' }}>
                                     Female
                                 </label>
                             </div>
@@ -177,15 +114,13 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Known Medical Conditions</label>
-                            @php
-                                $conditions = $patient->known_medical_conditions;
-                                if (is_array($conditions)) {
-                                    $conditions = implode(', ', $conditions);
-                                }
-                            @endphp
-                            <input type="text" name="known_medical_conditions" id="known_medical_conditions"
-                                   value="{{ old('known_medical_conditions', $conditions) }}"
-                                   placeholder="Type to search medical conditions.">
+                            <div class="tags-input-container">
+                                <input type="text" id="known_medical_conditions_input" class="tags-input"
+                                    placeholder="Type to search medical conditions." autocomplete="off">
+                                <div id="medical_conditions_tags" class="tags-container"></div>
+                                <input type="hidden" name="known_medical_conditions" id="known_medical_conditions"
+                                       value="{{ old('known_medical_conditions', $patient->known_medical_conditions) }}">
+                            </div>
                             <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple conditions</small>
                             @error('known_medical_conditions')
                                 <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -193,15 +128,13 @@
                         </div>
                         <div class="form-group">
                             <label>Allergies</label>
-                            @php
-                                $allergies = $patient->allergies;
-                                if (is_array($allergies)) {
-                                    $allergies = implode(', ', $allergies);
-                                }
-                            @endphp
-                            <input type="text" name="allergies" id="allergies"
-                                   value="{{ old('allergies', $allergies) }}"
-                                   placeholder="Type to search allergies.">
+                            <div class="tags-input-container">
+                                <input type="text" id="allergies_input" class="tags-input"
+                                    placeholder="Type to search allergies." autocomplete="off">
+                                <div id="allergies_tags" class="tags-container"></div>
+                                <input type="hidden" name="allergies" id="allergies"
+                                       value="{{ old('allergies', $patient->allergies) }}">
+                            </div>
                             <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple allergies</small>
                             @error('allergies')
                                 <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -233,32 +166,21 @@
                             <div class="radio-group">
                                 <label>
                                     <input type="radio" name="alcohol_consumption" value="none"
-                                           {{ old('alcohol_consumption', strtolower($patient->alcohol_consumption)) == 'none' ? 'checked' : '' }}>
+                                           {{ old('alcohol_consumption', strtolower(trim($patient->alcohol_consumption))) == 'none' ? 'checked' : '' }}>
                                     None
                                 </label>
                                 <label>
                                     <input type="radio" name="alcohol_consumption" value="occasional"
-                                           {{ old('alcohol_consumption', strtolower($patient->alcohol_consumption)) == 'occasional' ? 'checked' : '' }}>
+                                           {{ old('alcohol_consumption', strtolower(trim($patient->alcohol_consumption))) == 'occasional' ? 'checked' : '' }}>
                                     Occasional
                                 </label>
                                 <label>
                                     <input type="radio" name="alcohol_consumption" value="regular"
-                                           {{ old('alcohol_consumption', strtolower($patient->alcohol_consumption)) == 'regular' ? 'checked' : '' }}>
+                                           {{ old('alcohol_consumption', strtolower(trim($patient->alcohol_consumption))) == 'regular' ? 'checked' : '' }}>
                                     Regular
                                 </label>
                             </div>
                             @error('alcohol_consumption')
-                                <span class="text-red-500 text-xs">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="required">Registration Date</label>
-                            <input type="date" name="registration_date" id="registration_date"
-                                   value="{{ old('registration_date', $patient->registration_date ? \Carbon\Carbon::parse($patient->registration_date)->format('Y-m-d') : '') }}" required>
-                            @error('registration_date')
                                 <span class="text-red-500 text-xs">{{ $message }}</span>
                             @enderror
                         </div>
@@ -272,7 +194,6 @@
             </div>
 
             <style>
-                /* Reuse the same styling from the add form */
                 .section-title {
                     color: #1f3b57;
                     font-size: 16px;
@@ -326,6 +247,76 @@
                     outline: none;
                 }
 
+                /* Tags input styling */
+                .tags-input-container {
+                    border: 1px solid #c8e1f3;
+                    border-radius: 8px;
+                    background-color: #fff;
+                    padding: 4px;
+                }
+
+                .tags-input {
+                    width: 100%;
+                    border: none !important;
+                    padding: 6px 8px !important;
+                    font-size: 13px;
+                    outline: none;
+                }
+
+                .tags-input:focus {
+                    border: none;
+                    box-shadow: none;
+                }
+
+                .tags-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    padding: 4px 8px 8px 8px;
+                }
+
+                .condition-tag {
+                    background-color: #91defa;
+                    color: #104a58;
+                    padding: 4px 10px;
+                    border-radius: 16px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .allergy-tag {
+                    background-color: #fef3c7;
+                    color: #92400e;
+                    padding: 4px 10px;
+                    border-radius: 16px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .tag-remove {
+                    cursor: pointer;
+                    font-size: 16px;
+                    line-height: 1;
+                    color: currentColor;
+                    opacity: 0.7;
+                    transition: opacity 0.2s;
+                }
+
+                .tag-remove:hover {
+                    opacity: 1;
+                }
+
+                .tags-input-container:focus-within {
+                    border-color: #4a90e2;
+                    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+                }
+
                 .radio-group {
                     display: flex;
                     gap: 15px;
@@ -371,12 +362,6 @@
                     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
                 }
 
-                .register-btn:disabled {
-                    opacity: 0.6;
-                    cursor: not-allowed;
-                    background: linear-gradient(to right, #93c5fd, #60a5fa);
-                }
-
                 .cancel-btn {
                     flex: 1;
                     border: none;
@@ -402,151 +387,49 @@
                         min-width: 100%;
                     }
                 }
-
-                /* Animation for loading */
-                @keyframes pulse {
-                    0%, 100% {
-                        opacity: 1;
-                    }
-                    50% {
-                        opacity: 0.7;
-                    }
-                }
-
-                .animate-pulse {
-                    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-                }
             </style>
         </main>
     </div>
 @endsection
 
 @push('scripts')
-    <script>
-        // Initialize autocompleters for medical conditions and allergies
-        function initializeAutocompleters() {
-            if (typeof Def !== 'undefined' && Def.Autocompleter) {
-                new Def.Autocompleter.Search('known_medical_conditions',
-                    'https://clinicaltables.nlm.nih.gov/api/conditions/v3/search');
-                new Def.Autocompleter.Search('allergies', 'https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search');
-            }
-        }
+<!-- jQuery and jQuery UI for Autocomplete -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
 
-        // Form validation
-        function validateForm() {
-            const fullName = document.getElementById('full_name').value.trim();
-            const age = document.getElementById('age').value;
-            const dob = document.getElementById('date_of_birth').value;
-            const phone = document.getElementById('phone_number').value.trim();
-            const address = document.getElementById('address').value.trim();
-            const regDate = document.getElementById('registration_date').value;
-
-            // Basic validation
-            if (!fullName) {
-                alert('Please enter full name');
-                return false;
-            }
-
-            if (!age || age < 0 || age > 120) {
-                alert('Please enter a valid age (0-120)');
-                return false;
-            }
-
-            if (!dob) {
-                alert('Please select date of birth');
-                return false;
-            }
-
-            if (!phone) {
-                alert('Please enter phone number');
-                return false;
-            }
-
-            // Phone validation (simple check)
-            const phoneDigits = phone.replace(/\D/g, '');
-            if (phoneDigits.length < 10) {
-                alert('Please enter a valid phone number (at least 10 digits)');
-                return false;
-            }
-
-            if (!address) {
-                alert('Please enter address');
-                return false;
-            }
-
-            if (!regDate) {
-                alert('Please select registration date');
-                return false;
-            }
-
-            // Check if registration date is not in the future
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (regDate > todayStr) {
-                alert('Registration date cannot be in the future');
-                return false;
-            }
-
-            return true;
-        }
-
-        // Track original form data
-        let originalFormData = {};
-
-        function captureOriginalFormData() {
-            const form = document.getElementById('patientForm');
-            const formElements = form.querySelectorAll('input, select, textarea');
-
-            formElements.forEach(element => {
-                if (element.name) {
-                    if (element.type === 'radio') {
-                        const checkedRadio = form.querySelector(`input[name="${element.name}"]:checked`);
-                        originalFormData[element.name] = checkedRadio ? checkedRadio.value : '';
-                    } else {
-                        originalFormData[element.name] = element.value;
-                    }
-                }
-            });
-        }
-
-        // Check if form has changes
-        function hasFormChanges() {
-            const form = document.getElementById('patientForm');
-            const formElements = form.querySelectorAll('input, select, textarea');
-
-            for (let element of formElements) {
-                if (element.name) {
-                    let currentValue;
-
-                    if (element.type === 'radio') {
-                        const checkedRadio = form.querySelector(`input[name="${element.name}"]:checked`);
-                        currentValue = checkedRadio ? checkedRadio.value : '';
-                    } else {
-                        currentValue = element.value;
-                    }
-
-                    if (currentValue !== originalFormData[element.name]) {
-                        return true;
-                    }
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format phone number on load
+        const phoneInput = document.getElementById('phone_number');
+        if (phoneInput.value) {
+            let phone = phoneInput.value.replace(/\D/g, '');
+            if (phone.length > 0) {
+                if (phone.length <= 3) {
+                    phone = '(' + phone;
+                } else if (phone.length <= 6) {
+                    phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3);
+                } else {
+                    phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3, 6) + '-' + phone.substring(6, 10);
                 }
             }
-
-            return false;
+            phoneInput.value = phone;
         }
 
-        // Update submit button state
-        function updateSubmitButtonState() {
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (hasFormChanges()) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Update Patient';
-                submitBtn.classList.remove('opacity-75');
-            } else {
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'No Changes Made';
-                submitBtn.classList.add('opacity-75');
+        // Format phone number as user types
+        phoneInput.addEventListener('input', function(e) {
+            let phone = this.value.replace(/\D/g, '');
+            if (phone.length > 0) {
+                if (phone.length <= 3) {
+                    phone = '(' + phone;
+                } else if (phone.length <= 6) {
+                    phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3);
+                } else {
+                    phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3, 6) + '-' + phone.substring(6, 10);
+                }
             }
-        }
+            this.value = phone;
+        });
 
         // Auto-calculate age when date of birth changes
         document.getElementById('date_of_birth').addEventListener('change', function() {
@@ -562,142 +445,235 @@
                 }
 
                 document.getElementById('age').value = age;
-                updateSubmitButtonState();
             }
         });
+    });
 
-        // Format phone number as user types
-        document.getElementById('phone_number').addEventListener('input', function(e) {
-            let phone = this.value.replace(/\D/g, '');
+    $(document).ready(function() {
+        let medicalConditions = [];
+        let allergies = [];
 
-            if (phone.length > 0) {
-                if (phone.length <= 3) {
-                    phone = '(' + phone;
-                } else if (phone.length <= 6) {
-                    phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3);
-                } else {
-                    phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3, 6) + '-' + phone.substring(6, 10);
-                }
+        // Cache for autocomplete data
+        let medicalConditionsCache = null;
+        let allergiesCache = null;
+
+        // Load existing data from hidden inputs
+        function loadExistingData() {
+            // Load medical conditions
+            const conditionsHidden = $('#known_medical_conditions').val();
+            if (conditionsHidden) {
+                medicalConditions = conditionsHidden.split(',').map(item => item.trim()).filter(item => item);
+                updateMedicalConditionsDisplay();
             }
 
-            this.value = phone;
-        });
+            // Load allergies
+            const allergiesHidden = $('#allergies').val();
+            if (allergiesHidden) {
+                allergies = allergiesHidden.split(',').map(item => item.trim()).filter(item => item);
+                updateAllergiesDisplay();
+            }
+        }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeAutocompleters();
-            captureOriginalFormData();
-
-            // Set max date for date of birth and registration date
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date_of_birth').max = today;
-            document.getElementById('registration_date').max = today;
-
-            // Listen for form changes
-            const form = document.getElementById('patientForm');
-            form.addEventListener('input', updateSubmitButtonState);
-            form.addEventListener('change', updateSubmitButtonState);
-
-            // Initial button state
-            updateSubmitButtonState();
-
-            // Format phone number on load
-            const phoneInput = document.getElementById('phone_number');
-            if (phoneInput.value) {
-                let phone = phoneInput.value.replace(/\D/g, '');
-                if (phone.length > 0) {
-                    if (phone.length <= 3) {
-                        phone = '(' + phone;
-                    } else if (phone.length <= 6) {
-                        phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3);
-                    } else {
-                        phone = '(' + phone.substring(0, 3) + ') ' + phone.substring(3, 6) + '-' + phone.substring(6, 10);
-                    }
-                }
-                phoneInput.value = phone;
+        // Load data from JSON files
+        function loadMedicalConditions() {
+            if (medicalConditionsCache) {
+                return Promise.resolve(medicalConditionsCache);
             }
 
-            // Log for debugging
-            console.log('Sex/Gender from DB:', "{{ $patient->sex_gender }}");
-            console.log('Alcohol Consumption from DB:', "{{ $patient->alcohol_consumption }}");
-
-            // Form submission handling
-            const submitBtn = document.getElementById('submitBtn');
-
-            form.addEventListener('submit', function(e) {
-                // Prevent submission if no changes
-                if (!hasFormChanges()) {
-                    e.preventDefault();
-                    alert('No changes detected. Please modify at least one field before updating.');
-                    return false;
-                }
-
-                // Validate form
-                if (!validateForm()) {
-                    e.preventDefault();
-                    return false;
-                }
-
-                // Show loading state
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Updating...';
-                submitBtn.disabled = true;
-                submitBtn.classList.add('animate-pulse');
-
-                // Allow form to submit normally
+            return $.ajax({
+                url: '{{ asset('data/medical-conditions.json') }}',
+                dataType: 'json',
+                cache: true
+            }).then(function(data) {
+                medicalConditionsCache = data;
+                console.log('Medical conditions loaded:', data.length);
+                return data;
+            }).fail(function() {
+                console.warn('Failed to load medical conditions, using fallback');
+                medicalConditionsCache = getFallbackConditions();
+                return medicalConditionsCache;
             });
+        }
 
-            // Auto-hide success message after 5 seconds
-            const successMessage = document.getElementById('successMessage');
-            if (successMessage) {
-                setTimeout(() => {
-                    successMessage.style.opacity = '0';
-                    successMessage.style.transition = 'opacity 0.5s ease-out';
-                    setTimeout(() => {
-                        if (successMessage.parentNode) {
-                            successMessage.remove();
-                        }
-                    }, 500);
-                }, 5000);
+        function loadAllergies() {
+            if (allergiesCache) {
+                return Promise.resolve(allergiesCache);
             }
 
-            // Auto-hide info message after 5 seconds
-            const infoMessage = document.getElementById('infoMessage');
-            if (infoMessage) {
-                setTimeout(() => {
-                    infoMessage.style.opacity = '0';
-                    infoMessage.style.transition = 'opacity 0.5s ease-out';
-                    setTimeout(() => {
-                        if (infoMessage.parentNode) {
-                            infoMessage.remove();
-                        }
-                    }, 500);
-                }, 5000);
+            return $.ajax({
+                url: '{{ asset('data/allergies.json') }}',
+                dataType: 'json',
+                cache: true
+            }).then(function(data) {
+                allergiesCache = data;
+                console.log('Allergies loaded:', data.length);
+                return data;
+            }).fail(function() {
+                console.warn('Failed to load allergies, using fallback');
+                allergiesCache = getFallbackAllergies();
+                return allergiesCache;
+            });
+        }
+
+        // Fallback data in case JSON files fail
+        function getFallbackConditions() {
+            return [
+                "Hypertension", "Diabetes", "Asthma", "Arthritis", "Migraine",
+                "Anxiety", "Depression", "High Cholesterol", "Heart Disease",
+                "Allergic Rhinitis", "GERD", "Osteoporosis", "COPD", "Chronic kidney disease"
+            ];
+        }
+
+        function getFallbackAllergies() {
+            return [
+                "Penicillin", "Sulfa Drugs", "NSAIDs", "Aspirin", "Ibuprofen",
+                "Codeine", "Latex", "Pollen", "Dust Mites", "Peanuts"
+            ];
+        }
+
+        // Function to update medical conditions display
+        function updateMedicalConditionsDisplay() {
+            const container = $('#medical_conditions_tags');
+            container.empty();
+
+            if (medicalConditions.length > 0) {
+                medicalConditions.forEach((condition, index) => {
+                    const tag = $(`
+                        <span class="condition-tag">
+                            ${condition}
+                            <span class="tag-remove" data-index="${index}">×</span>
+                        </span>
+                    `);
+                    container.append(tag);
+                });
             }
 
-            // Set date limits
-            const minDate = new Date();
-            minDate.setFullYear(minDate.getFullYear() - 120);
-            document.getElementById('date_of_birth').min = minDate.toISOString().split('T')[0];
+            // Update hidden input
+            $('#known_medical_conditions').val(medicalConditions.join(', '));
+        }
 
-            // Calculate age on load if date of birth exists
-            const dobInput = document.getElementById('date_of_birth');
-            if (dobInput.value) {
-                const birthDate = new Date(dobInput.value);
-                const today = new Date();
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const monthDiff = today.getMonth() - birthDate.getMonth();
+        // Function to update allergies display
+        function updateAllergiesDisplay() {
+            const container = $('#allergies_tags');
+            container.empty();
 
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
+            if (allergies.length > 0) {
+                allergies.forEach((allergy, index) => {
+                    const tag = $(`
+                        <span class="allergy-tag">
+                            ${allergy}
+                            <span class="tag-remove" data-index="${index}">×</span>
+                        </span>
+                    `);
+                    container.append(tag);
+                });
+            }
+
+            // Update hidden input
+            $('#allergies').val(allergies.join(', '));
+        }
+
+        // Initialize Medical Conditions Autocomplete
+        $('#known_medical_conditions_input').autocomplete({
+            source: function(request, response) {
+                loadMedicalConditions().then(function(data) {
+                    const term = request.term.toLowerCase();
+                    const filtered = data.filter(function(item) {
+                        return item.toLowerCase().includes(term);
+                    });
+                    response(filtered.slice(0, 20));
+                });
+            },
+            minLength: 1,
+            delay: 50,
+            select: function(event, ui) {
+                const condition = ui.item.value;
+                if (condition && !medicalConditions.includes(condition)) {
+                    medicalConditions.push(condition);
+                    updateMedicalConditionsDisplay();
                 }
-
-                // Only update if age field is empty or different
-                const currentAge = document.getElementById('age').value;
-                if (!currentAge || currentAge != age) {
-                    document.getElementById('age').value = age;
+                $(this).val('');
+                return false;
+            },
+            open: function() {
+                $(this).autocomplete('widget').css('z-index', 999999);
+            }
+        }).on('keypress', function(e) {
+            if (e.which == 13) {
+                e.preventDefault();
+                const condition = $(this).val().trim();
+                if (condition && !medicalConditions.includes(condition)) {
+                    medicalConditions.push(condition);
+                    updateMedicalConditionsDisplay();
                 }
+                $(this).val('');
+                return false;
             }
         });
-    </script>
+
+        // Initialize Allergies Autocomplete
+        $('#allergies_input').autocomplete({
+            source: function(request, response) {
+                loadAllergies().then(function(data) {
+                    const term = request.term.toLowerCase();
+                    const filtered = data.filter(function(item) {
+                        return item.toLowerCase().includes(term);
+                    });
+                    response(filtered.slice(0, 20));
+                });
+            },
+            minLength: 1,
+            delay: 50,
+            select: function(event, ui) {
+                const allergy = ui.item.value;
+                if (allergy && !allergies.includes(allergy)) {
+                    allergies.push(allergy);
+                    updateAllergiesDisplay();
+                }
+                $(this).val('');
+                return false;
+            },
+            open: function() {
+                $(this).autocomplete('widget').css('z-index', 999999);
+            }
+        }).on('keypress', function(e) {
+            if (e.which == 13) {
+                e.preventDefault();
+                const allergy = $(this).val().trim();
+                if (allergy && !allergies.includes(allergy)) {
+                    allergies.push(allergy);
+                    updateAllergiesDisplay();
+                }
+                $(this).val('');
+                return false;
+            }
+        });
+
+        // Remove tag handlers (using event delegation)
+        $(document).on('click', '.condition-tag .tag-remove', function() {
+            const index = $(this).data('index');
+            medicalConditions.splice(index, 1);
+            updateMedicalConditionsDisplay();
+        });
+
+        $(document).on('click', '.allergy-tag .tag-remove', function() {
+            const index = $(this).data('index');
+            allergies.splice(index, 1);
+            updateAllergiesDisplay();
+        });
+
+        // Form submission handler
+        $('#patientForm').on('submit', function(e) {
+            // Ensure hidden inputs are updated
+            updateMedicalConditionsDisplay();
+            updateAllergiesDisplay();
+            return true;
+        });
+
+        // Load existing data and initialize
+        loadExistingData();
+        loadMedicalConditions();
+        loadAllergies();
+    });
+</script>
 @endpush

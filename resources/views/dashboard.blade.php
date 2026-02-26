@@ -304,8 +304,9 @@
             </section>
         </main>
     </div>
-
-    @include('add-modals.doctor-modal')
+{{--
+    @include('add-modals.doctor-modal') --}}
+    @include('doctors.partials.add-modal')
     @include('add-modals.patient-modal')
     @include('add-modals.service-modal')
     @include('add-modals.appointment-modal')

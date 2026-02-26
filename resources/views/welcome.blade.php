@@ -98,6 +98,7 @@
                 -webkit-box-orient: vertical;
                 overflow: hidden;
             }
+        }
     </style>
 </head>
 
@@ -118,7 +119,7 @@
     <!-- Main Content -->
     <div class="relative z-10">
 
-        <!-- Header (UNCHANGED) -->
+        <!-- Header -->
         <header class="w-full px-6 py-4">
             <div class="w-full flex items-center justify-between">
                 <div class="flex items-center space-x-2">
@@ -134,8 +135,8 @@
             </div>
         </header>
 
-        <!-- Hero Section (MOVED LOWER) -->
-        <main class="flex flex-col pt-48 md:pt-56">
+        <!-- Hero Section - Adjusted to higher position (pt-32 instead of pt-48) -->
+        <main class="flex flex-col pt-32 md:pt-40">
             <div class="hero-content">
 
                 <h1 class="hero-title font-bold text-gray-900 mb-6 text-left">
@@ -147,7 +148,6 @@
                     Every patient record, securely organized and instantly accessible —
                     designed to simplify clinic workflows and elevate quality of care.
                 </p>
-
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-start">
                     <a href="{{ route('login') }}"

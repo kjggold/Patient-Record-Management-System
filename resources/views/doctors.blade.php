@@ -37,14 +37,12 @@
                     class="border rounded px-3 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value="{{ request('search') ?? '' }}"
                     autocomplete="off">
-                <button onclick="performSearch()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
-                    Search
-                </button>
+                    <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
+                        + Add Doctor
+                    </button>
             </div>
 
-            <button onclick="openAddModal()" class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
-                + Add Doctor
-            </button>
+
         </div>
 
         <!-- DOCTOR TABLE CONTAINER -->
@@ -55,6 +53,7 @@
 </div>
 
 <!-- Include the add doctor modal -->
+{{-- @include('add-modals.doctor-modal') --}}
 @include('doctors.partials.add-modal')
 
 @push('scripts')

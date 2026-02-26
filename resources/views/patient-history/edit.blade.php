@@ -61,15 +61,6 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Date of Birth</label>
-                            {{-- <!-- Display current date from DB -->
-                            <div class="mb-1 text-sm text-gray-600">
-                                Current:
-                                @if($patient->date_of_birth)
-                                    {{ \Carbon\Carbon::parse($patient->date_of_birth)->format('m/d/Y') }}
-                                @else
-                                    Not set
-                                @endif
-                            </div> --}}
                             <input type="date" name="date_of_birth" id="date_of_birth"
                                    value="{{ old('date_of_birth', $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('Y-m-d') : '') }}"
                                    required>
@@ -123,9 +114,13 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Known Medical Conditions</label>
-                            <input type="text" name="known_medical_conditions" id="known_medical_conditions"
-                                   value="{{ old('known_medical_conditions', $patient->known_medical_conditions) }}"
-                                   placeholder="Type to search medical conditions.">
+                            <div class="tags-input-container">
+                                <input type="text" id="known_medical_conditions_input" class="tags-input"
+                                    placeholder="Type to search medical conditions." autocomplete="off">
+                                <div id="medical_conditions_tags" class="tags-container"></div>
+                                <input type="hidden" name="known_medical_conditions" id="known_medical_conditions"
+                                       value="{{ old('known_medical_conditions', $patient->known_medical_conditions) }}">
+                            </div>
                             <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple conditions</small>
                             @error('known_medical_conditions')
                                 <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -133,9 +128,13 @@
                         </div>
                         <div class="form-group">
                             <label>Allergies</label>
-                            <input type="text" name="allergies" id="allergies"
-                                   value="{{ old('allergies', $patient->allergies) }}"
-                                   placeholder="Type to search allergies.">
+                            <div class="tags-input-container">
+                                <input type="text" id="allergies_input" class="tags-input"
+                                    placeholder="Type to search allergies." autocomplete="off">
+                                <div id="allergies_tags" class="tags-container"></div>
+                                <input type="hidden" name="allergies" id="allergies"
+                                       value="{{ old('allergies', $patient->allergies) }}">
+                            </div>
                             <small class="text-gray-500 text-xs mt-1 block">Type and press Enter to add multiple allergies</small>
                             @error('allergies')
                                 <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -186,17 +185,6 @@
                             @enderror
                         </div>
                     </div>
-
-                    {{-- <div class="form-row">
-                        <div class="form-group">
-                            <label class="required">Registration Date</label>
-                            <input type="date" name="registration_date" id="registration_date"
-                                   value="{{ old('registration_date', $patient->registration_date ? \Carbon\Carbon::parse($patient->registration_date)->format('Y-m-d') : '') }}" required>
-                            @error('registration_date')
-                                <span class="text-red-500 text-xs">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div> --}}
 
                     <div class="button-container">
                         <a href="{{ route('patient-history.index') }}" class="cancel-btn">Cancel</a>
@@ -257,6 +245,76 @@
                     border-color: #4a90e2;
                     box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
                     outline: none;
+                }
+
+                /* Tags input styling */
+                .tags-input-container {
+                    border: 1px solid #c8e1f3;
+                    border-radius: 8px;
+                    background-color: #fff;
+                    padding: 4px;
+                }
+
+                .tags-input {
+                    width: 100%;
+                    border: none !important;
+                    padding: 6px 8px !important;
+                    font-size: 13px;
+                    outline: none;
+                }
+
+                .tags-input:focus {
+                    border: none;
+                    box-shadow: none;
+                }
+
+                .tags-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    padding: 4px 8px 8px 8px;
+                }
+
+                .condition-tag {
+                    background-color: #91defa;
+                    color: #104a58;
+                    padding: 4px 10px;
+                    border-radius: 16px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .allergy-tag {
+                    background-color: #fef3c7;
+                    color: #92400e;
+                    padding: 4px 10px;
+                    border-radius: 16px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .tag-remove {
+                    cursor: pointer;
+                    font-size: 16px;
+                    line-height: 1;
+                    color: currentColor;
+                    opacity: 0.7;
+                    transition: opacity 0.2s;
+                }
+
+                .tag-remove:hover {
+                    opacity: 1;
+                }
+
+                .tags-input-container:focus-within {
+                    border-color: #4a90e2;
+                    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
                 }
 
                 .radio-group {
@@ -335,6 +393,11 @@
 @endsection
 
 @push('scripts')
+<!-- jQuery and jQuery UI for Autocomplete -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Format phone number on load
@@ -384,6 +447,233 @@
                 document.getElementById('age').value = age;
             }
         });
+    });
+
+    $(document).ready(function() {
+        let medicalConditions = [];
+        let allergies = [];
+
+        // Cache for autocomplete data
+        let medicalConditionsCache = null;
+        let allergiesCache = null;
+
+        // Load existing data from hidden inputs
+        function loadExistingData() {
+            // Load medical conditions
+            const conditionsHidden = $('#known_medical_conditions').val();
+            if (conditionsHidden) {
+                medicalConditions = conditionsHidden.split(',').map(item => item.trim()).filter(item => item);
+                updateMedicalConditionsDisplay();
+            }
+
+            // Load allergies
+            const allergiesHidden = $('#allergies').val();
+            if (allergiesHidden) {
+                allergies = allergiesHidden.split(',').map(item => item.trim()).filter(item => item);
+                updateAllergiesDisplay();
+            }
+        }
+
+        // Load data from JSON files
+        function loadMedicalConditions() {
+            if (medicalConditionsCache) {
+                return Promise.resolve(medicalConditionsCache);
+            }
+
+            return $.ajax({
+                url: '{{ asset('data/medical-conditions.json') }}',
+                dataType: 'json',
+                cache: true
+            }).then(function(data) {
+                medicalConditionsCache = data;
+                console.log('Medical conditions loaded:', data.length);
+                return data;
+            }).fail(function() {
+                console.warn('Failed to load medical conditions, using fallback');
+                medicalConditionsCache = getFallbackConditions();
+                return medicalConditionsCache;
+            });
+        }
+
+        function loadAllergies() {
+            if (allergiesCache) {
+                return Promise.resolve(allergiesCache);
+            }
+
+            return $.ajax({
+                url: '{{ asset('data/allergies.json') }}',
+                dataType: 'json',
+                cache: true
+            }).then(function(data) {
+                allergiesCache = data;
+                console.log('Allergies loaded:', data.length);
+                return data;
+            }).fail(function() {
+                console.warn('Failed to load allergies, using fallback');
+                allergiesCache = getFallbackAllergies();
+                return allergiesCache;
+            });
+        }
+
+        // Fallback data in case JSON files fail
+        function getFallbackConditions() {
+            return [
+                "Hypertension", "Diabetes", "Asthma", "Arthritis", "Migraine",
+                "Anxiety", "Depression", "High Cholesterol", "Heart Disease",
+                "Allergic Rhinitis", "GERD", "Osteoporosis", "COPD", "Chronic kidney disease"
+            ];
+        }
+
+        function getFallbackAllergies() {
+            return [
+                "Penicillin", "Sulfa Drugs", "NSAIDs", "Aspirin", "Ibuprofen",
+                "Codeine", "Latex", "Pollen", "Dust Mites", "Peanuts"
+            ];
+        }
+
+        // Function to update medical conditions display
+        function updateMedicalConditionsDisplay() {
+            const container = $('#medical_conditions_tags');
+            container.empty();
+
+            if (medicalConditions.length > 0) {
+                medicalConditions.forEach((condition, index) => {
+                    const tag = $(`
+                        <span class="condition-tag">
+                            ${condition}
+                            <span class="tag-remove" data-index="${index}">×</span>
+                        </span>
+                    `);
+                    container.append(tag);
+                });
+            }
+
+            // Update hidden input
+            $('#known_medical_conditions').val(medicalConditions.join(', '));
+        }
+
+        // Function to update allergies display
+        function updateAllergiesDisplay() {
+            const container = $('#allergies_tags');
+            container.empty();
+
+            if (allergies.length > 0) {
+                allergies.forEach((allergy, index) => {
+                    const tag = $(`
+                        <span class="allergy-tag">
+                            ${allergy}
+                            <span class="tag-remove" data-index="${index}">×</span>
+                        </span>
+                    `);
+                    container.append(tag);
+                });
+            }
+
+            // Update hidden input
+            $('#allergies').val(allergies.join(', '));
+        }
+
+        // Initialize Medical Conditions Autocomplete
+        $('#known_medical_conditions_input').autocomplete({
+            source: function(request, response) {
+                loadMedicalConditions().then(function(data) {
+                    const term = request.term.toLowerCase();
+                    const filtered = data.filter(function(item) {
+                        return item.toLowerCase().includes(term);
+                    });
+                    response(filtered.slice(0, 20));
+                });
+            },
+            minLength: 1,
+            delay: 50,
+            select: function(event, ui) {
+                const condition = ui.item.value;
+                if (condition && !medicalConditions.includes(condition)) {
+                    medicalConditions.push(condition);
+                    updateMedicalConditionsDisplay();
+                }
+                $(this).val('');
+                return false;
+            },
+            open: function() {
+                $(this).autocomplete('widget').css('z-index', 999999);
+            }
+        }).on('keypress', function(e) {
+            if (e.which == 13) {
+                e.preventDefault();
+                const condition = $(this).val().trim();
+                if (condition && !medicalConditions.includes(condition)) {
+                    medicalConditions.push(condition);
+                    updateMedicalConditionsDisplay();
+                }
+                $(this).val('');
+                return false;
+            }
+        });
+
+        // Initialize Allergies Autocomplete
+        $('#allergies_input').autocomplete({
+            source: function(request, response) {
+                loadAllergies().then(function(data) {
+                    const term = request.term.toLowerCase();
+                    const filtered = data.filter(function(item) {
+                        return item.toLowerCase().includes(term);
+                    });
+                    response(filtered.slice(0, 20));
+                });
+            },
+            minLength: 1,
+            delay: 50,
+            select: function(event, ui) {
+                const allergy = ui.item.value;
+                if (allergy && !allergies.includes(allergy)) {
+                    allergies.push(allergy);
+                    updateAllergiesDisplay();
+                }
+                $(this).val('');
+                return false;
+            },
+            open: function() {
+                $(this).autocomplete('widget').css('z-index', 999999);
+            }
+        }).on('keypress', function(e) {
+            if (e.which == 13) {
+                e.preventDefault();
+                const allergy = $(this).val().trim();
+                if (allergy && !allergies.includes(allergy)) {
+                    allergies.push(allergy);
+                    updateAllergiesDisplay();
+                }
+                $(this).val('');
+                return false;
+            }
+        });
+
+        // Remove tag handlers (using event delegation)
+        $(document).on('click', '.condition-tag .tag-remove', function() {
+            const index = $(this).data('index');
+            medicalConditions.splice(index, 1);
+            updateMedicalConditionsDisplay();
+        });
+
+        $(document).on('click', '.allergy-tag .tag-remove', function() {
+            const index = $(this).data('index');
+            allergies.splice(index, 1);
+            updateAllergiesDisplay();
+        });
+
+        // Form submission handler
+        $('#patientForm').on('submit', function(e) {
+            // Ensure hidden inputs are updated
+            updateMedicalConditionsDisplay();
+            updateAllergiesDisplay();
+            return true;
+        });
+
+        // Load existing data and initialize
+        loadExistingData();
+        loadMedicalConditions();
+        loadAllergies();
     });
 </script>
 @endpush
