@@ -329,11 +329,10 @@
         <table class="appointments-table">
             <thead>
                 <tr>
-                    <th width="5%">No</th>
-                    <th width="15%">Date</th>
-                    <th width="25%">Doctor</th>
+                    <th width="10%">No</th>
+                    <th width="25%">Date</th>
+                    <th width="30%">Doctor</th>
                     <th width="35%">Service</th>
-                    <th width="20%">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -369,7 +368,6 @@
                         <td>{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M j, Y') }}</td>
                         <td class="doctor-name">{{ $doctorDisplay }}</td>
                         <td class="service-name">{{ $serviceName }}</td>
-                        <td class="status-text">{{ ucfirst($displayStatus) }}</td>
                     </tr>
                 @endforeach
             </tbody>

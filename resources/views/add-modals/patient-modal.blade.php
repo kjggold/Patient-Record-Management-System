@@ -1,6 +1,6 @@
 <<!-- ADD PATIENT MODAL -->
 <div id="patientModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 overflow-auto py-10 ">
-    <div class="patient-form-container ml-80">
+    <div class="patient-form-container ml-60">
         <form method="POST" action="{{ route('patients.store') }}" id="patientForm" enctype="multipart/form-data">
             @csrf
 

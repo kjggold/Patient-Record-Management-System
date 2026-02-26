@@ -18,11 +18,13 @@
             color: #475569;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            margin-bottom: 10px;
         }
 
         .stat-value {
             font-size: 20px;
             font-weight: 700;
+            padding: 10px;
             color: #0f172a;
             line-height: 1.2;
         }

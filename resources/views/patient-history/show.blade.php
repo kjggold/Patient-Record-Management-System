@@ -108,7 +108,7 @@
                                     <p class="text-xs font-medium text-gray-500 mb-1">Phone Number</p>
                                     <p class="text-sm font-medium text-gray-800">{{ $patient->phone_number ?? 'N/A' }}</p>
                                 </div>
-                                
+
                                 <div>
                                     <p class="text-xs font-medium text-gray-500 mb-1">Address</p>
                                     <p class="text-sm font-medium text-gray-800">{{ $patient->address ?? 'N/A' }}</p>
@@ -249,7 +249,20 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @php
-                                                $displayStatus = $appointment->status == 'scheduled' ? 'pending' : $appointment->status;
+                                                // Get the status, default to 'pending' if null or empty
+                                                $status = $appointment->status ?? 'pending';
+
+                                                // Convert scheduled to pending
+                                                if ($status == 'scheduled' || empty($status)) {
+                                                    $status = 'pending';
+                                                }
+
+                                                // Ensure status is one of the expected values
+                                                $validStatuses = ['pending', 'completed', 'cancelled', 'no-show', 'discharged'];
+                                                if (!in_array($status, $validStatuses)) {
+                                                    $status = 'pending';
+                                                }
+
                                                 $statusColors = [
                                                     'pending' => 'bg-green-100 text-green-800',
                                                     'completed' => 'bg-blue-100 text-blue-800',
@@ -257,10 +270,10 @@
                                                     'no-show' => 'bg-gray-100 text-gray-800',
                                                     'discharged' => 'bg-red-100 text-red-800',
                                                 ];
-                                                $statusColor = $statusColors[$displayStatus] ?? 'bg-gray-100 text-gray-800';
+                                                $statusColor = $statusColors[$status] ?? 'bg-gray-100 text-gray-800';
                                             @endphp
                                             <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusColor }}">
-                                                {{ ucfirst($displayStatus) }}
+                                                {{ ucfirst($status) }}
                                             </span>
                                         </td>
                                     </tr>
@@ -301,7 +314,20 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @php
-                                                $displayStatus = $record['status'] == 'scheduled' ? 'pending' : $record['status'];
+                                                // Get the status, default to 'pending' if not set
+                                                $status = $record['status'] ?? 'pending';
+
+                                                // Convert scheduled to pending
+                                                if ($status == 'scheduled' || empty($status)) {
+                                                    $status = 'pending';
+                                                }
+
+                                                // Ensure status is one of the expected values
+                                                $validStatuses = ['pending', 'completed', 'cancelled', 'no-show', 'discharged'];
+                                                if (!in_array($status, $validStatuses)) {
+                                                    $status = 'pending';
+                                                }
+
                                                 $statusColors = [
                                                     'pending' => 'bg-green-100 text-green-800',
                                                     'completed' => 'bg-blue-100 text-blue-800',
@@ -309,10 +335,10 @@
                                                     'no-show' => 'bg-gray-100 text-gray-800',
                                                     'discharged' => 'bg-red-100 text-red-800',
                                                 ];
-                                                $statusColor = $statusColors[$displayStatus] ?? 'bg-gray-100 text-gray-800';
+                                                $statusColor = $statusColors[$status] ?? 'bg-gray-100 text-gray-800';
                                             @endphp
                                             <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusColor }}">
-                                                {{ ucfirst($displayStatus) }}
+                                                {{ ucfirst($status) }}
                                             </span>
                                         </td>
                                     </tr>

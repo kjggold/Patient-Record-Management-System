@@ -23,6 +23,10 @@ class Discharge extends Model
     ];
 
     protected $casts = [
-        'services' => 'array',
+            'services' => 'array', // Automatically cast JSON to array
+            'total' => 'integer',
+            'discount' => 'integer',
+            'paid' => 'integer',
+            'balance' => 'integer',
     ];
 }

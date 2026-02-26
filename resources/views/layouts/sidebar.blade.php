@@ -1,17 +1,9 @@
-<aside class="sidebar">
+<aside class="sidebar" :class="{ 'open': sidebarOpen }">
     <h2 class="logo">MediCore</h2>
     <nav>
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
             <i class="fa-solid fa-chart-line"></i> Dashboard
         </a>
-
-        {{-- @if (Route::has('patients.index'))
-            <a href="{{ route('patients.index') }}" class="{{ request()->routeIs('patients.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-user"></i> Patients re
-            </a>
-        @else
-            <a href="#"><i class="fa-solid fa-user"></i> Patients</a>
-        @endif --}}
 
         @if (Route::has('patientHistory.index'))
             <a href="{{ route('patientHistory.index') }}"
@@ -55,15 +47,11 @@
             <a href="#"><i class="fa-solid fa-stethoscope"></i> Services</a>
         @endif
 
-
-
-        <!-- Logout -->
         <form method="POST" action="{{ route('logout') }}" class="logout-form">
             @csrf
             <a href="{{ route('logout') }}" class="logout"
                 onclick="event.preventDefault(); this.closest('form').submit();">
-                <i class="fa-solid fa-right-from-bracket">
-                </i>
+                <i class="fa-solid fa-right-from-bracket"></i>
                 Logout
             </a>
         </form>
@@ -71,7 +59,8 @@
 </aside>
 
 <style>
-    /* SIDEBAR STYLES - Fixed position */
+    /* SIDEBAR STYLES (original unchanged) */
+
     .sidebar {
         position: fixed;
         left: 0;
@@ -84,6 +73,7 @@
         z-index: 1000;
         overflow-y: auto;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        transition: left .25s ease;
     }
 
     .sidebar .logo {
@@ -96,7 +86,6 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Sidebar links */
     .sidebar nav {
         display: flex;
         flex-direction: column;
@@ -123,7 +112,6 @@
 
     .sidebar nav a:hover {
         background: rgba(255, 255, 255, 0.1);
-
         transform: translateX(5px);
     }
 
@@ -137,7 +125,6 @@
         font-size: 16px;
     }
 
-    /* Logout styling */
     nav .logout {
         color: #be1c1c;
         margin-top: auto;
@@ -154,7 +141,6 @@
         border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Scrollbar styling for sidebar */
     .sidebar::-webkit-scrollbar {
         width: 5px;
     }
@@ -170,5 +156,21 @@
 
     .sidebar::-webkit-scrollbar-thumb:hover {
         background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* -----------------------------------
+       MOBILE FIX (iPhone XR included)
+       ----------------------------------- */
+
+    @media (max-width: 767px) {
+        .sidebar {
+            left: -230px;
+            /* hidden by default */
+        }
+
+        /* NEW: when sidebar gets 'open' class, bring it into view */
+        .sidebar.open {
+            left: 0 !important;
+        }
     }
 </style>

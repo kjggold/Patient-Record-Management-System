@@ -7,12 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
 
-      <!-- Alpine.js for dropdown functionality -->
-      <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Alpine.js for dropdown functionality -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-      <!-- Font Awesome for icons -->
-
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -89,7 +88,7 @@
         /* HEADER */
         .main-header {
             display: flex;
-            justify-between;
+            justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             margin-bottom: 20px;
@@ -104,7 +103,7 @@
         /* CONTROLS */
         .flex-controls {
             display: flex;
-            justify-between;
+            justify-content: space-between;
             flex-wrap: wrap;
             margin-bottom: 15px;
             gap: 10px;
@@ -135,7 +134,7 @@
 
         /* TABLE */
         .table-container {
-            overflow-x-auto;
+            overflow-x: auto;
             background: white;
             padding: 15px;
             border-radius: 12px;
